@@ -1,0 +1,7 @@
+[package]
+name = "m7"
+edition = "2021"
+version = "0.0.1"
+authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
+
+[dependencies]
