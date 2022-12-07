@@ -5,3 +5,14 @@ version = "0.0.1"
 authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
 
 [dependencies]
+anyhow = "1"
+directories = "4"
+toml = "0.5"
+serde = { version = "1", features = ["derive"] }
+
+# GUI
+iced = "0.6"
+
+# Macros
+lazy_static = "1"
+paste = "1"

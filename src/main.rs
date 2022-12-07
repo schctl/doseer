@@ -1,3 +1,8 @@
+//! A sensible GUI file manager.
+
+mod config;
+mod dirs;
+
 fn main() {
-    println!("Hello, world!");
+    config::read_config().unwrap();
 }
