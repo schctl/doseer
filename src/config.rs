@@ -15,7 +15,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            dash_folders: vec![]
+            dash_folders: vec![],
         }
     }
 }
@@ -29,7 +29,7 @@ pub fn read_config() -> anyhow::Result<Config> {
         let config = Config::default();
         write_config(&config)?;
 
-        return Ok(config)
+        return Ok(config);
     }
 
     // Read file

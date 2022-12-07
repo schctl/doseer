@@ -3,6 +3,17 @@
 mod config;
 mod dirs;
 
+fn run() -> anyhow::Result<()> {
+    config::read_config()?;
+
+    Ok(())
+}
+
 fn main() {
-    config::read_config().unwrap();
+    tracing_subscriber::fmt::init();
+
+    if let Err(e) = run() {
+        tracing::error!("{}", e);
+        std::process::exit(-1);
+    }
 }
