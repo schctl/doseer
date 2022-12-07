@@ -1,10 +1,12 @@
 //! Directory locations for common usage.
 
-use directories::ProjectDirs;
+use directories::{BaseDirs, ProjectDirs};
 
 lazy_static::lazy_static! {
     pub static ref PROJECT: ProjectDirs
                                 = ProjectDirs::from("io", "schctl", env!("CARGO_PKG_NAME")).unwrap();
+
+    pub static ref BASE: BaseDirs = BaseDirs::new().unwrap();
 }
 
 /// Access a specific file or resource, based on required type.
