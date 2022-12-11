@@ -1145,6 +1145,7 @@ dependencies = [
  "anyhow",
  "directories",
  "iced",
+ "indexmap",
  "lazy_static",
  "paste",
  "serde",

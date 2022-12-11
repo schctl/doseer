@@ -1,6 +1,6 @@
 //! The GUI app.
 
-use iced::widget::{pane_grid, Container, Button, Text};
+use iced::widget::{pane_grid, Button, Container, Text};
 use iced::{executor, Command, Length};
 use iced::{Application, Theme};
 
@@ -17,8 +17,6 @@ pub enum Message {}
 pub struct Gui {
     /// Current configurations.
     config: Config,
-    /// All held tabs.
-    tabs: Vec<Tab>,
     /// Panegrid state.
     panes: pane_grid::State<Pane>,
     /// Focused pane.
@@ -32,22 +30,11 @@ impl Application for Gui {
     type Theme = Theme;
 
     fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
-        let tabs = vec![Tab {
-            id: 0,
-            location: crate::dirs::BASE.home_dir().to_owned(),
-            scroll: tab::ScrollableState::default(),
-        }];
-
-        let (panes, _) = pane_grid::State::new(Pane {
-            id: 0,
-            tabs: vec![0],
-            focused: 0,
-        });
+        let (panes, _) = pane_grid::State::new(Pane::new(Tab::new()));
 
         (
             Self {
                 config: flags,
-                tabs,
                 panes,
                 focused: 0,
             },
@@ -65,14 +52,14 @@ impl Application for Gui {
 
     fn view(&self) -> iced::Element<'_, Self::Message, iced::Renderer<Self::Theme>> {
         let pane_grid = pane_grid::PaneGrid::new(&self.panes, |pane, state, focused| {
-            let thing = format!(
-                "{:?}",
-                self.tabs[state.focused].location
-            );
+            let thing = format!("{:?}", state.focused().location());
 
             pane_grid::Content::new(Button::new(Text::new(thing)))
         });
 
-        Container::new(pane_grid).width(Length::Fill).height(Length::Fill).into()
+        Container::new(pane_grid)
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .into()
     }
 }

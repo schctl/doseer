@@ -3,9 +3,9 @@
 use anyhow::Context;
 use iced::{Application, Settings};
 
-mod gui;
 mod config;
 mod dirs;
+mod gui;
 
 fn run() -> anyhow::Result<()> {
     let config = config::read_config().context("failed to get configuration")?;

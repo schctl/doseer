@@ -7,6 +7,7 @@ authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
 [dependencies]
 anyhow = "1"
 directories = "4"
+indexmap = "1"
 toml = "0.5"
 serde = { version = "1", features = ["derive"] }
 

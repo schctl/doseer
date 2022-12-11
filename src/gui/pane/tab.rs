@@ -1,20 +1,43 @@
 //! Tab widget.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+
+use crate::dirs;
 
 /// Preserved scroll state of this tab.
 #[derive(Debug, Default)]
-pub struct ScrollableState {
-    pub offset: f32,
+struct ScrollableState {
+    offset: f32,
 }
 
 /// A single tab displays a single open location.
 #[derive(Debug)]
 pub struct Tab {
-    /// Unique identifier for this tab.
-    pub id: usize,
     /// The currently open location.
-    pub location: PathBuf,
+    location: PathBuf,
     /// Preserved scroll state.
-    pub scroll: ScrollableState,
+    scroll: ScrollableState,
+}
+
+impl Tab {
+    /// Open a new tab with the user's home directory.
+    #[inline]
+    pub fn new() -> Self {
+        Self::new_with(dirs::BASE.home_dir())
+    }
+
+    /// Open a new tab with a specified location.
+    #[inline]
+    pub fn new_with(location: &Path) -> Self {
+        Self {
+            location: location.to_owned(),
+            scroll: ScrollableState::default(),
+        }
+    }
+
+    /// Get the location this tab points to.
+    #[inline]
+    pub fn location(&self) -> &Path {
+        &self.location
+    }
 }
