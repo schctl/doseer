@@ -16,7 +16,7 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 
 # GUI
-iced = "0.6"
+iced = { version = "0.6", features = ["svg"] }
 
 # Macros
 lazy_static = "1"

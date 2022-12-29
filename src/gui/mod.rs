@@ -11,7 +11,9 @@ use pane::tab::{self, Tab};
 use pane::Pane;
 
 #[derive(Debug, Clone)]
-pub enum Message {}
+pub enum Message {
+    TabMessage(tab::Message),
+}
 
 /// The UI state.
 pub struct Gui {
@@ -30,7 +32,7 @@ impl Application for Gui {
     type Theme = Theme;
 
     fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
-        let (panes, _) = pane_grid::State::new(Pane::new(Tab::new()));
+        let (panes, _) = pane_grid::State::new(Pane::new(Tab::new().unwrap()));
 
         (
             Self {
@@ -52,9 +54,7 @@ impl Application for Gui {
 
     fn view(&self) -> iced::Element<'_, Self::Message, iced::Renderer<Self::Theme>> {
         let pane_grid = pane_grid::PaneGrid::new(&self.panes, |pane, state, focused| {
-            let thing = format!("{:?}", state.focused().location());
-
-            pane_grid::Content::new(Button::new(Text::new(thing)))
+            pane_grid::Content::new(state.focused().view().unwrap().map(Message::TabMessage))
         });
 
         Container::new(pane_grid)
