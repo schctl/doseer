@@ -13,6 +13,7 @@ use pane::Pane;
 #[derive(Debug, Clone)]
 pub enum Message {
     TabMessage(tab::Message),
+    IcedEvent(iced::Event),
 }
 
 /// The UI state.
@@ -48,13 +49,27 @@ impl Application for Gui {
         String::from("m7")
     }
 
-    fn update(&mut self, _: Self::Message) -> Command<Self::Message> {
+    fn theme(&self) -> Self::Theme {
+        Self::Theme::Dark
+    }
+
+    fn subscription(&self) -> iced::Subscription<Self::Message> {
+        iced::subscription::events().map(Message::IcedEvent)
+    }
+
+    fn update(&mut self, m: Self::Message) -> Command<Self::Message> {
         Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message, iced::Renderer<Self::Theme>> {
         let pane_grid = pane_grid::PaneGrid::new(&self.panes, |pane, state, focused| {
-            pane_grid::Content::new(state.focused().view().unwrap().map(Message::TabMessage))
+            pane_grid::Content::new(
+                state
+                    .focused()
+                    .view(tab::ViewOpts { columns: 6 })
+                    .unwrap()
+                    .map(Message::TabMessage),
+            )
         });
 
         Container::new(pane_grid)

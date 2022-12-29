@@ -2,6 +2,7 @@
 
 use std::path::{Path, PathBuf};
 
+use iced::widget::{container, scrollable};
 use iced::widget::{svg::Handle, Column, Row, Svg, Text};
 use iced::Command;
 
@@ -77,9 +78,11 @@ pub enum Message {
     ItemUpdate(()),
 }
 
-impl Tab {
-    const COLUMNS: usize = 6;
+pub struct ViewOpts {
+    pub columns: usize,
+}
 
+impl Tab {
     pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
         match message {
             Message::Update => {
@@ -95,21 +98,31 @@ impl Tab {
         Ok(())
     }
 
-    pub fn view(&self) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<iced::Theme>>> {
+    pub fn view(
+        &self,
+        opts: ViewOpts,
+    ) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<iced::Theme>>> {
         let mut columns = Column::new();
 
         let mut iter = self.items.iter();
 
-        for _ in 0..(self.items.len() / Self::COLUMNS) {
-            let mut row = Row::new();
+        // Grid of items
+        for _ in 0..(self.items.len() / opts.columns) {
+            let mut row = Row::new().width(iced::Length::Fill);
 
-            for item in iter.by_ref().take(Self::COLUMNS) {
-                row = row.push(item.view()?.map(Message::ItemUpdate));
+            for item in iter.by_ref().take(opts.columns) {
+                row = row.push(
+                    container(item.view()?.map(Message::ItemUpdate))
+                        .width(iced::Length::Units(128)),
+                );
             }
 
             columns = columns.push(row);
         }
 
-        Ok(columns.into())
+        // Scroll state
+        let scrollable = scrollable(columns);
+
+        Ok(scrollable.into())
     }
 }

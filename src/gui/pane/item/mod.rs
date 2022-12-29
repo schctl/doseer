@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use iced::widget::svg::Handle;
-use iced::widget::{column, Svg, Text};
+use iced::widget::{column, container, Svg, Text};
 
 pub mod icons;
 
@@ -39,11 +39,21 @@ impl Item {
     pub fn path(&self) -> &Path {
         &self.path
     }
+}
 
+impl Item {
     pub fn view(&self) -> anyhow::Result<iced::Element<'_, (), iced::Renderer<iced::Theme>>> {
         let icon = Svg::new(Handle::from_memory(icons::DIRECTORY));
-        let text = Text::new(format!("{:?}", self.path));
 
-        Ok(column!(icon, text).into())
+        let text = Text::new(self.path.as_os_str().to_string_lossy())
+            .horizontal_alignment(iced::alignment::Horizontal::Center);
+
+        Ok(container(
+            column!(icon, text)
+                .align_items(iced::Alignment::Center)
+                .width(iced::Length::Fill),
+        )
+        .width(iced::Length::Fill)
+        .into())
     }
 }
