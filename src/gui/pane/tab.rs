@@ -1,33 +1,22 @@
 //! Tab widget.
 
+use std::cell::UnsafeCell;
 use std::path::{Path, PathBuf};
-use std::time::SystemTime;
+use std::sync::RwLock;
 
 use iced::widget::{container, scrollable};
-use iced::widget::{svg::Handle, Column, Row, Svg, Text};
-use iced::Command;
+use iced::widget::{Column, Row};
 
+use super::item;
 use crate::dirs;
-
-use super::item::Item;
-
-/// Preserved scroll state of this tab.
-#[derive(Debug, Default)]
-struct ScrollableState {
-    offset: f32,
-}
 
 /// A single tab displays a single open location.
 #[derive(Debug)]
 pub struct Tab {
-    /// The currently open location.
-    location: PathBuf,
-    /// Items in current location.
-    items: Vec<PathBuf>,
-    /// Last modified time of this location.
-    ///
-    /// Used to auto-update the contents.
-    modified: SystemTime,
+    /// Update lock.
+    update_lock: RwLock<()>,
+    /// Contents of the current location.
+    contents: UnsafeCell<dirs::Contents>,
 }
 
 impl Tab {
@@ -39,55 +28,19 @@ impl Tab {
 
     /// Open a new tab with a specified location.
     #[inline]
-    pub fn new_with<P: AsRef<Path>>(location: P) -> anyhow::Result<Self> {
-        let location_ref = location.as_ref();
-
-        let items = Self::get_items(location_ref)?;
-        let location = location_ref.to_owned();
-
-        let modified = match location.metadata()?.modified() {
-            Ok(time) => time,
-            Err(_) => SystemTime::now(),
-        };
-
+    pub fn new_with<P: AsRef<Path>>(path: P) -> anyhow::Result<Self> {
         Ok(Self {
-            location,
-            items,
-            modified,
+            update_lock: RwLock::new(()),
+            contents: UnsafeCell::new(dirs::Contents::new(path)?),
         })
     }
 
     /// Get the location this tab points to.
     #[inline]
-    pub fn location(&self) -> &Path {
-        &self.location
-    }
-
-    /// Get items in this location.
-    fn get_items(path: &Path) -> anyhow::Result<Vec<PathBuf>> {
-        let dir = path
-            .read_dir()?
-            .filter_map(|e| match e {
-                Ok(entry) => Some(entry.path().to_owned()),
-                _ => None,
-            })
-            // TODO: collect_into when its stabilized
-            .collect::<Vec<_>>();
-
-        Ok(dir)
-    }
-
-    /// Update contents if needed.
-    fn update_contents(&mut self) -> anyhow::Result<()> {
-        if let Ok(metadata) = self.location.metadata() {
-            if let Ok(modified) = metadata.modified() {
-                if modified > self.modified {
-                    self.items = Self::get_items(&self.location)?;
-                }
-            }
-        }
-
-        Ok(())
+    pub fn location(&self) -> PathBuf {
+        let _read_lock = self.update_lock.read();
+        // SAFETY: Read lock held
+        (unsafe { &*self.contents.get() }).location().to_owned()
     }
 }
 
@@ -112,24 +65,32 @@ impl Tab {
             }
         }
 
-        // Try to update as frequently as we can.
-        // Ignore failures, since users should be able to manually refresh
-        // and we can deal with errors then.
-        let _ = self.update_contents();
-
         Ok(())
     }
 
-    pub fn view(
-        &self,
+    pub fn view<'a>(
+        &'a self,
         opts: ViewOpts,
     ) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<iced::Theme>>> {
         let mut columns = Column::new();
 
-        let mut iter = self.items.iter();
+        // Update contents
+        {
+            let _write_lock = self.update_lock.write();
+            // SAFETY: Write lock held
+            let contents = unsafe { &mut *self.contents.get() };
+
+            let _ = contents.update_contents();
+        }
+
+        let _read_lock = self.update_lock.read();
+        // SAFETY: Read lock held
+        let contents: &'a [PathBuf] = unsafe { &*self.contents.get() }.contents();
+
+        let mut iter = contents.iter();
 
         // Grid of items
-        let num_rows = std::cmp::max(self.items.len() / opts.columns, 1);
+        let num_rows = std::cmp::max(contents.len() / opts.columns, 1);
 
         // Column wise
         for _ in 0..num_rows {
@@ -137,9 +98,10 @@ impl Tab {
                 // Row wise
                 let mut row = Row::new().width(iced::Length::Fill);
 
-                for (index, item) in iter.by_ref().enumerate().take(opts.columns) {
+                for (index, path) in iter.by_ref().enumerate().take(opts.columns) {
                     row = row.push({
-                        let view = Item::new(item).view()?.map(move |m| Message::ItemUpdate(m, index));
+                        let view = item::view(path)?.map(move |m| Message::ItemUpdate(m, index));
+
                         container(view).width(iced::Length::Units(128))
                     });
                 }

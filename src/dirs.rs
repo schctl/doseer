@@ -1,4 +1,7 @@
-//! Directory locations for common usage.
+//! Directory tools.
+
+use std::path::{Path, PathBuf};
+use std::time::{Duration, Instant, SystemTime};
 
 use directories::{BaseDirs, ProjectDirs};
 
@@ -41,4 +44,106 @@ macro_rules! resource_make {
             }
         }
     };
+}
+
+/// Timestamps useful to indicate when to update contents.
+#[derive(Debug, Clone, Copy)]
+struct Checked {
+    /// Last modified time of the fs.
+    modified: SystemTime,
+    /// Last read time.
+    checked: Instant,
+}
+
+/// Reads the contents of a specific directory.
+///
+/// Designed to be readable and self-update as frequently as possible.
+#[derive(Debug)]
+pub struct Contents {
+    /// The currently open location.
+    location: PathBuf,
+    /// Items in current location.
+    contents: Vec<PathBuf>,
+    /// Last checked time.
+    checked: Checked,
+}
+
+impl Contents {
+    pub fn new<P: AsRef<Path>>(path: P) -> anyhow::Result<Self> {
+        let location_ref = path.as_ref();
+        let location = location_ref.to_owned();
+
+        let mut items = Vec::new();
+        Self::read_items_into(location_ref, &mut items)?;
+        let contents = items;
+
+        let modified = match location.metadata()?.modified() {
+            Ok(time) => time,
+            Err(_) => SystemTime::now(),
+        };
+
+        let checked = Checked {
+            modified,
+            checked: Instant::now(),
+        };
+
+        Ok(Self {
+            location,
+            contents,
+            checked,
+        })
+    }
+
+    /// Get the location this tab points to.
+    #[inline]
+    pub fn location(&self) -> &Path {
+        &self.location
+    }
+
+    /// Read the contents of this directory.
+    #[inline]
+    pub fn contents(&self) -> &[PathBuf] {
+        &self.contents
+    }
+
+    /// Update contents if needed.
+    pub fn update_contents(&mut self) -> anyhow::Result<()> {
+        // Check if its been 5 seconds since the last check.
+        // This is pretty reasonable since checking over this would be less intensive
+        // than fetching fs metadata every call.
+        if (Instant::now() - self.checked.checked) > Duration::from_secs(5) {
+            // Check the fs metadata for changes
+            if let Ok(metadata) = self.location.metadata() {
+                if let Ok(modified) = metadata.modified() {
+                    if modified > self.checked.modified {
+                        // Update contents
+                        Self::read_items_into(&self.location, &mut self.contents)?;
+
+                        // Update last checked time
+                        self.checked.checked = Instant::now();
+                        self.checked.modified = modified;
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Get items in this location.
+    ///
+    /// Clears the provided buffer of all its previous contents.
+    fn read_items_into(path: &Path, buf: &mut Vec<PathBuf>) -> anyhow::Result<()> {
+        buf.clear();
+
+        // TODO: collect_into when its stabilized
+        for entry in path.read_dir()?.filter_map(|e| match e {
+            Ok(entry) => Some(entry.path()),
+            _ => None,
+        }) {
+            buf.push(entry)
+        }
+
+        Ok(())
+    }
 }

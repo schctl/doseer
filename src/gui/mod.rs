@@ -1,6 +1,6 @@
 //! The GUI app.
 
-use iced::widget::{pane_grid, Button, Container, Text};
+use iced::widget::{pane_grid, Container};
 use iced::{executor, Command, Length};
 use iced::{Application, Theme};
 
@@ -34,7 +34,7 @@ impl Application for Gui {
 
     fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
         let mut pane = Pane::new(Tab::new().unwrap());
-        pane.add_tab(Tab::new_with("/home").unwrap());
+        pane.add_tab(Tab::new_with("/usr/lib").unwrap());
         let (panes, _) = pane_grid::State::new(pane);
 
         (
