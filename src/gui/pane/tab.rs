@@ -1,6 +1,7 @@
 //! Tab widget.
 
 use std::path::{Path, PathBuf};
+use std::time::SystemTime;
 
 use iced::widget::{container, scrollable};
 use iced::widget::{svg::Handle, Column, Row, Svg, Text};
@@ -22,9 +23,11 @@ pub struct Tab {
     /// The currently open location.
     location: PathBuf,
     /// Items in current location.
-    items: Vec<Item>,
-    /// Preserved scroll state.
-    scroll: ScrollableState,
+    items: Vec<PathBuf>,
+    /// Last modified time of this location.
+    ///
+    /// Used to auto-update the contents.
+    modified: SystemTime,
 }
 
 impl Tab {
@@ -37,13 +40,21 @@ impl Tab {
     /// Open a new tab with a specified location.
     #[inline]
     pub fn new_with<P: AsRef<Path>>(location: P) -> anyhow::Result<Self> {
-        let this = Self {
-            location: location.as_ref().to_owned(),
-            items: Self::get_items(location.as_ref())?,
-            scroll: ScrollableState::default(),
+        let location_ref = location.as_ref();
+
+        let items = Self::get_items(location_ref)?;
+        let location = location_ref.to_owned();
+
+        let modified = match location.metadata()?.modified() {
+            Ok(time) => time,
+            Err(_) => SystemTime::now(),
         };
 
-        Ok(this)
+        Ok(Self {
+            location,
+            items,
+            modified,
+        })
     }
 
     /// Get the location this tab points to.
@@ -53,17 +64,30 @@ impl Tab {
     }
 
     /// Get items in this location.
-    fn get_items(path: &Path) -> anyhow::Result<Vec<Item>> {
+    fn get_items(path: &Path) -> anyhow::Result<Vec<PathBuf>> {
         let dir = path
             .read_dir()?
             .filter_map(|e| match e {
-                Ok(entry) => Some(Item::new(entry.path())),
+                Ok(entry) => Some(entry.path().to_owned()),
                 _ => None,
             })
             // TODO: collect_into when its stabilized
             .collect::<Vec<_>>();
 
         Ok(dir)
+    }
+
+    /// Update contents if needed.
+    fn update_contents(&mut self) -> anyhow::Result<()> {
+        if let Ok(metadata) = self.location.metadata() {
+            if let Ok(modified) = metadata.modified() {
+                if modified > self.modified {
+                    self.items = Self::get_items(&self.location)?;
+                }
+            }
+        }
+
+        Ok(())
     }
 }
 
@@ -73,6 +97,7 @@ impl Tab {
 #[derive(Debug, Clone)]
 pub enum Message {
     ItemUpdate((), usize),
+    // TODO: manual update contents
 }
 
 pub struct ViewOpts {
@@ -87,8 +112,10 @@ impl Tab {
             }
         }
 
-        // update anyway
-        self.items = Self::get_items(&self.location)?;
+        // Try to update as frequently as we can.
+        // Ignore failures, since users should be able to manually refresh
+        // and we can deal with errors then.
+        let _ = self.update_contents();
 
         Ok(())
     }
@@ -112,7 +139,7 @@ impl Tab {
 
                 for (index, item) in iter.by_ref().enumerate().take(opts.columns) {
                     row = row.push({
-                        let view = item.view()?.map(move |m| Message::ItemUpdate(m, index));
+                        let view = Item::new(item).view()?.map(move |m| Message::ItemUpdate(m, index));
                         container(view).width(iced::Length::Units(128))
                     });
                 }

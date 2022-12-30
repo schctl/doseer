@@ -9,16 +9,16 @@ use super::icons;
 
 /// A single item.
 #[derive(Debug, Clone)]
-pub struct Item {
+pub struct Item<'a> {
     /// Path to this item.
-    path: PathBuf,
+    path: &'a Path,
 }
 
-impl Item {
+impl<'a> Item<'a> {
     #[inline]
-    pub fn new<P: AsRef<Path>>(path: P) -> Self {
+    pub fn new(path: &'a Path) -> Self {
         Self {
-            path: path.as_ref().to_owned(),
+            path
         }
     }
 
@@ -28,8 +28,8 @@ impl Item {
     }
 }
 
-impl Item {
-    pub fn view(&self) -> anyhow::Result<iced::Element<'_, (), iced::Renderer<iced::Theme>>> {
+impl<'a> Item<'a> {
+    pub fn view(&self) -> anyhow::Result<iced::Element<'a, (), iced::Renderer<iced::Theme>>> {
         let icon = Svg::new(Handle::from_memory(icons::DIRECTORY));
 
         let text = Text::new(self.path.as_os_str().to_string_lossy())
