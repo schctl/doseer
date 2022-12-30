@@ -14,24 +14,11 @@ pub struct Item {
     path: PathBuf,
 }
 
-impl<T> From<T> for Item
-where
-    T: ToOwned<Owned = PathBuf>,
-{
-    #[inline]
-    fn from(path: T) -> Self {
-        Self::new(path)
-    }
-}
-
 impl Item {
     #[inline]
-    pub fn new<T>(path: T) -> Self
-    where
-        T: ToOwned<Owned = PathBuf>,
-    {
+    pub fn new<P: AsRef<Path>>(path: P) -> Self {
         Self {
-            path: path.to_owned(),
+            path: path.as_ref().to_owned(),
         }
     }
 

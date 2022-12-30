@@ -12,7 +12,7 @@ use pane::Pane;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    TabMessage(tab::Message),
+    PaneMessage(pane::Message, pane_grid::Pane),
     IcedEvent(iced::Event),
 }
 
@@ -33,7 +33,9 @@ impl Application for Gui {
     type Theme = Theme;
 
     fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
-        let (panes, _) = pane_grid::State::new(Pane::new(Tab::new().unwrap()));
+        let mut pane = Pane::new(Tab::new().unwrap());
+        pane.add_tab(Tab::new_with("/home").unwrap());
+        let (panes, _) = pane_grid::State::new(pane);
 
         (
             Self {
@@ -58,17 +60,26 @@ impl Application for Gui {
     }
 
     fn update(&mut self, m: Self::Message) -> Command<Self::Message> {
+        match m {
+            Message::PaneMessage(message, id) => {
+                let pane = self.panes.panes.get_mut(&id).unwrap();
+                pane.update(message).unwrap();
+            }
+            _ => {}
+        }
+
         Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message, iced::Renderer<Self::Theme>> {
-        let pane_grid = pane_grid::PaneGrid::new(&self.panes, |pane, state, focused| {
+        let pane_grid = pane_grid::PaneGrid::new(&self.panes, |id, state, _focused| {
             pane_grid::Content::new(
                 state
-                    .focused()
-                    .view(tab::ViewOpts { columns: 6 })
+                    .view(pane::ViewOpts {
+                        tab: tab::ViewOpts { columns: 6 },
+                    })
                     .unwrap()
-                    .map(Message::TabMessage),
+                    .map(move |m| Message::PaneMessage(m, id)),
             )
         });
 

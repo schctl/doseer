@@ -1,5 +1,6 @@
 //! Pane widget.
 
+use iced::widget::{button, text, Row};
 use indexmap::IndexMap;
 
 pub mod tab;
@@ -68,5 +69,78 @@ impl Pane {
     #[inline]
     pub fn focused(&self) -> &Tab {
         self.tabs.get(&self.focused).unwrap()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum TabMessage {
+    Internal(tab::Message),
+    Focus,
+    Remove,
+}
+
+#[derive(Debug, Clone)]
+pub enum Message {
+    Tab(TabMessage, usize),
+}
+
+pub struct ViewOpts {
+    pub tab: tab::ViewOpts,
+}
+
+impl Pane {
+    pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
+        match message {
+            Message::Tab(message, index) => match message {
+                TabMessage::Internal(i) => {
+                    self.tabs.get_mut(&index).unwrap().update(i)?;
+                }
+                TabMessage::Focus => {
+                    self.focus(index);
+                }
+                TabMessage::Remove => {
+                    self.remove_tab(index);
+                }
+            },
+        }
+
+        Ok(())
+    }
+
+    pub fn view(
+        &self,
+        opts: ViewOpts,
+    ) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<iced::Theme>>> {
+        // Create top tab view
+        let mut tab_list = Row::new();
+
+        for (index, tab) in &self.tabs {
+            // create tab as a button
+            let tab = button(text(
+                // get file name location
+                tab.location()
+                    .canonicalize()?
+                    .file_name()
+                    // unwrap ok since name is canonicalized
+                    .unwrap()
+                    .to_string_lossy(),
+            ))
+            // focus tab when the button is pressed
+            .on_press(Message::Tab(TabMessage::Focus, *index));
+
+            tab_list = tab_list.push(tab);
+        }
+
+        // Focused tab view
+        let focused = self.tabs.get(&self.focused).unwrap();
+
+        let view = focused
+            .view(opts.tab)?
+            .map(|i| Message::Tab(TabMessage::Internal(i), self.focused));
+
+        // Final view
+        let final_view = iced::widget::column!(tab_list, view);
+
+        Ok(final_view.into())
     }
 }

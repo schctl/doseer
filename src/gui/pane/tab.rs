@@ -36,10 +36,10 @@ impl Tab {
 
     /// Open a new tab with a specified location.
     #[inline]
-    pub fn new_with(location: &Path) -> anyhow::Result<Self> {
+    pub fn new_with<P: AsRef<Path>>(location: P) -> anyhow::Result<Self> {
         let this = Self {
-            location: location.to_owned(),
-            items: Self::get_items(location)?,
+            location: location.as_ref().to_owned(),
+            items: Self::get_items(location.as_ref())?,
             scroll: ScrollableState::default(),
         };
 
@@ -72,10 +72,7 @@ impl Tab {
 /// Internal tab message.
 #[derive(Debug, Clone)]
 pub enum Message {
-    Scrolled(f32),
-    Update,
-    UpdateLocation(PathBuf),
-    ItemUpdate(()),
+    ItemUpdate((), usize),
 }
 
 pub struct ViewOpts {
@@ -85,15 +82,13 @@ pub struct ViewOpts {
 impl Tab {
     pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
         match message {
-            Message::Update => {
-                self.items = Self::get_items(&self.location)?;
+            Message::ItemUpdate(_, _) => {
+                // ¯\_(ツ)_/¯
             }
-            Message::UpdateLocation(loc) => {
-                self.location = loc;
-                self.items = Self::get_items(&self.location)?;
-            }
-            _ => {}
-        };
+        }
+
+        // update anyway
+        self.items = Self::get_items(&self.location)?;
 
         Ok(())
     }
@@ -107,17 +102,23 @@ impl Tab {
         let mut iter = self.items.iter();
 
         // Grid of items
-        for _ in 0..(self.items.len() / opts.columns) {
-            let mut row = Row::new().width(iced::Length::Fill);
+        let num_rows = std::cmp::max(self.items.len() / opts.columns, 1);
 
-            for item in iter.by_ref().take(opts.columns) {
-                row = row.push(
-                    container(item.view()?.map(Message::ItemUpdate))
-                        .width(iced::Length::Units(128)),
-                );
-            }
+        // Column wise
+        for _ in 0..num_rows {
+            columns = columns.push({
+                // Row wise
+                let mut row = Row::new().width(iced::Length::Fill);
 
-            columns = columns.push(row);
+                for (index, item) in iter.by_ref().enumerate().take(opts.columns) {
+                    row = row.push({
+                        let view = item.view()?.map(move |m| Message::ItemUpdate(m, index));
+                        container(view).width(iced::Length::Units(128))
+                    });
+                }
+
+                row
+            });
         }
 
         // Scroll state
