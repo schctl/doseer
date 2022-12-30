@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use iced::widget::svg::Handle;
 use iced::widget::{column, container, Svg, Text};
 
-pub mod icons;
+use super::icons;
 
 /// A single item.
 #[derive(Debug, Clone)]

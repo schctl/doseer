@@ -5,6 +5,7 @@ use indexmap::IndexMap;
 pub mod tab;
 use tab::Tab;
 
+pub mod icons;
 pub mod item;
 
 /// A pane contains many tabs, but displays only one at a time.
