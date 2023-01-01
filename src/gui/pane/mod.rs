@@ -3,6 +3,8 @@
 use iced::widget::{button, text, Row};
 use indexmap::IndexMap;
 
+use crate::gui::Theme;
+
 pub mod tab;
 use tab::Tab;
 
@@ -110,7 +112,7 @@ impl Pane {
     pub fn view(
         &self,
         opts: ViewOpts,
-    ) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<iced::Theme>>> {
+    ) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<Theme>>> {
         // Create top tab view
         let mut tab_list = Row::new();
 

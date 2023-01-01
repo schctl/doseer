@@ -6,10 +6,9 @@ use iced::widget::svg::Handle;
 use iced::widget::{column, container, Svg, Text};
 
 use super::icons;
+use crate::gui::Theme;
 
-pub fn view<'a>(
-    path: &'a Path,
-) -> anyhow::Result<iced::Element<'a, (), iced::Renderer<iced::Theme>>> {
+pub fn view<'a>(path: &'a Path) -> anyhow::Result<iced::Element<'a, (), iced::Renderer<Theme>>> {
     let icon = Svg::new(Handle::from_memory(icons::DIRECTORY));
 
     let text = Text::new(path.as_os_str().to_string_lossy())

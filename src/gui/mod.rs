@@ -1,14 +1,17 @@
 //! The GUI app.
 
 use iced::widget::{pane_grid, Container};
+use iced::Application;
 use iced::{executor, Command, Length};
-use iced::{Application, Theme};
 
 use crate::config::Config;
 
 pub mod pane;
 use pane::tab::{self, Tab};
 use pane::Pane;
+
+pub mod theme;
+pub use theme::Theme;
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -37,6 +40,8 @@ impl Application for Gui {
         pane.add_tab(Tab::new_with("/usr/lib").unwrap());
         let (panes, _) = pane_grid::State::new(pane);
 
+        let theme = iced::Theme::Dark;
+
         (
             Self {
                 config: flags,
@@ -49,10 +54,6 @@ impl Application for Gui {
 
     fn title(&self) -> String {
         String::from("m7")
-    }
-
-    fn theme(&self) -> Self::Theme {
-        Self::Theme::Dark
     }
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {
@@ -71,7 +72,7 @@ impl Application for Gui {
         Command::none()
     }
 
-    fn view(&self) -> iced::Element<'_, Self::Message, iced::Renderer<Self::Theme>> {
+    fn view(&self) -> iced::Element<'_, Self::Message, iced::Renderer<Theme>> {
         let pane_grid = pane_grid::PaneGrid::new(&self.panes, |id, state, _focused| {
             pane_grid::Content::new(
                 state
