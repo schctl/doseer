@@ -2073,22 +2073,52 @@ dependencies = [
 [[package]]
 name = "sleet"
 version = "0.0.1"
-source = "git+https://github.com/rescramble/sleet?branch=rewrite#3a69833278f3895150a1903ce7c19c85d9e3b58d"
+source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
 dependencies = [
  "iced_core",
  "iced_style",
  "paste",
- "sleet_proc_macros",
+ "sleet_nfp",
+ "sleet_stylesheet",
+ "sleet_theme",
+ "sleet_theme_sample",
 ]
 
 [[package]]
-name = "sleet_proc_macros"
+name = "sleet_nfp"
 version = "0.0.1"
-source = "git+https://github.com/rescramble/sleet?branch=rewrite#3a69833278f3895150a1903ce7c19c85d9e3b58d"
+source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
 dependencies = [
  "convert_case",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "sleet_stylesheet"
+version = "0.0.1"
+source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
+dependencies = [
+ "iced_core",
+ "iced_style",
+]
+
+[[package]]
+name = "sleet_theme"
+version = "0.0.1"
+source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
+dependencies = [
+ "iced_core",
+ "iced_style",
+]
+
+[[package]]
+name = "sleet_theme_sample"
+version = "0.0.1"
+source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
+dependencies = [
+ "sleet_stylesheet",
+ "sleet_theme",
 ]
 
 [[package]]

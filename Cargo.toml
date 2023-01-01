@@ -17,7 +17,7 @@ tracing-subscriber = "0.3"
 
 # GUI
 iced = { version = "0.6", features = ["svg"] }
-sleet = { git = "https://github.com/rescramble/sleet", branch = "rewrite" }
+sleet = { git = "https://github.com/rescramble/sleet", branch = "rewrite", features = ["sample"] }
 
 # Macros
 lazy_static = "1"

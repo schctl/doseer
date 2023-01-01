@@ -1,6 +1,6 @@
 //! A single item (file/folder/whatever) in a directory.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use iced::widget::svg::Handle;
 use iced::widget::{column, container, Svg, Text};
@@ -8,7 +8,7 @@ use iced::widget::{column, container, Svg, Text};
 use super::icons;
 use crate::gui::Theme;
 
-pub fn view<'a>(path: &'a Path) -> anyhow::Result<iced::Element<'a, (), iced::Renderer<Theme>>> {
+pub fn view(path: &Path) -> anyhow::Result<iced::Element<'_, (), iced::Renderer<Theme>>> {
     let icon = Svg::new(Handle::from_memory(icons::DIRECTORY));
 
     let text = Text::new(path.as_os_str().to_string_lossy())

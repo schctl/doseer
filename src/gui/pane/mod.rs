@@ -1,12 +1,16 @@
 //! Pane widget.
 
-use iced::widget::{button, text, Row};
+use iced::widget::svg::Handle;
+use iced::widget::{button, row, text, Row, Svg};
+use iced::{Alignment, Length, Padding};
 use indexmap::IndexMap;
 
 use crate::gui::Theme;
 
 pub mod tab;
 use tab::Tab;
+
+use super::theme;
 
 pub mod icons;
 pub mod item;
@@ -114,21 +118,45 @@ impl Pane {
         opts: ViewOpts,
     ) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<Theme>>> {
         // Create top tab view
-        let mut tab_list = Row::new();
+        let mut tab_list = Row::new()
+            .align_items(Alignment::Center)
+            .padding(6)
+            .spacing(4);
 
         for (index, tab) in &self.tabs {
             // create tab as a button
-            let tab = button(text(
-                // get file name location
-                tab.location()
-                    .canonicalize()?
-                    .file_name()
-                    // unwrap ok since name is canonicalized
-                    .unwrap()
-                    .to_string_lossy(),
-            ))
+            let tab = button(
+                row!(
+                    Svg::new(Handle::from_memory(icons::DIRECTORY))
+                        .width(Length::Units(22))
+                        .height(Length::Units(22)),
+                    text(
+                        // get file name location
+                        tab.location()
+                            .canonicalize()?
+                            .file_name()
+                            // unwrap ok since name is canonicalized
+                            .unwrap()
+                            .to_string_lossy(),
+                    )
+                    .size(22),
+                )
+                .spacing(6)
+                .align_items(Alignment::Center)
+                .width(Length::Units(186))
+                .height(Length::Units(28))
+                .padding(Padding::from([0, 4])),
+            )
             // focus tab when the button is pressed
-            .on_press(Message::Tab(TabMessage::Focus, *index));
+            .on_press(Message::Tab(TabMessage::Focus, *index))
+            .style(
+                if *index == self.focused {
+                    TabTheme::Focused
+                } else {
+                    TabTheme::Unfocused
+                }
+                .into(),
+            );
 
             tab_list = tab_list.push(tab);
         }
@@ -144,5 +172,56 @@ impl Pane {
         let final_view = iced::widget::column!(tab_list, view);
 
         Ok(final_view.into())
+    }
+}
+
+/// Tab button theme.
+#[derive(Debug, Clone, Default)]
+pub enum TabTheme {
+    Focused,
+    #[default]
+    Unfocused,
+}
+
+impl From<TabTheme> for theme::Button {
+    fn from(t: TabTheme) -> Self {
+        theme::Button::Tab(t)
+    }
+}
+
+impl TabTheme {
+    pub fn active(&self, theme: &Theme) -> iced::widget::button::Appearance {
+        let base = theme.base();
+        let normal = theme.normal();
+
+        match self {
+            Self::Focused => iced::widget::button::Appearance {
+                background: normal.bg.into(),
+                text_color: base.fg,
+                border_radius: 6.0,
+                ..Default::default()
+            },
+            Self::Unfocused => iced::widget::button::Appearance {
+                background: base.bg.into(),
+                text_color: base.fg,
+                border_radius: 6.0,
+                ..Default::default()
+            },
+        }
+    }
+
+    pub fn hovered(&self, theme: &Theme) -> iced::widget::button::Appearance {
+        let base = theme.base();
+        let normal = theme.normal();
+
+        match self {
+            Self::Focused => self.active(theme),
+            Self::Unfocused => iced::widget::button::Appearance {
+                background: normal.bg.into(),
+                text_color: base.fg,
+                border_radius: 6.0,
+                ..Default::default()
+            },
+        }
     }
 }
