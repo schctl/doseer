@@ -98,10 +98,9 @@ impl Area {
 
     pub fn view(&self) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<Theme>>> {
         let grid = pane_grid::PaneGrid::new(&self.panes, |id, state, _focused| {
-            pane_grid::Content::new(
+            let top_bar = pane_grid::TitleBar::new(
                 state
-                    .view(super::ViewOpts {
-                        tab: tab::ViewOpts { columns: 6 },
+                    .top_bar(super::TopBarOpts {
                         controls: vec![button(text("split"))
                             .on_press(ControlMessage::Split(Split {
                                 axis: pane_grid::Axis::Horizontal,
@@ -111,7 +110,17 @@ impl Area {
                     })
                     .unwrap()
                     .map(move |m| Message::Pane(m, id)),
+            );
+
+            pane_grid::Content::new(
+                state
+                    .view(super::ViewOpts {
+                        tab: tab::ViewOpts { columns: 6 },
+                    })
+                    .unwrap()
+                    .map(move |m| Message::Pane(m, id)),
             )
+            .title_bar(top_bar)
         })
         .on_click(Message::Clicked)
         .on_drag(Message::Dragged)

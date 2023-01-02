@@ -94,8 +94,11 @@ pub enum Message {
     Control(area::ControlMessage),
 }
 
-pub struct ViewOpts<'a> {
+pub struct ViewOpts {
     pub tab: tab::ViewOpts,
+}
+
+pub struct TopBarOpts<'a> {
     pub controls: Vec<Element<'a, area::ControlMessage>>,
 }
 
@@ -121,9 +124,7 @@ impl Pane {
         Ok(())
     }
 
-    pub fn view<'a>(&'a self, opts: ViewOpts<'a>) -> anyhow::Result<Element<'a, Message>> {
-        // Create top tab view
-
+    pub fn top_bar<'a>(&'a self, opts: TopBarOpts<'a>) -> anyhow::Result<Element<'a, Message>> {
         // Pane area provided controllers
         let mut control_list = Row::new()
             .align_items(Alignment::Center)
@@ -179,6 +180,10 @@ impl Pane {
             tab_list = tab_list.push(tab);
         }
 
+        Ok(row!(tab_list, control_list).into())
+    }
+
+    pub fn view(&self, opts: ViewOpts) -> anyhow::Result<Element<Message>> {
         // Focused tab view
         let focused = self.tabs.get(&self.focused).unwrap();
 
@@ -186,10 +191,7 @@ impl Pane {
             .view(opts.tab)?
             .map(|i| Message::Tab(TabMessage::Internal(i), self.focused));
 
-        // Final view
-        let final_view = column!(row!(tab_list, control_list), view);
-
-        Ok(final_view.into())
+        Ok(view)
     }
 }
 
