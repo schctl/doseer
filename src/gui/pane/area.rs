@@ -1,27 +1,41 @@
 //! Pane collection widget.
 
 use iced::widget::pane_grid::{self, Pane as PaneId};
+use iced::widget::{button, text};
 
 use super::{tab, Pane, Tab};
 use crate::gui::Theme;
+
+/// Grid split option.
+#[derive(Debug, Clone)]
+pub struct Split {
+    /// Axis along which the new split must occur.
+    axis: pane_grid::Axis,
+    /// Id of the pane to split.
+    ///
+    /// If [`None`], is the focused pane.
+    pane: Option<PaneId>,
+}
+
+/// Messages from the controller section of each pane.
+#[derive(Debug, Clone)]
+pub enum ControlMessage {
+    Split(Split),
+    Maximize(PaneId),
+    Restore,
+}
 
 #[derive(Debug, Clone)]
 pub enum Message {
     /// A message to a single pane.
     Pane(super::Message, PaneId),
+    Control(ControlMessage),
     // Grid messages
     // These and their handlers are more or less copied exactly from iced examples
     // https://github.com/iced-rs/iced/blob/master/examples/pane_grid/src/main.rs
-    Split(pane_grid::Axis, PaneId),
-    SplitFocused(pane_grid::Axis),
-    FocusAdjacent(pane_grid::Direction),
     Clicked(PaneId),
     Dragged(pane_grid::DragEvent),
     Resized(pane_grid::ResizeEvent),
-    Maximize(PaneId),
-    Restore,
-    Close(PaneId),
-    CloseFocused,
 }
 
 /// The main space where all panes are displayed.
@@ -45,30 +59,13 @@ impl Area {
     pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
         match message {
             Message::Pane(m, id) => {
-                let pane = self.panes.get_mut(&id).unwrap();
-                pane.update(m)?;
-            }
-            Message::Split(axis, pane) => {
-                let result = self.panes.split(axis, &pane, Pane::new(Tab::new()?));
-
-                if let Some((pane, _)) = result {
-                    self.focused = Some(pane);
-                }
-            }
-            Message::SplitFocused(axis) => {
-                if let Some(pane) = self.focused {
-                    let result = self.panes.split(axis, &pane, Pane::new(Tab::new()?));
-
-                    if let Some((pane, _)) = result {
-                        self.focused = Some(pane);
-                    }
-                }
-            }
-            Message::FocusAdjacent(direction) => {
-                if let Some(pane) = self.focused {
-                    if let Some(adjacent) = self.panes.adjacent(&pane, direction) {
-                        self.focused = Some(adjacent);
-                    }
+                // Control messages are intended for the pane area
+                // So we don't pass them onto the pane
+                if let super::Message::Control(c) = m {
+                    self.update(Message::Control(c))?;
+                } else {
+                    let pane = self.panes.get_mut(&id).unwrap();
+                    pane.update(m)?;
                 }
             }
             Message::Clicked(pane) => {
@@ -80,22 +77,19 @@ impl Area {
             Message::Dragged(pane_grid::DragEvent::Dropped { pane, target }) => {
                 self.panes.swap(&pane, &target);
             }
-            Message::Maximize(pane) => self.panes.maximize(&pane),
-            Message::Restore => {
-                self.panes.restore();
-            }
-            Message::Close(pane) => {
-                if let Some((_, sibling)) = self.panes.close(&pane) {
-                    self.focused = Some(sibling);
-                }
-            }
-            Message::CloseFocused => {
-                if let Some(pane) = self.focused {
-                    if let Some((_, sibling)) = self.panes.close(&pane) {
-                        self.focused = Some(sibling);
+            Message::Control(p) => match p {
+                ControlMessage::Maximize(pane) => self.panes.maximize(&pane),
+                ControlMessage::Restore => self.panes.restore(),
+                ControlMessage::Split(split) => {
+                    if let Some(pane) = split.pane.map_or(self.focused, Some) {
+                        let result = self.panes.split(split.axis, &pane, Pane::new(Tab::new()?));
+
+                        if let Some((pane, _)) = result {
+                            self.focused = Some(pane);
+                        }
                     }
                 }
-            }
+            },
             _ => {}
         }
 
@@ -108,6 +102,12 @@ impl Area {
                 state
                     .view(super::ViewOpts {
                         tab: tab::ViewOpts { columns: 6 },
+                        controls: vec![button(text("split"))
+                            .on_press(ControlMessage::Split(Split {
+                                axis: pane_grid::Axis::Horizontal,
+                                pane: Some(id),
+                            }))
+                            .into()],
                     })
                     .unwrap()
                     .map(move |m| Message::Pane(m, id)),

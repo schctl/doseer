@@ -1,6 +1,6 @@
 //! The GUI app.
 
-use iced::widget::{pane_grid, Container};
+use iced::widget::Container;
 use iced::Application;
 use iced::{executor, Command, Length};
 

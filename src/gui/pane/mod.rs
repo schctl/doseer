@@ -90,10 +90,13 @@ pub enum TabMessage {
 #[derive(Debug, Clone)]
 pub enum Message {
     Tab(TabMessage, usize),
+    /// For external use by the pane area.
+    Control(area::ControlMessage),
 }
 
-pub struct ViewOpts {
+pub struct ViewOpts<'a> {
     pub tab: tab::ViewOpts,
+    pub controls: Vec<Element<'a, area::ControlMessage>>,
 }
 
 impl Pane {
@@ -110,13 +113,28 @@ impl Pane {
                     self.remove_tab(index);
                 }
             },
+            _ => {
+                tracing::error!("invalid message received: {:?}", message)
+            }
         }
 
         Ok(())
     }
 
-    pub fn view<'a>(&'a self, opts: ViewOpts) -> anyhow::Result<Element<'a, Message>> {
+    pub fn view<'a>(&'a self, opts: ViewOpts<'a>) -> anyhow::Result<Element<'a, Message>> {
         // Create top tab view
+
+        // Pane area provided controllers
+        let mut control_list = Row::new()
+            .align_items(Alignment::Center)
+            .padding(6)
+            .spacing(4);
+
+        for control in opts.controls {
+            control_list = control_list.push(control.map(Message::Control));
+        }
+
+        // Held tab list
         let mut tab_list = Row::new()
             .align_items(Alignment::Center)
             .padding(6)
@@ -169,7 +187,7 @@ impl Pane {
             .map(|i| Message::Tab(TabMessage::Internal(i), self.focused));
 
         // Final view
-        let final_view = column!(row!(tab_list), view);
+        let final_view = column!(row!(tab_list, control_list), view);
 
         Ok(final_view.into())
     }
