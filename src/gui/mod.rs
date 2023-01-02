@@ -12,6 +12,9 @@ use pane::{Pane, Tab};
 pub mod theme;
 pub use theme::Theme;
 
+/// Shorthand for an iced element generic over some message.
+pub type Element<'a, T> = iced::Element<'a, T, iced::Renderer<Theme>>;
+
 #[derive(Debug, Clone)]
 pub enum Message {
     PaneArea(pane::area::Message),
@@ -64,7 +67,7 @@ impl Application for Gui {
         Command::none()
     }
 
-    fn view(&self) -> iced::Element<'_, Self::Message, iced::Renderer<Theme>> {
+    fn view(&self) -> Element<Self::Message> {
         let pane_area = self.pane_area.view().unwrap().map(Message::PaneArea);
 
         Container::new(pane_area)

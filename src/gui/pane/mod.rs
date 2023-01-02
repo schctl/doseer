@@ -1,12 +1,12 @@
 //! Pane widget.
 
 use iced::widget::svg::Handle;
-use iced::widget::{button, row, text, Row, Svg};
+use iced::widget::{button, column, row, text, Row, Svg};
 use iced::{Alignment, Length, Padding};
 use indexmap::IndexMap;
 
 use super::theme;
-use crate::gui::Theme;
+use crate::gui::{Element, Theme};
 
 pub mod tab;
 pub use tab::Tab;
@@ -115,15 +115,13 @@ impl Pane {
         Ok(())
     }
 
-    pub fn view(
-        &self,
-        opts: ViewOpts,
-    ) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<Theme>>> {
+    pub fn view<'a>(&'a self, opts: ViewOpts) -> anyhow::Result<Element<'a, Message>> {
         // Create top tab view
         let mut tab_list = Row::new()
             .align_items(Alignment::Center)
             .padding(6)
-            .spacing(4);
+            .spacing(4)
+            .width(Length::Fill);
 
         for (index, tab) in &self.tabs {
             // create tab as a button
@@ -171,7 +169,7 @@ impl Pane {
             .map(|i| Message::Tab(TabMessage::Internal(i), self.focused));
 
         // Final view
-        let final_view = iced::widget::column!(tab_list, view);
+        let final_view = column!(row!(tab_list), view);
 
         Ok(final_view.into())
     }

@@ -9,7 +9,7 @@ use iced::widget::{Column, Row};
 
 use super::item;
 use crate::dirs;
-use crate::gui::Theme;
+use crate::gui::Element;
 
 /// A single tab displays a single open location.
 #[derive(Debug)]
@@ -69,10 +69,7 @@ impl Tab {
         Ok(())
     }
 
-    pub fn view<'a>(
-        &'a self,
-        opts: ViewOpts,
-    ) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<Theme>>> {
+    pub fn view<'a>(&'a self, opts: ViewOpts) -> anyhow::Result<Element<'a, Message>> {
         let mut columns = Column::new();
 
         // Update contents
