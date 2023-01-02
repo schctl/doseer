@@ -1,0 +1,21 @@
+<svg width="96" height="48" viewBox="0 0 96 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<style>
+    .m {
+        fill: #0F0F0F;
+    }
+    .seven {
+        fill: #1F1F1F;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .m {
+            fill: #F0F0F0;
+        }
+        .seven {
+            fill: #E0E0E0;
+        }
+    }
+</style>
+<path d="M34.302 20.5733H42.8936V48L34.302 47.9967V20.57H25.7104V47.9967H17.1188V20.57H8.52718V47.9967H0V13.7133L34.302 13.7166V20.5733Z" class="m"/>
+<path d="M61.6791 6.85667V13.7133L53.1064 13.7134V5.88513e-05L96 0V10.285L95.9698 13.7133V20.57H87.3971V27.4267H78.8244V34.2834H70.2517V41.14H61.6791V47.9967L53.1064 47.9968V34.2834H61.6791V27.4267H70.2517V20.57H78.8244V13.7133H87.3971V6.85667H61.6791Z" class="seven"/>
+</svg>

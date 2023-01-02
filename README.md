@@ -1,3 +1,3 @@
-# m7
+<img src="res/logo.svg" height=64>
 
-A sensible GUI file manager.
+A beautiful and practical file manager.
