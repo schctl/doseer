@@ -5,15 +5,17 @@ use iced::widget::{button, row, text, Row, Svg};
 use iced::{Alignment, Length, Padding};
 use indexmap::IndexMap;
 
+use super::theme;
 use crate::gui::Theme;
 
 pub mod tab;
-use tab::Tab;
+pub use tab::Tab;
 
-use super::theme;
-
+pub mod area;
 pub mod icons;
 pub mod item;
+
+pub use area::Area;
 
 /// A pane contains many tabs, but displays only one at a time.
 #[derive(Debug)]

@@ -7,26 +7,23 @@ use iced::{executor, Command, Length};
 use crate::config::Config;
 
 pub mod pane;
-use pane::tab::{self, Tab};
-use pane::Pane;
+use pane::{Pane, Tab};
 
 pub mod theme;
 pub use theme::Theme;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    PaneMessage(pane::Message, pane_grid::Pane),
+    PaneArea(pane::area::Message),
     IcedEvent(iced::Event),
 }
 
 /// The UI state.
 pub struct Gui {
+    /// File pane grid area.
+    pane_area: pane::Area,
     /// Current configurations.
     config: Config,
-    /// Panegrid state.
-    panes: pane_grid::State<Pane>,
-    /// Focused pane.
-    focused: usize,
 }
 
 impl Application for Gui {
@@ -38,15 +35,13 @@ impl Application for Gui {
     fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
         let mut pane = Pane::new(Tab::new().unwrap());
         pane.add_tab(Tab::new_with("/usr/lib").unwrap());
-        let (panes, _) = pane_grid::State::new(pane);
 
-        let theme = iced::Theme::Dark;
+        let pane_area = pane::Area::new(pane);
 
         (
             Self {
                 config: flags,
-                panes,
-                focused: 0,
+                pane_area,
             },
             Command::none(),
         )
@@ -60,12 +55,9 @@ impl Application for Gui {
         iced::subscription::events().map(Message::IcedEvent)
     }
 
-    fn update(&mut self, m: Self::Message) -> Command<Self::Message> {
-        match m {
-            Message::PaneMessage(message, id) => {
-                let pane = self.panes.panes.get_mut(&id).unwrap();
-                pane.update(message).unwrap();
-            }
+    fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
+        match message {
+            Message::PaneArea(m) => self.pane_area.update(m).unwrap(),
             _ => {}
         }
 
@@ -73,18 +65,9 @@ impl Application for Gui {
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message, iced::Renderer<Theme>> {
-        let pane_grid = pane_grid::PaneGrid::new(&self.panes, |id, state, _focused| {
-            pane_grid::Content::new(
-                state
-                    .view(pane::ViewOpts {
-                        tab: tab::ViewOpts { columns: 6 },
-                    })
-                    .unwrap()
-                    .map(move |m| Message::PaneMessage(m, id)),
-            )
-        });
+        let pane_area = self.pane_area.view().unwrap().map(Message::PaneArea);
 
-        Container::new(pane_grid)
+        Container::new(pane_area)
             .width(Length::Fill)
             .height(Length::Fill)
             .into()
