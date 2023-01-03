@@ -5,7 +5,7 @@ use std::path::Path;
 use iced::widget::svg::Handle;
 use iced::widget::{column, container, Svg, Text};
 
-use super::icons;
+use crate::gui::icons;
 use crate::gui::Theme;
 
 pub fn view(path: &Path) -> anyhow::Result<iced::Element<'_, (), iced::Renderer<Theme>>> {

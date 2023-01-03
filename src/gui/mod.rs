@@ -7,10 +7,16 @@ use iced::{executor, Command, Length};
 use crate::config::Config;
 
 pub mod pane;
-use pane::{Pane, Tab};
+use pane::Pane;
 
 pub mod theme;
 pub use theme::Theme;
+
+pub mod tab;
+pub use tab::Tab;
+
+pub mod icons;
+pub mod item;
 
 /// Shorthand for an iced element generic over some message.
 pub type Element<'a, T> = iced::Element<'a, T, iced::Renderer<Theme>>;
