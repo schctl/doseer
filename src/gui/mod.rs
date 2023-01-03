@@ -1,6 +1,6 @@
 //! The GUI app.
 
-use iced::widget::Container;
+use iced::widget::row;
 use iced::Application;
 use iced::{executor, Command, Length};
 
@@ -18,6 +18,9 @@ pub use tab::Tab;
 pub mod icons;
 pub mod item;
 
+pub mod side_bar;
+pub use side_bar::SideBar;
+
 /// Shorthand for an iced element generic over some message.
 pub type Element<'a, T> = iced::Element<'a, T, iced::Renderer<Theme>>;
 
@@ -31,6 +34,8 @@ pub enum Message {
 pub struct Gui {
     /// File pane grid area.
     pane_area: pane::Area,
+    /// The side bar.
+    side_bar: SideBar,
     /// Current configurations.
     config: Config,
 }
@@ -42,14 +47,18 @@ impl Application for Gui {
     type Theme = Theme;
 
     fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
-        let mut pane = Pane::new(Tab::new().unwrap());
-        pane.add_tab(Tab::new_with("/usr/lib").unwrap());
-
+        let pane = Pane::new(Tab::new().unwrap());
         let pane_area = pane::Area::new(pane);
+
+        let side_bar = SideBar {
+            default: flags.side_bar.clone(),
+            bookmarks: flags.bookmarks.clone(),
+        };
 
         (
             Self {
                 config: flags,
+                side_bar,
                 pane_area,
             },
             Command::none(),
@@ -74,9 +83,14 @@ impl Application for Gui {
     }
 
     fn view(&self) -> Element<Self::Message> {
+        let side_bar = self
+            .side_bar
+            .view(|_| false)
+            .unwrap()
+            .map(Message::PaneArea);
         let pane_area = self.pane_area.view().unwrap().map(Message::PaneArea);
 
-        Container::new(pane_area)
+        row!(side_bar, pane_area)
             .width(Length::Fill)
             .height(Length::Fill)
             .into()

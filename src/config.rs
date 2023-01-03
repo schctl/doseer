@@ -4,18 +4,22 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
+use crate::dirs;
 use crate::{resource, resource_make};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 pub struct Config {
-    /// Dashbar folder list.
-    dash_folders: Vec<PathBuf>,
+    /// Side bar folder list.
+    pub side_bar: Vec<PathBuf>,
+    /// Bookmark folder list.
+    pub bookmarks: Vec<PathBuf>,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
-            dash_folders: vec![],
+            side_bar: vec![dirs::BASE.home_dir().to_owned()],
+            bookmarks: vec![],
         }
     }
 }

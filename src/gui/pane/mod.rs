@@ -1,8 +1,11 @@
 //! Pane widget.
 
+use std::convert::identity;
+use std::path::PathBuf;
+
 use iced::widget::svg::Handle;
 use iced::widget::{button, row, text, Row, Svg};
-use iced::{Alignment, Length, Padding};
+use iced::{Alignment, Color, Length, Padding};
 use indexmap::IndexMap;
 
 use crate::gui::{icons, tab, theme, Element, Tab, Theme};
@@ -50,6 +53,12 @@ impl Pane {
         None
     }
 
+    /// Replace the currently focused tab with another tab.
+    pub fn replace_focused(&mut self, tab: Tab) {
+        self.tabs.remove(&self.focused);
+        self.tabs.insert(self.focused, tab);
+    }
+
     /// Get all held tabs.
     #[inline]
     pub fn tabs(&self) -> &IndexMap<usize, Tab> {
@@ -78,11 +87,13 @@ pub enum TabMessage {
     Internal(tab::Message),
     Focus,
     Remove,
+    Add(PathBuf),
+    Replace(PathBuf),
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Tab(TabMessage, usize),
+    Tab(TabMessage, Option<usize>),
     /// For external use by the pane area.
     Control(area::ControlMessage),
 }
@@ -100,14 +111,21 @@ impl Pane {
         match message {
             Message::Tab(message, index) => match message {
                 TabMessage::Internal(i) => {
-                    self.tabs.get_mut(&index).unwrap().update(i)?;
+                    self.tabs
+                        .get_mut(&index.map_or(self.focused, identity))
+                        .unwrap()
+                        .update(i)?;
                 }
                 TabMessage::Focus => {
-                    self.focus(index);
+                    self.focus(index.map_or(self.focused, identity));
                 }
                 TabMessage::Remove => {
-                    self.remove_tab(index);
+                    self.remove_tab(index.map_or(self.focused, identity));
                 }
+                TabMessage::Add(tab) => {
+                    self.add_tab(Tab::new_with(tab)?);
+                }
+                TabMessage::Replace(tab) => self.replace_focused(Tab::new_with(tab)?),
             },
             _ => {
                 tracing::error!("invalid message received: {:?}", message)
@@ -160,7 +178,7 @@ impl Pane {
                 .padding(Padding::from([0, 4])),
             )
             // focus tab when the button is pressed
-            .on_press(Message::Tab(TabMessage::Focus, *index))
+            .on_press(Message::Tab(TabMessage::Focus, Some(*index)))
             .style(
                 if *index == self.focused {
                     TabTheme::Focused
@@ -182,7 +200,7 @@ impl Pane {
 
         let view = focused
             .view(opts.tab)?
-            .map(|i| Message::Tab(TabMessage::Internal(i), self.focused));
+            .map(|i| Message::Tab(TabMessage::Internal(i), None));
 
         Ok(view)
     }
@@ -215,7 +233,7 @@ impl TabTheme {
                 ..Default::default()
             },
             Self::Unfocused => iced::widget::button::Appearance {
-                background: base.bg.into(),
+                background: Color::TRANSPARENT.into(),
                 text_color: base.fg,
                 border_radius: 6.0,
                 ..Default::default()

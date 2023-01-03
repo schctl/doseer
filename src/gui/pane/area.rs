@@ -28,7 +28,7 @@ pub enum ControlMessage {
 #[derive(Debug, Clone)]
 pub enum Message {
     /// A message to a single pane.
-    Pane(super::Message, PaneId),
+    Pane(super::Message, Option<PaneId>),
     Control(ControlMessage),
     // Grid messages
     // These and their handlers are more or less copied exactly from iced examples
@@ -63,9 +63,10 @@ impl Area {
                 // So we don't pass them onto the pane
                 if let super::Message::Control(c) = m {
                     self.update(Message::Control(c))?;
-                } else {
-                    let pane = self.panes.get_mut(&id).unwrap();
-                    pane.update(m)?;
+                } else if let Some(id) = id.map_or(self.focused, Some) {
+                    if let Some(pane) = self.panes.get_mut(&id) {
+                        pane.update(m)?;
+                    }
                 }
             }
             Message::Clicked(pane) => {
@@ -109,7 +110,7 @@ impl Area {
                             .into()],
                     })
                     .unwrap()
-                    .map(move |m| Message::Pane(m, id)),
+                    .map(move |m| Message::Pane(m, Some(id))),
             );
 
             pane_grid::Content::new(
@@ -118,7 +119,7 @@ impl Area {
                         tab: tab::ViewOpts { columns: 6 },
                     })
                     .unwrap()
-                    .map(move |m| Message::Pane(m, id)),
+                    .map(move |m| Message::Pane(m, Some(id))),
             )
             .title_bar(top_bar)
         })
