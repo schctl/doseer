@@ -9,6 +9,7 @@ use iced::{Alignment, Color, Length, Padding};
 use indexmap::IndexMap;
 
 use crate::gui::{icons, tab, theme, Element, Tab, Theme};
+use crate::path::PathWrap;
 
 pub mod area;
 pub use area::Area;
@@ -87,8 +88,8 @@ pub enum TabMessage {
     Internal(tab::Message),
     Focus,
     Remove,
-    Add(PathBuf),
-    Replace(PathBuf),
+    Add(PathWrap),
+    Replace(PathWrap),
 }
 
 #[derive(Debug, Clone)]

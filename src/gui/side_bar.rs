@@ -8,6 +8,7 @@ use iced::{Alignment, Length, Padding};
 
 use crate::gui::pane::{self, TabButtonStyle};
 use crate::gui::{icons, Element};
+use crate::path::PathWrap;
 
 /// The file picker side bar.
 #[derive(Debug)]
@@ -18,10 +19,17 @@ pub struct SideBar {
     pub bookmarks: Vec<PathBuf>,
 }
 
-fn item_button(
+fn item_button<'a>(
     path: &Path,
     is_open: impl Fn(&Path) -> bool,
-) -> anyhow::Result<Element<pane::area::Message>> {
+) -> anyhow::Result<Element<'a, pane::area::Message>> {
+    let style = // We can reuse this
+    if (is_open)(&path) {
+        TabButtonStyle::Focused
+    } else {
+        TabButtonStyle::Default
+    }.into();
+
     let item_button = button(
         row!(
             Svg::new(Handle::from_memory(icons::DIRECTORY))
@@ -45,18 +53,10 @@ fn item_button(
     )
     // focus tab when the button is pressed
     .on_press(pane::area::Message::Pane(
-        pane::Message::Tab(pane::TabMessage::Replace(path.to_owned()), None),
+        pane::Message::Tab(pane::TabMessage::Replace(PathWrap::from_path(path)?), None),
         None,
     ))
-    .style(
-        // We can reuse this
-        if (is_open)(path) {
-            TabButtonStyle::Focused
-        } else {
-            TabButtonStyle::Default
-        }
-        .into(),
-    );
+    .style(style);
 
     Ok(item_button.into())
 }

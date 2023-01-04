@@ -1,7 +1,7 @@
 //! Tab widget.
 
 use std::cell::UnsafeCell;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::RwLock;
 
 use iced::widget::{container, scrollable};
@@ -10,6 +10,7 @@ use iced::widget::{Column, Row};
 use super::item;
 use crate::dirs;
 use crate::gui::Element;
+use crate::path::PathWrap;
 
 /// A single tab displays a single open location.
 #[derive(Debug)]
@@ -19,7 +20,7 @@ pub struct Tab {
     /// Contents of the current location.
     contents: UnsafeCell<dirs::Contents>,
     /// The currently selected item.
-    selected: Option<PathBuf>,
+    selected: Option<PathWrap>,
 }
 
 impl Tab {
@@ -41,10 +42,10 @@ impl Tab {
 
     /// Get the location this tab points to.
     #[inline]
-    pub fn location(&self) -> PathBuf {
+    pub fn location(&self) -> &Path {
         let _read_lock = self.update_lock.read();
         // SAFETY: Read lock held
-        (unsafe { &*self.contents.get() }).location().to_owned()
+        (unsafe { &*self.contents.get() }).location()
     }
 
     /// Change this tab to a new location.
@@ -70,7 +71,7 @@ pub struct ViewOpts {
 impl Tab {
     fn is_selected<P: AsRef<Path>>(&self, path: P) -> bool {
         if let Some(selected) = &self.selected {
-            if selected == path.as_ref() {
+            if selected.as_ref() == path.as_ref() {
                 return true;
             }
         }
@@ -123,7 +124,7 @@ impl Tab {
 
         let _read_lock = self.update_lock.read();
         // SAFETY: Read lock held
-        let contents: &'a [PathBuf] = unsafe { &*self.contents.get() }.contents();
+        let contents: &'a [PathWrap] = unsafe { &*self.contents.get() }.contents();
 
         let mut iter = contents.iter();
 
@@ -139,7 +140,7 @@ impl Tab {
                 for path in iter.by_ref().take(opts.columns) {
                     row = row.push({
                         let view = item::view(
-                            path,
+                            path.clone(),
                             if self.is_selected(path) {
                                 item::Style::Selected
                             } else {

@@ -6,6 +6,7 @@ use iced::{Application, Settings};
 mod config;
 mod dirs;
 mod gui;
+mod path;
 
 fn run() -> anyhow::Result<()> {
     let config = config::read_config().context("failed to get configuration")?;

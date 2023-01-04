@@ -1,9 +1,11 @@
 //! Directory tools.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::time::{Duration, Instant, SystemTime};
 
 use directories::{BaseDirs, ProjectDirs};
+
+use crate::path::PathWrap;
 
 lazy_static::lazy_static! {
     pub static ref PROJECT: ProjectDirs
@@ -61,20 +63,19 @@ struct Checked {
 #[derive(Debug)]
 pub struct Contents {
     /// The currently open location.
-    location: PathBuf,
+    location: PathWrap,
     /// Items in current location.
-    contents: Vec<PathBuf>,
+    contents: Vec<PathWrap>,
     /// Last checked time.
     checked: Checked,
 }
 
 impl Contents {
     pub fn new<P: AsRef<Path>>(path: P) -> anyhow::Result<Self> {
-        let location_ref = path.as_ref();
-        let location = location_ref.to_owned();
+        let location = PathWrap::from_path(path)?;
 
         let mut items = Vec::new();
-        Self::read_items_into(location_ref, &mut items)?;
+        Self::read_items_into(&location, &mut items)?;
         let contents = items;
 
         let modified = match location.metadata()?.modified() {
@@ -102,7 +103,7 @@ impl Contents {
 
     /// Read the contents of this directory.
     #[inline]
-    pub fn contents(&self) -> &[PathBuf] {
+    pub fn contents(&self) -> &[PathWrap] {
         &self.contents
     }
 
@@ -133,7 +134,7 @@ impl Contents {
     /// Get items in this location.
     ///
     /// Clears the provided buffer of all its previous contents.
-    fn read_items_into(path: &Path, buf: &mut Vec<PathBuf>) -> anyhow::Result<()> {
+    fn read_items_into(path: &Path, buf: &mut Vec<PathWrap>) -> anyhow::Result<()> {
         buf.clear();
 
         // TODO: collect_into when its stabilized
@@ -141,7 +142,7 @@ impl Contents {
             Ok(entry) => Some(entry.path()),
             _ => None,
         }) {
-            buf.push(entry);
+            buf.push(PathWrap::from_path(entry)?);
         }
 
         Ok(())

@@ -1,23 +1,22 @@
 //! A single item (file/folder/whatever) in a directory.
 
-use std::path::{Path, PathBuf};
-
 use iced::widget::svg::Handle;
-use iced::widget::{button, column, Svg, Text};
+use iced::widget::{button, column, text, Svg};
 use iced::Color;
 
 use crate::gui::{icons, theme, Element};
+use crate::path::PathWrap;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Click(PathBuf),
+    Click(PathWrap),
     // TODO: Delete, Properties, Copy, Paste, etc
 }
 
-pub fn view(path: &Path, theme: Style) -> Element<Message> {
+pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
     let icon = Svg::new(Handle::from_memory(icons::DIRECTORY));
 
-    let text = Text::new(path.as_os_str().to_string_lossy())
+    let text = text(path.display().to_string_lossy())
         .horizontal_alignment(iced::alignment::Horizontal::Center);
 
     button(
@@ -26,7 +25,7 @@ pub fn view(path: &Path, theme: Style) -> Element<Message> {
             .width(iced::Length::Fill),
     )
     .width(iced::Length::Fill)
-    .on_press(Message::Click(path.to_owned()))
+    .on_press(Message::Click(path))
     .style(theme.into())
     .into()
 }
