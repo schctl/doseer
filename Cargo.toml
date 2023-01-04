@@ -27,6 +27,11 @@ paste = "1"
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = "0.5"
 
-[profile.release]
+[features]
+debug = ["iced/debug"]
+
+[profile.release-full]
+inherits = "release"
 lto = true
+strip = true
 codegen-units = 1
