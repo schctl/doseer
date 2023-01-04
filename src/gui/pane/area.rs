@@ -3,8 +3,7 @@
 use iced::widget::pane_grid::{self, Pane as PaneId};
 use iced::widget::{button, text};
 
-use super::{tab, Pane, Tab};
-use crate::gui::{Element, Theme};
+use crate::gui::{tab, Element, Pane, Tab};
 
 /// Grid split option.
 #[derive(Debug, Clone)]

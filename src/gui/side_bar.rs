@@ -6,10 +6,8 @@ use iced::widget::svg::{Handle, Svg};
 use iced::widget::{button, column, container, row, text, Column};
 use iced::{Alignment, Length, Padding};
 
-use crate::gui::icons;
-use crate::gui::pane;
-use crate::gui::pane::TabTheme;
-use crate::gui::Element;
+use crate::gui::pane::{self, TabButtonStyle};
+use crate::gui::{icons, Element};
 
 /// The file picker side bar.
 #[derive(Debug)]
@@ -53,9 +51,9 @@ fn item_button(
     .style(
         // We can reuse this
         if (is_open)(path) {
-            TabTheme::Focused
+            TabButtonStyle::Focused
         } else {
-            TabTheme::Unfocused
+            TabButtonStyle::Default
         }
         .into(),
     );

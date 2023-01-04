@@ -3,7 +3,7 @@
 use iced::widget::button;
 use sleet::style::{sample, stylesheet, theme};
 
-use super::pane;
+use crate::gui::{item, pane};
 
 theme::theme! {
     Theme
@@ -18,7 +18,8 @@ stylesheet::impl_all! {
 pub enum Button {
     #[default]
     Default,
-    Tab(pane::TabTheme),
+    Tab(pane::TabButtonStyle),
+    Item(item::Style),
 }
 
 impl button::StyleSheet for Theme {
@@ -27,6 +28,7 @@ impl button::StyleSheet for Theme {
     fn active(&self, style: &Self::Style) -> button::Appearance {
         match style {
             Self::Style::Tab(t) => t.active(self),
+            Self::Style::Item(t) => t.active(self),
             _ => sample::default_style!(Button::active(self)),
         }
     }
@@ -34,6 +36,7 @@ impl button::StyleSheet for Theme {
     fn hovered(&self, style: &Self::Style) -> button::Appearance {
         match style {
             Self::Style::Tab(t) => t.hovered(self),
+            Self::Style::Item(t) => t.hovered(self),
             _ => sample::default_style!(Button::hovered(self)),
         }
     }

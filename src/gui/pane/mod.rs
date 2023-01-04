@@ -181,9 +181,9 @@ impl Pane {
             .on_press(Message::Tab(TabMessage::Focus, Some(*index)))
             .style(
                 if *index == self.focused {
-                    TabTheme::Focused
+                    TabButtonStyle::Focused
                 } else {
-                    TabTheme::Unfocused
+                    TabButtonStyle::Default
                 }
                 .into(),
             );
@@ -207,19 +207,19 @@ impl Pane {
 
 /// Tab button theme.
 #[derive(Debug, Clone, Default)]
-pub enum TabTheme {
-    Focused,
+pub enum TabButtonStyle {
     #[default]
-    Unfocused,
+    Default,
+    Focused,
 }
 
-impl From<TabTheme> for theme::Button {
-    fn from(t: TabTheme) -> Self {
+impl From<TabButtonStyle> for theme::Button {
+    fn from(t: TabButtonStyle) -> Self {
         theme::Button::Tab(t)
     }
 }
 
-impl TabTheme {
+impl TabButtonStyle {
     pub fn active(&self, theme: &Theme) -> iced::widget::button::Appearance {
         let base = theme.base();
         let normal = theme.normal();
@@ -231,7 +231,7 @@ impl TabTheme {
                 border_radius: 6.0,
                 ..Default::default()
             },
-            Self::Unfocused => iced::widget::button::Appearance {
+            Self::Default => iced::widget::button::Appearance {
                 background: Color::TRANSPARENT.into(),
                 text_color: base.fg,
                 border_radius: 6.0,
@@ -246,7 +246,7 @@ impl TabTheme {
 
         match self {
             Self::Focused => self.active(theme),
-            Self::Unfocused => iced::widget::button::Appearance {
+            Self::Default => iced::widget::button::Appearance {
                 background: normal.bg.into(),
                 text_color: base.fg,
                 border_radius: 6.0,

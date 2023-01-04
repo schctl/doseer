@@ -18,6 +18,8 @@ pub struct Tab {
     update_lock: RwLock<()>,
     /// Contents of the current location.
     contents: UnsafeCell<dirs::Contents>,
+    /// The currently selected item.
+    selected: Option<PathBuf>,
 }
 
 impl Tab {
@@ -33,6 +35,7 @@ impl Tab {
         Ok(Self {
             update_lock: RwLock::new(()),
             contents: UnsafeCell::new(dirs::Contents::new(path)?),
+            selected: None,
         })
     }
 
@@ -43,6 +46,12 @@ impl Tab {
         // SAFETY: Read lock held
         (unsafe { &*self.contents.get() }).location().to_owned()
     }
+
+    /// Change this tab to a new location.
+    pub fn update_location<P: AsRef<Path>>(&mut self, new: P) -> anyhow::Result<()> {
+        self.contents = UnsafeCell::new(dirs::Contents::new(new)?);
+        Ok(())
+    }
 }
 
 // Widget stuff
@@ -50,7 +59,7 @@ impl Tab {
 /// Internal tab message.
 #[derive(Debug, Clone)]
 pub enum Message {
-    ItemUpdate((), usize),
+    Item(item::Message),
     // TODO: manual update contents
 }
 
@@ -59,11 +68,42 @@ pub struct ViewOpts {
 }
 
 impl Tab {
+    fn is_selected<P: AsRef<Path>>(&self, path: P) -> bool {
+        if let Some(selected) = &self.selected {
+            if selected == path.as_ref() {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    /// Open a path.
+    fn open<P: AsRef<Path>>(&mut self, path: P) -> anyhow::Result<()> {
+        let path = path.as_ref();
+
+        if path.is_dir() {
+            self.update_location(path)?
+        } else {
+            open::that(path)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Tab {
     pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
         match message {
-            Message::ItemUpdate(_, _) => {
-                // ¯\_(ツ)_/¯
-            }
+            Message::Item(m) => match m {
+                item::Message::Click(path) => {
+                    if self.is_selected(&path) {
+                        self.open(path)?;
+                    } else {
+                        self.selected = Some(path);
+                    }
+                }
+            },
         }
 
         Ok(())
@@ -96,9 +136,17 @@ impl Tab {
                 // Row wise
                 let mut row = Row::new().width(iced::Length::Fill);
 
-                for (index, path) in iter.by_ref().enumerate().take(opts.columns) {
+                for path in iter.by_ref().take(opts.columns) {
                     row = row.push({
-                        let view = item::view(path).map(move |m| Message::ItemUpdate(m, index));
+                        let view = item::view(
+                            path,
+                            if self.is_selected(path) {
+                                item::Style::Selected
+                            } else {
+                                item::Style::Default
+                            },
+                        )
+                        .map(Message::Item);
 
                         container(view).width(iced::Length::Units(128))
                     });
