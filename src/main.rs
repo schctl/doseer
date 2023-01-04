@@ -8,12 +8,13 @@ mod dirs;
 mod gui;
 mod path;
 
+#[cfg(not(target_env = "msvc"))]
+#[global_allocator]
+static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+
 fn run() -> anyhow::Result<()> {
     let config = config::read_config().context("failed to get configuration")?;
-
-    // Run the GUI
     gui::Gui::run(Settings::with_flags(config))?;
-
     Ok(())
 }
 
