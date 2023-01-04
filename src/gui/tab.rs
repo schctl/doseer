@@ -69,7 +69,7 @@ impl Tab {
         Ok(())
     }
 
-    pub fn view<'a>(&'a self, opts: ViewOpts) -> anyhow::Result<Element<'a, Message>> {
+    pub fn view<'a>(&'a self, opts: ViewOpts) -> Element<'a, Message> {
         let mut columns = Column::new();
 
         // Update contents
@@ -98,7 +98,7 @@ impl Tab {
 
                 for (index, path) in iter.by_ref().enumerate().take(opts.columns) {
                     row = row.push({
-                        let view = item::view(path)?.map(move |m| Message::ItemUpdate(m, index));
+                        let view = item::view(path).map(move |m| Message::ItemUpdate(m, index));
 
                         container(view).width(iced::Length::Units(128))
                     });
@@ -111,6 +111,6 @@ impl Tab {
         // Scroll state
         let scrollable = scrollable(columns);
 
-        Ok(scrollable.into())
+        scrollable.into()
     }
 }

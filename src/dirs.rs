@@ -111,7 +111,7 @@ impl Contents {
         // Check if its been 5 seconds since the last check.
         // This is pretty reasonable since checking over this would be less intensive
         // than fetching fs metadata every call.
-        if (Instant::now() - self.checked.checked) > Duration::from_secs(5) {
+        if self.checked.checked.elapsed() > Duration::from_secs(5) {
             // Check the fs metadata for changes
             if let Ok(metadata) = self.location.metadata() {
                 if let Ok(modified) = metadata.modified() {
@@ -141,7 +141,7 @@ impl Contents {
             Ok(entry) => Some(entry.path()),
             _ => None,
         }) {
-            buf.push(entry)
+            buf.push(entry);
         }
 
         Ok(())

@@ -37,7 +37,7 @@ pub struct Gui {
     /// The side bar.
     side_bar: SideBar,
     /// Current configurations.
-    config: Config,
+    _config: Config,
 }
 
 impl Application for Gui {
@@ -57,7 +57,7 @@ impl Application for Gui {
 
         (
             Self {
-                config: flags,
+                _config: flags,
                 side_bar,
                 pane_area,
             },
@@ -88,7 +88,7 @@ impl Application for Gui {
             .view(|_| false)
             .unwrap()
             .map(Message::PaneArea);
-        let pane_area = self.pane_area.view().unwrap().map(Message::PaneArea);
+        let pane_area = self.pane_area.view().map(Message::PaneArea);
 
         row!(side_bar, pane_area)
             .width(Length::Fill)

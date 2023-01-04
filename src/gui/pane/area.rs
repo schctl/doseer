@@ -4,7 +4,7 @@ use iced::widget::pane_grid::{self, Pane as PaneId};
 use iced::widget::{button, text};
 
 use super::{tab, Pane, Tab};
-use crate::gui::Theme;
+use crate::gui::{Element, Theme};
 
 /// Grid split option.
 #[derive(Debug, Clone)]
@@ -97,7 +97,7 @@ impl Area {
         Ok(())
     }
 
-    pub fn view(&self) -> anyhow::Result<iced::Element<'_, Message, iced::Renderer<Theme>>> {
+    pub fn view(&self) -> Element<Message> {
         let grid = pane_grid::PaneGrid::new(&self.panes, |id, state, _focused| {
             let top_bar = pane_grid::TitleBar::new(
                 state
@@ -118,7 +118,6 @@ impl Area {
                     .view(super::ViewOpts {
                         tab: tab::ViewOpts { columns: 6 },
                     })
-                    .unwrap()
                     .map(move |m| Message::Pane(m, Some(id))),
             )
             .title_bar(top_bar)
@@ -127,6 +126,6 @@ impl Area {
         .on_drag(Message::Dragged)
         .on_resize(10, Message::Resized);
 
-        Ok(grid.into())
+        grid.into()
     }
 }

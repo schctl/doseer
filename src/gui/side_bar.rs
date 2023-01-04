@@ -80,13 +80,13 @@ impl SideBar {
         let mut col = Column::new();
 
         for path in &self.default {
-            col = col.push(item_button(path, &is_open)?)
+            col = col.push(item_button(path, &is_open)?);
         }
 
         col = col.push(separator());
 
         for path in &self.bookmarks {
-            col = col.push(item_button(path, &is_open)?)
+            col = col.push(item_button(path, &is_open)?);
         }
 
         Ok(column!(title, col).into())

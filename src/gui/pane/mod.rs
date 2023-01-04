@@ -128,7 +128,7 @@ impl Pane {
                 TabMessage::Replace(tab) => self.replace_focused(Tab::new_with(tab)?),
             },
             _ => {
-                tracing::error!("invalid message received: {:?}", message)
+                tracing::error!("invalid message received: {:?}", message);
             }
         }
 
@@ -194,15 +194,14 @@ impl Pane {
         Ok(row!(tab_list, control_list).into())
     }
 
-    pub fn view(&self, opts: ViewOpts) -> anyhow::Result<Element<Message>> {
+    pub fn view(&self, opts: ViewOpts) -> Element<Message> {
         // Focused tab view
-        let focused = self.tabs.get(&self.focused).unwrap();
-
-        let view = focused
-            .view(opts.tab)?
+        let view = self
+            .focused()
+            .view(opts.tab)
             .map(|i| Message::Tab(TabMessage::Internal(i), None));
 
-        Ok(view)
+        view
     }
 }
 
