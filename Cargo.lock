@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "ab_glyph"
-version = "0.2.18"
+version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4dcdbc68024b653943864d436fe8a24b028095bc1cf91a8926f8241e4aaffe59"
+checksum = "e5568a4aa5ba8adf5175c5c460b030e27d8893412976cc37bef0e4fbc16cfbba"
 dependencies = [
  "ab_glyph_rasterizer",
  "owned_ttf_parser",
@@ -190,9 +190,9 @@ checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
 name = "clipboard-win"
-version = "4.4.2"
+version = "4.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4ab1b92798304eedc095b53942963240037c0516452cb11aeba709d420b2219"
+checksum = "7191c27c2357d9b7ef96baac1773290d4ca63b24205b82a3fd8a0637afcf0362"
 dependencies = [
  "error-code",
  "str-buf",
@@ -284,6 +284,12 @@ name = "const_panic"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58baae561b85ca19b3122a9ddd35c8ec40c3bcd14fe89921824eae73f7baffbf"
+
+[[package]]
+name = "convert_case"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
 
 [[package]]
 name = "convert_case"
@@ -484,6 +490,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive_more"
+version = "0.99.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
+dependencies = [
+ "convert_case 0.4.0",
+ "proc-macro2",
+ "quote",
+ "rustc_version",
+ "syn",
+]
+
+[[package]]
 name = "directories"
 version = "4.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -571,6 +590,18 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0f2f4de457d974f548d2c2a16f709ebd81013579e543bd1a9b19ced88132c2cf"
 dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "enum_dispatch"
+version = "0.3.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb609da60cb562dcb49cd458d42d0d8501d2312aa56dd246911472f9422db017"
+dependencies = [
+ "once_cell",
  "proc-macro2",
  "quote",
  "syn",
@@ -1467,9 +1498,9 @@ dependencies = [
 
 [[package]]
 name = "nom"
-version = "7.1.1"
+version = "7.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8903e5a29a317527874d0402f867152a3d21c908bb0b933e416c65e301d4c36"
+checksum = "e5507769c4919c998e69e49c839d9dc6e693ede4cc4290d6ad8b41d4f09c548c"
 dependencies = [
  "memchr",
  "minimal-lexical",
@@ -1597,11 +1628,11 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
 name = "owned_ttf_parser"
-version = "0.17.1"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18904d3c65493a9f0d7542293d1a7f69bfdc309a6b9ef4f46dc3e58b0577edc5"
+checksum = "2a5f3c7ca08b6879e7965fb25e24d1f5eeb32ea73f9ad99b3854778a38c57e93"
 dependencies = [
- "ttf-parser 0.17.1",
+ "ttf-parser 0.18.1",
 ]
 
 [[package]]
@@ -1972,6 +2003,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
+name = "rustc_version"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
+dependencies = [
+ "semver",
+]
+
+[[package]]
 name = "rustybuzz"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2019,6 +2059,12 @@ dependencies = [
  "smithay-client-toolkit",
  "tiny-skia 0.7.0",
 ]
+
+[[package]]
+name = "semver"
+version = "1.0.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58bc9567378fc7690d6b2addae4e60ac2eeea07becb2c64b9f218b53865cba2a"
 
 [[package]]
 name = "serde"
@@ -2097,52 +2143,45 @@ dependencies = [
 [[package]]
 name = "sleet"
 version = "0.0.1"
-source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#5715d323bc21d2325ae29b53fdf25f5783cbef28"
 dependencies = [
  "iced_core",
  "iced_style",
  "paste",
  "sleet_nfp",
+ "sleet_style",
  "sleet_stylesheet",
- "sleet_theme",
- "sleet_theme_sample",
 ]
 
 [[package]]
 name = "sleet_nfp"
 version = "0.0.1"
-source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#5715d323bc21d2325ae29b53fdf25f5783cbef28"
 dependencies = [
- "convert_case",
+ "convert_case 0.6.0",
  "quote",
  "syn",
 ]
 
 [[package]]
+name = "sleet_style"
+version = "0.0.1"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#5715d323bc21d2325ae29b53fdf25f5783cbef28"
+dependencies = [
+ "enum_dispatch",
+ "iced_core",
+ "iced_style",
+]
+
+[[package]]
 name = "sleet_stylesheet"
 version = "0.0.1"
-source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#5715d323bc21d2325ae29b53fdf25f5783cbef28"
 dependencies = [
+ "derive_more",
  "iced_core",
  "iced_style",
-]
-
-[[package]]
-name = "sleet_theme"
-version = "0.0.1"
-source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
-dependencies = [
- "iced_core",
- "iced_style",
-]
-
-[[package]]
-name = "sleet_theme_sample"
-version = "0.0.1"
-source = "git+https://github.com/rescramble/sleet?branch=rewrite#9694aa271152e6db2417cc32fb1202a119f2efb0"
-dependencies = [
- "sleet_stylesheet",
- "sleet_theme",
+ "sleet_style",
 ]
 
 [[package]]
@@ -2426,9 +2465,9 @@ checksum = "7ae2f58a822f08abdaf668897e96a5656fe72f5a9ce66422423e8849384872e6"
 
 [[package]]
 name = "ttf-parser"
-version = "0.17.1"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "375812fa44dab6df41c195cd2f7fecb488f6c09fbaafb62807488cefab642bff"
+checksum = "0609f771ad9c6155384897e1df4d948e692667cc0588548b68eb44d052b27633"
 
 [[package]]
 name = "twox-hash"

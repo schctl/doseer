@@ -1,12 +1,12 @@
 //! Pane widget.
 
 use std::convert::identity;
-use std::path::PathBuf;
 
 use iced::widget::svg::Handle;
 use iced::widget::{button, row, text, Row, Svg};
 use iced::{Alignment, Color, Length, Padding};
 use indexmap::IndexMap;
+use sleet::style::Palettable;
 
 use crate::gui::{icons, tab, theme, Element, Tab, Theme};
 use crate::path::PathWrap;

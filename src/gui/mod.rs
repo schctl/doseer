@@ -3,6 +3,7 @@
 use iced::widget::row;
 use iced::Application;
 use iced::{executor, Command, Length};
+use sleet::stylesheet::Wrap;
 
 use crate::config::Config;
 
@@ -22,7 +23,7 @@ pub mod side_bar;
 pub use side_bar::SideBar;
 
 /// Shorthand for an iced element generic over some message.
-pub type Element<'a, T> = iced::Element<'a, T, iced::Renderer<Theme>>;
+pub type Element<'a, T> = iced::Element<'a, T, iced::Renderer<Wrap<Theme>>>;
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -44,7 +45,7 @@ impl Application for Gui {
     type Executor = executor::Default;
     type Flags = Config;
     type Message = Message;
-    type Theme = Theme;
+    type Theme = Wrap<Theme>;
 
     fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
         let pane = Pane::new(Tab::new().unwrap());

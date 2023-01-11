@@ -1,18 +1,31 @@
 //! Global theme.
 
+use std::ops::Deref;
+
 use iced::widget::button;
-use sleet::style::{sample, stylesheet, theme};
+use sleet::style;
+use sleet::stylesheet;
 
 use crate::gui::{item, pane};
 
-theme::theme! {
-    Theme
-    into_other(sample::Theme)
+#[derive(Debug, Clone, Default)]
+pub struct Theme(pub style::Theme);
+
+impl Deref for Theme {
+    type Target = style::Theme;
+
+    #[inline]
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-stylesheet::impl_all! {
-    [Application, Container, PaneGrid, Svg, Scrollable, Text] for Theme;
-}
+impl stylesheet::application::Auto for Theme {}
+impl stylesheet::container::Auto for Theme {}
+impl stylesheet::pane_grid::Auto for Theme {}
+impl stylesheet::scrollable::Auto for Theme {}
+impl stylesheet::svg::Auto for Theme {}
+impl stylesheet::text::Auto for Theme {}
 
 #[derive(Debug, Clone, Default)]
 pub enum Button {
@@ -22,14 +35,17 @@ pub enum Button {
     Item(item::Style),
 }
 
-impl button::StyleSheet for Theme {
+impl stylesheet::button::StyleSheet for Theme {
     type Style = Button;
 
     fn active(&self, style: &Self::Style) -> button::Appearance {
         match style {
             Self::Style::Tab(t) => t.active(self),
             Self::Style::Item(t) => t.active(self),
-            _ => sample::default_style!(Button::active(self)),
+            _ => <style::Theme as stylesheet::button::StyleSheet>::active(
+                &self.0,
+                &Default::default(),
+            ),
         }
     }
 
@@ -37,7 +53,10 @@ impl button::StyleSheet for Theme {
         match style {
             Self::Style::Tab(t) => t.hovered(self),
             Self::Style::Item(t) => t.hovered(self),
-            _ => sample::default_style!(Button::hovered(self)),
+            _ => <style::Theme as stylesheet::button::StyleSheet>::hovered(
+                &self.0,
+                &Default::default(),
+            ),
         }
     }
 }

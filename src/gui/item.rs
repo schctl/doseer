@@ -3,6 +3,7 @@
 use iced::widget::svg::Handle;
 use iced::widget::{button, column, text, Svg};
 use iced::Color;
+use sleet::style::Palettable;
 
 use crate::gui::{icons, theme, Element};
 use crate::path::PathWrap;
