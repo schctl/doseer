@@ -17,7 +17,7 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 
 # GUI
-iced = { version = "0.6", features = ["svg"] }
+iced = { version = "0.7", features = ["svg"] }
 sleet = { git = "https://github.com/schctl/sleet", branch = "rewrite-2", features = ["all"] }
 
 # Macros
