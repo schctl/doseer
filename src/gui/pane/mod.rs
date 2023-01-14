@@ -3,7 +3,7 @@
 use std::convert::identity;
 
 use iced::widget::svg::Handle;
-use iced::widget::{button, row, text, Row, Svg};
+use iced::widget::{button, container, row, text, Row, Svg};
 use iced::{Alignment, Color, Length, Padding};
 use indexmap::IndexMap;
 use sleet::style::Palettable;
@@ -136,11 +136,14 @@ impl Pane {
         Ok(())
     }
 
+    pub const TOP_BAR_HEIGHT: Length = Length::Units(52);
+
     pub fn top_bar<'a>(&'a self, opts: TopBarOpts<'a>) -> anyhow::Result<Element<'a, Message>> {
         // Pane area provided controllers
         let mut control_list = Row::new()
             .align_items(Alignment::Center)
             .padding(6)
+            .height(Length::Fill)
             .spacing(4);
 
         for control in opts.controls {
@@ -152,6 +155,7 @@ impl Pane {
             .align_items(Alignment::Center)
             .padding(6)
             .spacing(4)
+            .height(Length::Fill)
             .width(Length::Fill);
 
         for (index, tab) in &self.tabs {
@@ -176,7 +180,7 @@ impl Pane {
                 .align_items(Alignment::Center)
                 .width(Length::Units(186))
                 .height(Length::Units(28))
-                .padding(Padding::from([0, 4])),
+                .padding([0, 4]),
             )
             // focus tab when the button is pressed
             .on_press(Message::Tab(TabMessage::Focus, Some(*index)))
@@ -192,7 +196,9 @@ impl Pane {
             tab_list = tab_list.push(tab);
         }
 
-        Ok(row!(tab_list, control_list).into())
+        Ok(row!(tab_list, control_list)
+            .height(Self::TOP_BAR_HEIGHT)
+            .into())
     }
 
     pub fn view(&self, opts: ViewOpts) -> Element<Message> {

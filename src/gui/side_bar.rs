@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use iced::widget::svg::{Handle, Svg};
 use iced::widget::{button, column, container, row, text, Column};
-use iced::{Alignment, Length, Padding};
+use iced::{alignment, Alignment, Length, Padding};
 
 use crate::gui::pane::{self, TabButtonStyle};
 use crate::gui::{icons, Element};
@@ -73,7 +73,10 @@ impl SideBar {
         &self,
         is_open: impl Fn(&Path) -> bool,
     ) -> anyhow::Result<Element<pane::area::Message>> {
-        let title = container(text("Files")).height(iced::Length::Units(28));
+        let title = container(text("Files").size(28))
+            .height(pane::Pane::TOP_BAR_HEIGHT)
+            .align_y(alignment::Vertical::Center)
+            .padding([0, 8]);
 
         let mut col = Column::new();
 
