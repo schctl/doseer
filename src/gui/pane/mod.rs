@@ -6,7 +6,7 @@ use iced::widget::svg::Handle;
 use iced::widget::{button, container, row, text, Row, Svg};
 use iced::{Alignment, Color, Length, Padding};
 use indexmap::IndexMap;
-use sleet::style::Palettable;
+use sleet::style::ColorScheme;
 
 use crate::gui::{icons, tab, theme, Element, Tab, Theme};
 use crate::path::PathWrap;
@@ -228,19 +228,18 @@ impl From<TabButtonStyle> for theme::Button {
 
 impl TabButtonStyle {
     pub fn active(&self, theme: &Theme) -> iced::widget::button::Appearance {
-        let base = theme.base();
-        let normal = theme.normal();
+        let palette = theme.palette();
 
         match self {
             Self::Focused => iced::widget::button::Appearance {
-                background: normal.bg.into(),
-                text_color: base.fg,
+                background: palette.surface.base.base.into(),
+                text_color: palette.surface.base.on_base,
                 border_radius: 6.0,
                 ..Default::default()
             },
             Self::Default => iced::widget::button::Appearance {
                 background: Color::TRANSPARENT.into(),
-                text_color: base.fg,
+                text_color: palette.surface.weak.on_base,
                 border_radius: 6.0,
                 ..Default::default()
             },
@@ -248,14 +247,13 @@ impl TabButtonStyle {
     }
 
     pub fn hovered(&self, theme: &Theme) -> iced::widget::button::Appearance {
-        let base = theme.base();
-        let normal = theme.normal();
+        let palette = theme.palette();
 
         match self {
             Self::Focused => self.active(theme),
             Self::Default => iced::widget::button::Appearance {
-                background: normal.bg.into(),
-                text_color: base.fg,
+                background: palette.surface.weak.base.into(),
+                text_color: palette.surface.weak.on_base,
                 border_radius: 6.0,
                 ..Default::default()
             },

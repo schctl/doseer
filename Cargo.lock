@@ -292,15 +292,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
 
 [[package]]
-name = "convert_case"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
-dependencies = [
- "unicode-segmentation",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -495,7 +486,7 @@ version = "0.99.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
 dependencies = [
- "convert_case 0.4.0",
+ "convert_case",
  "proc-macro2",
  "quote",
  "rustc_version",
@@ -1498,9 +1489,9 @@ dependencies = [
 
 [[package]]
 name = "nom"
-version = "7.1.2"
+version = "7.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5507769c4919c998e69e49c839d9dc6e693ede4cc4290d6ad8b41d4f09c548c"
+checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
 dependencies = [
  "memchr",
  "minimal-lexical",
@@ -1822,9 +1813,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.49"
+version = "1.0.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57a8eca9f9c4ffde41714334dee777596264c7825420f521abc92b5b5deb63a5"
+checksum = "6ef7d57beacfaf2d8aee5937dab7b7f28de3cb8b1828479bb5de2a7106f2bae2"
 dependencies = [
  "unicode-ident",
 ]
@@ -2143,30 +2134,18 @@ dependencies = [
 [[package]]
 name = "sleet"
 version = "0.0.1"
-source = "git+https://github.com/schctl/sleet?branch=rewrite-2#75dbd4fb988162381b92d20d3c5d0e4b7ac9978f"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#659af7f6872affbd65692ebeccc260988b8bc62e"
 dependencies = [
  "iced_core",
  "iced_style",
- "paste",
- "sleet_nfp",
  "sleet_style",
  "sleet_stylesheet",
 ]
 
 [[package]]
-name = "sleet_nfp"
-version = "0.0.1"
-source = "git+https://github.com/schctl/sleet?branch=rewrite-2#75dbd4fb988162381b92d20d3c5d0e4b7ac9978f"
-dependencies = [
- "convert_case 0.6.0",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "sleet_style"
 version = "0.0.1"
-source = "git+https://github.com/schctl/sleet?branch=rewrite-2#75dbd4fb988162381b92d20d3c5d0e4b7ac9978f"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#659af7f6872affbd65692ebeccc260988b8bc62e"
 dependencies = [
  "enum_dispatch",
  "iced_core",
@@ -2176,7 +2155,7 @@ dependencies = [
 [[package]]
 name = "sleet_stylesheet"
 version = "0.0.1"
-source = "git+https://github.com/schctl/sleet?branch=rewrite-2#75dbd4fb988162381b92d20d3c5d0e4b7ac9978f"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#659af7f6872affbd65692ebeccc260988b8bc62e"
 dependencies = [
  "derive_more",
  "iced_core",
@@ -2294,9 +2273,9 @@ dependencies = [
 
 [[package]]
 name = "termcolor"
-version = "1.1.3"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bab24d30b911b2376f3a13cc2cd443142f0c81dda04c118693e35b3835757755"
+checksum = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
 dependencies = [
  "winapi-util",
 ]

@@ -3,7 +3,7 @@
 use iced::widget::svg::Handle;
 use iced::widget::{button, column, text, Svg};
 use iced::Color;
-use sleet::style::Palettable;
+use sleet::style::ColorScheme;
 
 use crate::gui::{icons, theme, Element};
 use crate::path::PathWrap;
@@ -47,19 +47,24 @@ impl From<Style> for theme::Button {
 
 impl Style {
     pub fn active(&self, theme: &theme::Theme) -> iced::widget::button::Appearance {
-        let base = theme.base();
-        let normal = theme.normal();
+        let palette = theme.palette();
 
         match self {
             Self::Selected => iced::widget::button::Appearance {
-                background: normal.bg.into(),
-                text_color: base.fg,
+                background: Color {
+                    a: 0.7,
+                    ..palette.primary.base.accent
+                }
+                .into(),
+                text_color: palette.primary.base.on_accent,
                 border_radius: 6.0,
+                border_color: palette.primary.strong.accent,
+                border_width: 1.0,
                 ..Default::default()
             },
             Self::Default => iced::widget::button::Appearance {
                 background: Color::TRANSPARENT.into(),
-                text_color: base.fg,
+                text_color: palette.surface.base.on_base,
                 border_radius: 6.0,
                 ..Default::default()
             },
@@ -67,14 +72,17 @@ impl Style {
     }
 
     pub fn hovered(&self, theme: &theme::Theme) -> iced::widget::button::Appearance {
-        let base = theme.base();
-        let normal = theme.normal();
+        let palette = theme.palette();
 
         match self {
             Self::Selected => self.active(theme),
             Self::Default => iced::widget::button::Appearance {
-                background: normal.bg.into(),
-                text_color: base.fg,
+                background: Color {
+                    a: 0.8,
+                    ..palette.surface.base.base
+                }
+                .into(),
+                text_color: palette.surface.base.on_base,
                 border_radius: 6.0,
                 ..Default::default()
             },
