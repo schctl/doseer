@@ -1,11 +1,10 @@
 //! A single item (file/folder/whatever) in a directory.
 
-use iced::widget::svg::Handle;
-use iced::widget::{button, column, text, Svg};
-use iced::Color;
+use iced::widget::{button, column, text};
+use iced::{Color, Background};
 use sleet::style::ColorScheme;
 
-use crate::gui::{icons, theme, Element};
+use crate::gui::{icons::Icon, theme, Element};
 use crate::path::PathWrap;
 
 #[derive(Debug, Clone)]
@@ -15,7 +14,7 @@ pub enum Message {
 }
 
 pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
-    let icon = Svg::new(Handle::from_memory(icons::DIRECTORY));
+    let icon = Icon::Directory.svg();
 
     let text = text(path.display().to_string_lossy())
         .horizontal_alignment(iced::alignment::Horizontal::Center);
@@ -86,6 +85,38 @@ impl Style {
                 border_radius: 6.0,
                 ..Default::default()
             },
+        }
+    }
+
+    pub fn pressed(&self, theme: &theme::Theme) -> iced::widget::button::Appearance {
+        let hovered = self.hovered(theme);
+
+        let background = match hovered.background {
+            Some(Background::Color(c)) => {
+                if theme.brightness().is_light() {
+                    Color {
+                        r: c.r - 0.07,
+                        g: c.g - 0.07,
+                        b: c.b - 0.07,
+                        a: c.a,
+                    }
+                    .into()
+                } else {
+                    Color {
+                        r: c.r + 0.07,
+                        g: c.g + 0.07,
+                        b: c.b + 0.07,
+                        a: c.a,
+                    }
+                    .into()
+                }
+            }
+            _ => hovered.background,
+        };
+
+        iced::widget::button::Appearance {
+            background,
+            ..hovered
         }
     }
 }

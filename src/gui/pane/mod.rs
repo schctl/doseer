@@ -2,13 +2,12 @@
 
 use std::convert::identity;
 
-use iced::widget::svg::Handle;
-use iced::widget::{button, container, row, text, Row, Svg};
-use iced::{Alignment, Color, Length, Padding};
+use iced::widget::{button, row, text, Row};
+use iced::{Alignment, Color, Length};
 use indexmap::IndexMap;
 use sleet::style::ColorScheme;
 
-use crate::gui::{icons, tab, theme, Element, Tab, Theme};
+use crate::gui::{icons::Icon, tab, theme, Element, Tab, Theme};
 use crate::path::PathWrap;
 
 pub mod area;
@@ -60,12 +59,6 @@ impl Pane {
         self.tabs.insert(self.focused, tab);
     }
 
-    /// Get all held tabs.
-    #[inline]
-    pub fn tabs(&self) -> &IndexMap<usize, Tab> {
-        &self.tabs
-    }
-
     /// Bring focus to a tab.
     pub fn focus(&mut self, tab: usize) -> Option<()> {
         if self.tabs.get(&tab).is_some() {
@@ -88,7 +81,7 @@ pub enum TabMessage {
     Internal(tab::Message),
     Focus,
     Remove,
-    Add(PathWrap),
+    New,
     Replace(PathWrap),
 }
 
@@ -123,8 +116,9 @@ impl Pane {
                 TabMessage::Remove => {
                     self.remove_tab(index.map_or(self.focused, identity));
                 }
-                TabMessage::Add(tab) => {
-                    self.add_tab(Tab::new_with(tab)?);
+                TabMessage::New => {
+                    let index = self.add_tab(Tab::new()?);
+                    self.focus(index);
                 }
                 TabMessage::Replace(tab) => self.replace_focused(Tab::new_with(tab)?),
             },
@@ -162,7 +156,8 @@ impl Pane {
             // create tab as a button
             let tab = button(
                 row!(
-                    Svg::new(Handle::from_memory(icons::DIRECTORY))
+                    Icon::Directory
+                        .svg()
                         .width(Length::Units(22))
                         .height(Length::Units(22)),
                     text(
@@ -195,6 +190,17 @@ impl Pane {
 
             tab_list = tab_list.push(tab);
         }
+
+        let new_tab = button(
+            Icon::Plus
+                .svg()
+                .height(Length::Units(26))
+                .width(Length::Units(26)),
+        )
+        .style(TabButtonStyle::Default.into())
+        .on_press(Message::Tab(TabMessage::New, None));
+
+        tab_list = tab_list.push(new_tab);
 
         Ok(row!(tab_list, control_list)
             .height(Self::TOP_BAR_HEIGHT)
@@ -252,11 +258,15 @@ impl TabButtonStyle {
         match self {
             Self::Focused => self.active(theme),
             Self::Default => iced::widget::button::Appearance {
-                background: palette.surface.weak.base.into(),
-                text_color: palette.surface.weak.on_base,
+                background: palette.surface.base.base.into(),
+                text_color: palette.surface.base.on_base,
                 border_radius: 6.0,
                 ..Default::default()
             },
         }
+    }
+
+    pub fn pressed(&self, theme: &Theme) -> iced::widget::button::Appearance {
+        Self::Focused.active(theme)
     }
 }

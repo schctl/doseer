@@ -59,4 +59,15 @@ impl stylesheet::button::StyleSheet for Theme {
             ),
         }
     }
+
+    fn pressed(&self, style: &Self::Style) -> button::Appearance {
+        match style {
+            Self::Style::Tab(t) => t.pressed(self),
+            Self::Style::Item(t) => t.pressed(self),
+            _ => <style::Theme as stylesheet::button::StyleSheet>::pressed(
+                &self.0,
+                &Default::default(),
+            ),
+        }
+    }
 }

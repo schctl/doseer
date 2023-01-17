@@ -23,7 +23,8 @@ pub mod side_bar;
 pub use side_bar::SideBar;
 
 /// Shorthand for an iced element generic over some message.
-pub type Element<'a, T> = iced::Element<'a, T, iced::Renderer<Wrap<Theme>>>;
+pub type Renderer = iced::Renderer<Wrap<Theme>>;
+pub type Element<'a, T> = iced::Element<'a, T, Renderer>;
 
 #[derive(Debug, Clone)]
 pub enum Message {

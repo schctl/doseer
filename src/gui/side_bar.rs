@@ -2,12 +2,11 @@
 
 use std::path::{Path, PathBuf};
 
-use iced::widget::svg::{Handle, Svg};
 use iced::widget::{button, column, container, row, text, Column};
 use iced::{alignment, Alignment, Length, Padding};
 
-use crate::gui::pane::{self, TabButtonStyle};
-use crate::gui::{icons, Element};
+use crate::gui::pane::TabButtonStyle;
+use crate::gui::{icons::Icon, pane, Element};
 use crate::path::PathWrap;
 
 /// The file picker side bar.
@@ -32,7 +31,8 @@ fn item_button<'a>(
 
     let item_button = button(
         row!(
-            Svg::new(Handle::from_memory(icons::DIRECTORY))
+            Icon::Directory
+                .svg()
                 .width(Length::Units(22))
                 .height(Length::Units(22)),
             text(
