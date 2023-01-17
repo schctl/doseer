@@ -30,8 +30,11 @@ tikv-jemallocator = "0.5"
 [features]
 debug = ["iced/debug"]
 
-[profile.release-full]
-inherits = "release"
+# Max OO ┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻
+[profile.release]
 lto = true
 strip = true
 codegen-units = 1
+
+[profile.dev]
+opt-level = 1
