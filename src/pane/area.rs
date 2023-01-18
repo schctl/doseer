@@ -1,7 +1,8 @@
 //! Pane collection widget.
 
 use iced::widget::pane_grid::{self, Pane as PaneId};
-use iced::widget::{button, text};
+use iced::widget::{button, text, Row};
+use iced::Alignment;
 
 use crate::gui::Element;
 use crate::{tab, Pane, Tab};
@@ -59,11 +60,7 @@ impl Area {
     pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
         match message {
             Message::Pane(m, id) => {
-                // Control messages are intended for the pane area
-                // So we don't pass them onto the pane
-                if let super::Message::Control(c) = m {
-                    self.update(Message::Control(c))?;
-                } else if let Some(id) = id.map_or(self.focused, Some) {
+                if let Some(id) = id.map_or(self.focused, Some) {
                     if let Some(pane) = self.panes.get_mut(&id) {
                         pane.update(m)?;
                     }
@@ -98,20 +95,33 @@ impl Area {
     }
 
     pub fn view(&self) -> Element<Message> {
+        // Controller list
+        fn view_controls(controls: Vec<Element<ControlMessage>>) -> Element<Message> {
+            let mut control_list = Row::new()
+                .align_items(Alignment::Center)
+                .padding(6)
+                .spacing(4);
+
+            for control in controls {
+                control_list = control_list.push(control.map(Message::Control));
+            }
+
+            control_list.into()
+        }
+
         let grid = pane_grid::PaneGrid::new(&self.panes, |id, state, _focused| {
             let top_bar = pane_grid::TitleBar::new(
                 state
-                    .top_bar(super::TopBarOpts {
-                        controls: vec![button(text("split"))
-                            .on_press(ControlMessage::Split(Split {
-                                axis: pane_grid::Axis::Horizontal,
-                                pane: Some(id),
-                            }))
-                            .into()],
-                    })
+                    .top_bar()
                     .unwrap()
                     .map(move |m| Message::Pane(m, Some(id))),
-            );
+            )
+            .controls(view_controls(vec![button(text("split"))
+                .on_press(ControlMessage::Split(Split {
+                    axis: pane_grid::Axis::Horizontal,
+                    pane: Some(id),
+                }))
+                .into()]));
 
             pane_grid::Content::new(
                 state

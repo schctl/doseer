@@ -90,16 +90,10 @@ pub enum TabMessage {
 #[derive(Debug, Clone)]
 pub enum Message {
     Tab(TabMessage, Option<usize>),
-    /// For external use by the pane area.
-    Control(area::ControlMessage),
 }
 
 pub struct ViewOpts {
     pub tab: tab::ViewOpts,
-}
-
-pub struct TopBarOpts<'a> {
-    pub controls: Vec<Element<'a, area::ControlMessage>>,
 }
 
 impl Pane {
@@ -134,24 +128,15 @@ impl Pane {
 
     pub const TOP_BAR_HEIGHT: Length = Length::Units(50);
 
-    pub fn top_bar<'a>(&'a self, opts: TopBarOpts<'a>) -> anyhow::Result<Element<'a, Message>> {
+    pub fn top_bar<'a>(&'a self) -> anyhow::Result<Element<'a, Message>> {
         // Pane area provided controllers
-        let mut control_list = Row::new()
-            .align_items(Alignment::Center)
-            .padding(6)
-            .height(Length::Fill)
-            .spacing(4);
-
-        for control in opts.controls {
-            control_list = control_list.push(control.map(Message::Control));
-        }
 
         // Held tab list
         let mut tab_list = Row::new()
             .align_items(Alignment::Center)
             .padding(6)
             .spacing(4)
-            .height(Length::Fill);
+            .height(Self::TOP_BAR_HEIGHT);
 
         for (index, tab) in &self.tabs {
             // the name and icon of the tab
@@ -227,12 +212,7 @@ impl Pane {
 
         tab_list = tab_list.push(new_tab);
 
-        Ok(row!(
-            tab_list.width(Length::Fill),
-            control_list.width(Length::Shrink)
-        )
-        .height(Self::TOP_BAR_HEIGHT)
-        .into())
+        Ok(tab_list.into())
     }
 
     pub fn view(&self, opts: ViewOpts) -> Element<Message> {
