@@ -158,16 +158,7 @@ impl Pane {
                     .svg()
                     .width(Length::Units(22))
                     .height(Length::Units(22)),
-                text(
-                    // get file name location
-                    tab.location()
-                        .canonicalize()?
-                        .file_name()
-                        // unwrap ok since name is canonicalized
-                        .unwrap()
-                        .to_string_lossy(),
-                )
-                .size(22),
+                text(tab.location().display().to_string_lossy()).size(22),
             )
             .spacing(6)
             .align_items(Alignment::Center)

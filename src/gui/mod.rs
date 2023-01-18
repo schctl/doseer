@@ -6,6 +6,7 @@ use iced::{executor, Command, Length};
 use sleet::stylesheet::Wrap;
 
 use crate::config::Config;
+use crate::path::PathWrap;
 
 pub mod pane;
 use pane::Pane;
@@ -53,8 +54,16 @@ impl Application for Gui {
         let pane_area = pane::Area::new(pane);
 
         let side_bar = SideBar {
-            default: flags.side_bar.clone(),
-            bookmarks: flags.bookmarks.clone(),
+            default: flags
+                .side_bar
+                .iter()
+                .map(|p| PathWrap::from_path(p).unwrap())
+                .collect(),
+            bookmarks: flags
+                .bookmarks
+                .iter()
+                .map(|p| PathWrap::from_path(p).unwrap())
+                .collect(),
         };
 
         (

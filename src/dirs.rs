@@ -97,7 +97,7 @@ impl Contents {
 
     /// Get the location this tab points to.
     #[inline]
-    pub fn location(&self) -> &Path {
+    pub fn location(&self) -> &PathWrap {
         &self.location
     }
 

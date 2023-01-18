@@ -42,7 +42,7 @@ impl Tab {
 
     /// Get the location this tab points to.
     #[inline]
-    pub fn location(&self) -> &Path {
+    pub fn location(&self) -> &PathWrap {
         let _read_lock = self.update_lock.read();
         // SAFETY: Read lock held
         (unsafe { &*self.contents.get() }).location()

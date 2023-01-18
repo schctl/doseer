@@ -1,6 +1,6 @@
 //! Side bar widget.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use iced::widget::{button, column, container, row, text, Column};
 use iced::{alignment, Alignment, Length, Padding};
@@ -13,13 +13,13 @@ use crate::path::PathWrap;
 #[derive(Debug)]
 pub struct SideBar {
     /// Section of the sidebar which contains a set of default paths.
-    pub default: Vec<PathBuf>,
+    pub default: Vec<PathWrap>,
     /// Customizable section.
-    pub bookmarks: Vec<PathBuf>,
+    pub bookmarks: Vec<PathWrap>,
 }
 
 fn item_button<'a>(
-    path: &Path,
+    path: &PathWrap,
     is_open: impl Fn(&Path) -> bool,
 ) -> anyhow::Result<Element<'a, pane::area::Message>> {
     let style = // We can reuse this
@@ -35,15 +35,7 @@ fn item_button<'a>(
                 .svg()
                 .width(Length::Units(22))
                 .height(Length::Units(22)),
-            text(
-                // get file name location
-                path.canonicalize()?
-                    .file_name()
-                    // unwrap ok since name is canonicalized
-                    .unwrap()
-                    .to_string_lossy(),
-            )
-            .size(22),
+            text(path.display().to_string_lossy()).size(22),
         )
         .spacing(6)
         .align_items(Alignment::Center)
