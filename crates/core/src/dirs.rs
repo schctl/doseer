@@ -9,7 +9,7 @@ use crate::path::PathWrap;
 
 lazy_static::lazy_static! {
     pub static ref PROJECT: ProjectDirs
-                                = ProjectDirs::from("io", "schctl", env!("CARGO_PKG_NAME")).unwrap();
+                                = ProjectDirs::from("io", "schctl", "m7").unwrap();
 
     pub static ref BASE: BaseDirs = BaseDirs::new().unwrap();
 }
