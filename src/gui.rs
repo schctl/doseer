@@ -1,27 +1,14 @@
 //! The GUI app.
 
 use iced::widget::row;
-use iced::Application;
-use iced::{executor, Command, Length};
+use iced::{executor, Application, Command, Length};
 use sleet::stylesheet::Wrap;
 
-use crate::config::Config;
-use crate::path::PathWrap;
+use m7_core::config::Config;
+use m7_core::path::PathWrap;
 
-pub mod pane;
-use pane::Pane;
-
-pub mod theme;
-pub use theme::Theme;
-
-pub mod tab;
-pub use tab::Tab;
-
-pub mod icons;
-pub mod item;
-
-pub mod side_bar;
-pub use side_bar::SideBar;
+use crate::pane::{self, Pane};
+use crate::{SideBar, Tab, Theme};
 
 /// Shorthand for an iced element generic over some message.
 pub type Renderer = iced::Renderer<Wrap<Theme>>;

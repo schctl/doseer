@@ -4,13 +4,13 @@ use std::cell::UnsafeCell;
 use std::path::Path;
 use std::sync::RwLock;
 
-use iced::widget::{container, scrollable};
-use iced::widget::{Column, Row};
+use m7_core::dirs;
+use m7_core::path::PathWrap;
 
-use super::item;
-use crate::dirs;
+use iced::widget::{container, scrollable, Column, Row};
+
 use crate::gui::Element;
-use crate::path::PathWrap;
+use crate::item;
 
 /// A single tab displays a single open location.
 #[derive(Debug)]

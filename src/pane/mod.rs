@@ -2,13 +2,15 @@
 
 use std::convert::identity;
 
+use m7_core::path::PathWrap;
+
 use iced::widget::{button, container, row, text, Row};
 use iced::{alignment, Alignment, Color, Length};
 use indexmap::IndexMap;
 use sleet::style::ColorScheme;
 
-use crate::gui::{icons::Icon, tab, theme, Element, Tab, Theme};
-use crate::path::PathWrap;
+use crate::gui::Element;
+use crate::{tab, theme, Icon, Tab, Theme};
 
 pub mod area;
 pub use area::Area;

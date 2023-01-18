@@ -3,9 +3,9 @@
 use iced::widget::svg::Handle;
 use iced::widget::Svg;
 
-const DIRECTORY: &[u8] = include_bytes!("../../res/static/icons/folder.svg");
-const PLUS: &[u8] = include_bytes!("../../res/static/icons/plus.svg");
-const CROSS: &[u8] = include_bytes!("../../res/static/icons/cross.svg");
+const DIRECTORY: &[u8] = include_bytes!("../res/static/icons/folder.svg");
+const PLUS: &[u8] = include_bytes!("../res/static/icons/plus.svg");
+const CROSS: &[u8] = include_bytes!("../res/static/icons/cross.svg");
 
 #[derive(Debug, Clone, Copy)]
 pub enum Icon {

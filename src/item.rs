@@ -1,11 +1,13 @@
 //! A single item (file/folder/whatever) in a directory.
 
+use m7_core::path::PathWrap;
+
 use iced::widget::{button, column, text};
 use iced::{Background, Color};
 use sleet::style::ColorScheme;
 
-use crate::gui::{icons::Icon, theme, Element};
-use crate::path::PathWrap;
+use crate::gui::Element;
+use crate::{theme, Icon};
 
 #[derive(Debug, Clone)]
 pub enum Message {

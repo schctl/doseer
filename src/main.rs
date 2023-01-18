@@ -2,11 +2,26 @@
 
 use anyhow::Context;
 use iced::{Application, Settings};
+use m7_core::config;
 
-mod config;
-mod dirs;
 mod gui;
-mod path;
+
+mod tab;
+pub use tab::Tab;
+
+mod pane;
+pub use pane::Pane;
+
+mod theme;
+pub use theme::Theme;
+
+mod icons;
+pub use icons::Icon;
+
+mod item;
+
+mod side_bar;
+pub use side_bar::SideBar;
 
 #[cfg(not(target_env = "msvc"))]
 #[global_allocator]

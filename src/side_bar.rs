@@ -2,12 +2,14 @@
 
 use std::path::Path;
 
+use m7_core::path::PathWrap;
+
 use iced::widget::{button, column, container, row, text, Column};
 use iced::{alignment, Alignment, Length, Padding};
 
-use crate::gui::pane::TabButtonStyle;
-use crate::gui::{icons::Icon, pane, Element};
-use crate::path::PathWrap;
+use crate::gui::Element;
+use crate::pane::{self, TabButtonStyle};
+use crate::Icon;
 
 /// The file picker side bar.
 #[derive(Debug)]

@@ -2,10 +2,9 @@
 
 use derive_more::{Deref, From};
 use iced::widget::button;
-use sleet::style;
-use sleet::stylesheet;
+use sleet::{style, stylesheet};
 
-use crate::gui::{item, pane};
+use crate::{item, pane};
 
 #[derive(Debug, Clone, Default, From, Deref)]
 pub struct Theme(pub style::Theme);

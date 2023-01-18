@@ -1260,18 +1260,26 @@ version = "0.0.1"
 dependencies = [
  "anyhow",
  "derive_more",
- "directories",
  "iced",
  "indexmap",
- "lazy_static",
+ "m7_core",
  "open",
- "paste",
- "serde",
  "sleet",
  "tikv-jemallocator",
- "toml",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "m7_core"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "directories",
+ "lazy_static",
+ "paste",
+ "serde",
+ "toml",
 ]
 
 [[package]]
