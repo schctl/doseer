@@ -21,6 +21,7 @@ iced = { version = "0.7", features = ["svg"] }
 sleet = { git = "https://github.com/schctl/sleet", branch = "rewrite-2", features = ["all"] }
 
 # Macros
+derive_more = "0.99"
 lazy_static = "1"
 paste = "1"
 

@@ -1,30 +1,19 @@
 //! Global theme.
 
-use std::ops::Deref;
-
+use derive_more::{Deref, From};
 use iced::widget::button;
 use sleet::style;
 use sleet::stylesheet;
 
 use crate::gui::{item, pane};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, From, Deref)]
 pub struct Theme(pub style::Theme);
-
-impl Deref for Theme {
-    type Target = style::Theme;
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
 
 impl stylesheet::application::Auto for Theme {}
 impl stylesheet::container::Auto for Theme {}
 impl stylesheet::pane_grid::Auto for Theme {}
 impl stylesheet::scrollable::Auto for Theme {}
-impl stylesheet::svg::Auto for Theme {}
 impl stylesheet::text::Auto for Theme {}
 
 #[derive(Debug, Clone, Default)]
@@ -68,6 +57,47 @@ impl stylesheet::button::StyleSheet for Theme {
                 &self.0,
                 &Default::default(),
             ),
+        }
+    }
+}
+
+pub mod svg {
+    use sleet::style::ColorScheme;
+
+    use super::*;
+
+    #[derive(Debug, Clone, Copy, Default)]
+    pub enum Neutral {
+        /// Lower brightness
+        Bright0,
+        #[default]
+        /// Higher brightness
+        Bright1,
+    }
+
+    #[derive(Debug, Clone, Copy, Default, From)]
+    pub enum Svg {
+        #[default]
+        Default,
+        /// An svg with neutral tones
+        Neutral(Neutral),
+    }
+
+    impl stylesheet::svg::StyleSheet for Theme {
+        type Style = Svg;
+
+        fn appearance(&self, style: &Self::Style) -> iced::widget::svg::Appearance {
+            let palette = self.palette();
+
+            iced::widget::svg::Appearance {
+                color: match style {
+                    Svg::Default => None,
+                    Svg::Neutral(tone) => match tone {
+                        Neutral::Bright0 => palette.surface.weak.on_base.into(),
+                        Neutral::Bright1 => palette.surface.base.on_base.into(),
+                    },
+                },
+            }
         }
     }
 }

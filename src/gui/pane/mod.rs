@@ -2,8 +2,8 @@
 
 use std::convert::identity;
 
-use iced::widget::{button, row, text, Row};
-use iced::{Alignment, Color, Length};
+use iced::widget::{button, container, row, text, Row};
+use iced::{alignment, Alignment, Color, Length};
 use indexmap::IndexMap;
 use sleet::style::ColorScheme;
 
@@ -130,7 +130,7 @@ impl Pane {
         Ok(())
     }
 
-    pub const TOP_BAR_HEIGHT: Length = Length::Units(52);
+    pub const TOP_BAR_HEIGHT: Length = Length::Units(50);
 
     pub fn top_bar<'a>(&'a self, opts: TopBarOpts<'a>) -> anyhow::Result<Element<'a, Message>> {
         // Pane area provided controllers
@@ -149,62 +149,97 @@ impl Pane {
             .align_items(Alignment::Center)
             .padding(6)
             .spacing(4)
-            .height(Length::Fill)
-            .width(Length::Fill);
+            .height(Length::Fill);
 
         for (index, tab) in &self.tabs {
-            // create tab as a button
-            let tab = button(
-                row!(
-                    Icon::Directory
-                        .svg()
-                        .width(Length::Units(22))
-                        .height(Length::Units(22)),
-                    text(
-                        // get file name location
-                        tab.location()
-                            .canonicalize()?
-                            .file_name()
-                            // unwrap ok since name is canonicalized
-                            .unwrap()
-                            .to_string_lossy(),
-                    )
-                    .size(22),
+            // the name and icon of the tab
+            let folder_name = row!(
+                Icon::Directory
+                    .svg()
+                    .width(Length::Units(22))
+                    .height(Length::Units(22)),
+                text(
+                    // get file name location
+                    tab.location()
+                        .canonicalize()?
+                        .file_name()
+                        // unwrap ok since name is canonicalized
+                        .unwrap()
+                        .to_string_lossy(),
                 )
-                .spacing(6)
-                .align_items(Alignment::Center)
-                .width(Length::Units(186))
-                .height(Length::Units(28))
-                .padding([0, 4]),
+                .size(22),
             )
-            // focus tab when the button is pressed
-            .on_press(Message::Tab(TabMessage::Focus, Some(*index)))
-            .style(
-                if *index == self.focused {
-                    TabButtonStyle::Focused
-                } else {
-                    TabButtonStyle::Default
-                }
-                .into(),
-            );
+            .spacing(6)
+            .align_items(Alignment::Center)
+            .height(Length::Fill)
+            .padding([0, 4]);
+
+            // close this tab
+            let close_button = button(
+                container(
+                    Icon::Cross
+                        .svg()
+                        .height(Length::Units(18))
+                        .width(Length::Units(18))
+                        .style(
+                            if *index == self.focused {
+                                theme::svg::Neutral::Bright1
+                            } else {
+                                theme::svg::Neutral::Bright0
+                            }
+                            .into(),
+                        ),
+                )
+                .align_x(alignment::Horizontal::Center)
+                .align_y(alignment::Vertical::Center)
+                .height(Length::Units(24))
+                .width(Length::Units(24)),
+            )
+            .style(TabButtonStyle::Default.into())
+            .on_press(Message::Tab(TabMessage::Remove, Some(*index)));
+
+            // create tab as a button
+            let contents = row!(folder_name.width(Length::Units(186)), close_button);
+
+            let tab = button(contents)
+                // focus tab when the button is pressed
+                .on_press(Message::Tab(TabMessage::Focus, Some(*index)))
+                .style(
+                    if *index == self.focused {
+                        TabButtonStyle::Focused
+                    } else {
+                        TabButtonStyle::Default
+                    }
+                    .into(),
+                );
 
             tab_list = tab_list.push(tab);
         }
 
         let new_tab = button(
-            Icon::Plus
-                .svg()
-                .height(Length::Units(26))
-                .width(Length::Units(26)),
+            container(
+                Icon::Plus
+                    .svg()
+                    .height(Length::Units(18))
+                    .width(Length::Units(18))
+                    .style(theme::svg::Neutral::Bright1.into()),
+            )
+            .align_x(alignment::Horizontal::Center)
+            .align_y(alignment::Vertical::Center)
+            .height(Length::Units(24))
+            .width(Length::Units(24)),
         )
         .style(TabButtonStyle::Default.into())
         .on_press(Message::Tab(TabMessage::New, None));
 
         tab_list = tab_list.push(new_tab);
 
-        Ok(row!(tab_list, control_list)
-            .height(Self::TOP_BAR_HEIGHT)
-            .into())
+        Ok(row!(
+            tab_list.width(Length::Fill),
+            control_list.width(Length::Shrink)
+        )
+        .height(Self::TOP_BAR_HEIGHT)
+        .into())
     }
 
     pub fn view(&self, opts: ViewOpts) -> Element<Message> {

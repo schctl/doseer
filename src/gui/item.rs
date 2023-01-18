@@ -1,7 +1,7 @@
 //! A single item (file/folder/whatever) in a directory.
 
 use iced::widget::{button, column, text};
-use iced::{Color, Background};
+use iced::{Background, Color};
 use sleet::style::ColorScheme;
 
 use crate::gui::{icons::Icon, theme, Element};
