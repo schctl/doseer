@@ -1263,6 +1263,7 @@ dependencies = [
  "iced",
  "indexmap",
  "m7_core",
+ "m7_ui_ext",
  "open",
  "sleet",
  "tikv-jemallocator",
@@ -1280,6 +1281,13 @@ dependencies = [
  "paste",
  "serde",
  "toml",
+]
+
+[[package]]
+name = "m7_ui_ext"
+version = "0.0.1"
+dependencies = [
+ "iced_native",
 ]
 
 [[package]]

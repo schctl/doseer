@@ -1,0 +1,10 @@
+[package]
+name = "m7_ui_ext"
+version = "0.0.1"
+authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+iced_native = "0.8"

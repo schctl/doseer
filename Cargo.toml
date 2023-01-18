@@ -15,6 +15,7 @@ publish = false
 
 [dependencies]
 m7_core = { path = "crates/core" }
+m7_ui_ext = { path = "crates/ui_ext" }
 
 anyhow = "1"
 indexmap = "1"
