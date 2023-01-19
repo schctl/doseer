@@ -1,68 +1,109 @@
 //! Global theme.
 
 use derive_more::{Deref, From};
-use iced::widget::button;
+use sleet::style::ColorScheme;
 use sleet::{style, stylesheet};
 
-use crate::{item, pane};
+use crate::{item, pane, side_bar};
 
 #[derive(Debug, Clone, Default, From, Deref)]
 pub struct Theme(pub style::Theme);
 
 impl stylesheet::application::Auto for Theme {}
-impl stylesheet::container::Auto for Theme {}
 impl stylesheet::pane_grid::Auto for Theme {}
 impl stylesheet::scrollable::Auto for Theme {}
-impl stylesheet::text::Auto for Theme {}
 
-#[derive(Debug, Clone, Default)]
-pub enum Button {
-    #[default]
-    Default,
-    Tab(pane::TabButtonStyle),
-    Item(item::Style),
+pub mod button {
+    use super::*;
+
+    use iced::widget::button;
+
+    #[derive(Debug, Clone, Default)]
+    pub enum Button {
+        #[default]
+        Default,
+        Tab(pane::TabButtonStyle),
+        SideBar(side_bar::ButtonStyle),
+        Item(item::Style),
+    }
+
+    impl stylesheet::button::StyleSheet for Theme {
+        type Style = Button;
+
+        fn active(&self, style: &Self::Style) -> button::Appearance {
+            match style {
+                Self::Style::Tab(t) => t.active(self),
+                Self::Style::SideBar(t) => t.active(self),
+                Self::Style::Item(t) => t.active(self),
+                _ => <style::Theme as stylesheet::button::StyleSheet>::active(
+                    &self.0,
+                    &Default::default(),
+                ),
+            }
+        }
+
+        fn hovered(&self, style: &Self::Style) -> button::Appearance {
+            match style {
+                Self::Style::Tab(t) => t.hovered(self),
+                Self::Style::SideBar(t) => t.hovered(self),
+                Self::Style::Item(t) => t.hovered(self),
+                _ => <style::Theme as stylesheet::button::StyleSheet>::hovered(
+                    &self.0,
+                    &Default::default(),
+                ),
+            }
+        }
+
+        fn pressed(&self, style: &Self::Style) -> button::Appearance {
+            match style {
+                Self::Style::Tab(t) => t.pressed(self),
+                Self::Style::SideBar(t) => t.pressed(self),
+                Self::Style::Item(t) => t.pressed(self),
+                _ => <style::Theme as stylesheet::button::StyleSheet>::pressed(
+                    &self.0,
+                    &Default::default(),
+                ),
+            }
+        }
+    }
 }
 
-impl stylesheet::button::StyleSheet for Theme {
-    type Style = Button;
+pub mod container {
+    use super::*;
 
-    fn active(&self, style: &Self::Style) -> button::Appearance {
-        match style {
-            Self::Style::Tab(t) => t.active(self),
-            Self::Style::Item(t) => t.active(self),
-            _ => <style::Theme as stylesheet::button::StyleSheet>::active(
-                &self.0,
-                &Default::default(),
-            ),
-        }
+    #[derive(Debug, Clone, Default)]
+    pub enum Container {
+        /// A transparent box.
+        #[default]
+        Default,
+        /// A box drawn on the base color.
+        OnBase,
+        /// A box with a less emphasized color.
+        Weak,
     }
 
-    fn hovered(&self, style: &Self::Style) -> button::Appearance {
-        match style {
-            Self::Style::Tab(t) => t.hovered(self),
-            Self::Style::Item(t) => t.hovered(self),
-            _ => <style::Theme as stylesheet::button::StyleSheet>::hovered(
-                &self.0,
-                &Default::default(),
-            ),
-        }
-    }
+    impl stylesheet::container::StyleSheet for Theme {
+        type Style = Container;
 
-    fn pressed(&self, style: &Self::Style) -> button::Appearance {
-        match style {
-            Self::Style::Tab(t) => t.pressed(self),
-            Self::Style::Item(t) => t.pressed(self),
-            _ => <style::Theme as stylesheet::button::StyleSheet>::pressed(
-                &self.0,
-                &Default::default(),
-            ),
+        fn appearance(&self, style: &Self::Style) -> iced::widget::container::Appearance {
+            let palette = self.palette();
+
+            match style {
+                Container::Default => Default::default(),
+                Container::OnBase => iced::widget::container::Appearance {
+                    background: palette.primary.base.on_base.into(),
+                    ..Default::default()
+                },
+                Container::Weak => iced::widget::container::Appearance {
+                    background: palette.primary.weak.base.into(),
+                    ..Default::default()
+                },
+            }
         }
     }
 }
 
 pub mod svg {
-    use sleet::style::ColorScheme;
-
     use super::*;
 
     #[derive(Debug, Clone, Copy, Default)]
@@ -95,6 +136,30 @@ pub mod svg {
                         Neutral::Bright0 => palette.surface.weak.on_base.into(),
                         Neutral::Bright1 => palette.surface.base.on_base.into(),
                     },
+                },
+            }
+        }
+    }
+}
+
+pub mod text {
+    use super::*;
+
+    #[derive(Debug, Clone, Copy, Default)]
+    pub enum Text {
+        #[default]
+        Default,
+    }
+
+    impl stylesheet::text::StyleSheet for Theme {
+        type Style = Text;
+
+        fn appearance(&self, style: Self::Style) -> iced::widget::text::Appearance {
+            let palette = self.palette();
+
+            match style {
+                Text::Default => iced::widget::text::Appearance {
+                    color: palette.primary.base.on_base.into(),
                 },
             }
         }

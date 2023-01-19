@@ -231,9 +231,9 @@ pub enum TabButtonStyle {
     Focused,
 }
 
-impl From<TabButtonStyle> for theme::Button {
+impl From<TabButtonStyle> for theme::button::Button {
     fn from(t: TabButtonStyle) -> Self {
-        theme::Button::Tab(t)
+        Self::Tab(t)
     }
 }
 

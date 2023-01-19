@@ -39,7 +39,7 @@ pub enum Style {
     Selected,
 }
 
-impl From<Style> for theme::Button {
+impl From<Style> for theme::button::Button {
     #[inline]
     fn from(t: Style) -> Self {
         Self::Item(t)

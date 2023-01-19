@@ -83,6 +83,10 @@ impl Application for Gui {
         Command::none()
     }
 
+    fn theme(&self) -> Self::Theme {
+        Wrap(sleet::style::Theme::Catppuccin(sleet::style::catppuccin::Variant::Mocha).into())
+    }
+
     fn view(&self) -> Element<Self::Message> {
         Panelled::new(
             &self.main_area,

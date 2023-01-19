@@ -2152,7 +2152,7 @@ dependencies = [
 [[package]]
 name = "sleet"
 version = "0.0.1"
-source = "git+https://github.com/schctl/sleet?branch=rewrite-2#35a6f142d6f5574029d5dd96336bdfbf763ce0b7"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#09b29d63e912b6ed9aaddd9a1f7fe3f33dc114dd"
 dependencies = [
  "iced_core",
  "iced_style",
@@ -2163,7 +2163,7 @@ dependencies = [
 [[package]]
 name = "sleet_style"
 version = "0.0.1"
-source = "git+https://github.com/schctl/sleet?branch=rewrite-2#35a6f142d6f5574029d5dd96336bdfbf763ce0b7"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#09b29d63e912b6ed9aaddd9a1f7fe3f33dc114dd"
 dependencies = [
  "enum_dispatch",
  "iced_core",
@@ -2173,7 +2173,7 @@ dependencies = [
 [[package]]
 name = "sleet_stylesheet"
 version = "0.0.1"
-source = "git+https://github.com/schctl/sleet?branch=rewrite-2#35a6f142d6f5574029d5dd96336bdfbf763ce0b7"
+source = "git+https://github.com/schctl/sleet?branch=rewrite-2#09b29d63e912b6ed9aaddd9a1f7fe3f33dc114dd"
 dependencies = [
  "derive_more",
  "iced_core",

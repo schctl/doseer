@@ -158,7 +158,7 @@ impl Tab {
         }
 
         // Scroll state
-        let scrollable = scrollable(columns);
+        let scrollable = scrollable(container(columns).padding(8));
 
         scrollable.into()
     }
