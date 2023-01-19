@@ -1,3 +1,3 @@
-//! More `iced` widgets.
+//! Somewhat like widgets but not exactly.
 
 pub mod panelled;

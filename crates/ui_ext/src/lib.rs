@@ -2,3 +2,4 @@
 //! have to do with the actual UI of `m7` but adds/builds functionality on top of [`iced`](iced_native).
 
 pub mod components;
+pub mod widgets;
