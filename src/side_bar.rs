@@ -99,7 +99,7 @@ fn item_button(
     )
     // focus tab when the button is pressed
     .on_press(pane::area::Message::Pane(
-        pane::Message::Tab(pane::TabMessage::Replace(PathWrap::from_path(path)?), None),
+        pane::Message::Replace(PathWrap::from_path(path)?),
         None,
     ))
     .width(Length::Fill)

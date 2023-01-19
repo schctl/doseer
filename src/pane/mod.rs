@@ -79,17 +79,17 @@ impl Pane {
 }
 
 #[derive(Debug, Clone)]
-pub enum TabMessage {
-    Internal(tab::Message),
-    Focus,
-    Remove,
-    New,
-    Replace(PathWrap),
-}
-
-#[derive(Debug, Clone)]
 pub enum Message {
-    Tab(TabMessage, Option<usize>),
+    /// A message to a single tab.
+    Tab(tab::Message, Option<usize>),
+    /// Focus the indicated tab.
+    Focus(usize),
+    /// Remove the indicated tab.
+    Remove(usize),
+    /// Add a new tab, and maybe focus.
+    New(Option<PathWrap>, bool),
+    /// Replace the focused tab with a new tab.
+    Replace(PathWrap),
 }
 
 pub struct ViewOpts {
@@ -99,25 +99,31 @@ pub struct ViewOpts {
 impl Pane {
     pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
         match message {
-            Message::Tab(message, index) => match message {
-                TabMessage::Internal(i) => {
-                    self.tabs
-                        .get_mut(&index.map_or(self.focused, identity))
-                        .unwrap()
-                        .update(i)?;
-                }
-                TabMessage::Focus => {
-                    self.focus(index.map_or(self.focused, identity));
-                }
-                TabMessage::Remove => {
-                    self.remove_tab(index.map_or(self.focused, identity));
-                }
-                TabMessage::New => {
-                    let index = self.add_tab(Tab::new()?);
+            Message::Tab(i, index) => {
+                self.tabs
+                    .get_mut(&index.map_or(self.focused, identity))
+                    .unwrap()
+                    .update(i)?;
+            }
+            Message::Focus(index) => {
+                self.focus(index);
+            }
+            Message::Remove(index) => {
+                self.remove_tab(index);
+            }
+            Message::New(path, focus) => {
+                let tab = match path {
+                    Some(t) => Tab::new_with(t)?,
+                    None => Tab::new()?,
+                };
+
+                let index = self.add_tab(tab);
+
+                if focus {
                     self.focus(index);
                 }
-                TabMessage::Replace(tab) => self.replace_focused(Tab::new_with(tab)?),
-            },
+            }
+            Message::Replace(tab) => self.replace_focused(Tab::new_with(tab)?),
         }
 
         Ok(())
@@ -171,14 +177,14 @@ impl Pane {
                 .width(Length::Units(24)),
             )
             .style(TabButtonStyle::Default.into())
-            .on_press(Message::Tab(TabMessage::Remove, Some(*index)));
+            .on_press(Message::Remove(*index));
 
             // create tab as a button
             let contents = row!(folder_name.width(Length::Units(186)), close_button);
 
             let tab = button(contents)
                 // focus tab when the button is pressed
-                .on_press(Message::Tab(TabMessage::Focus, Some(*index)))
+                .on_press(Message::Focus(*index))
                 .style(
                     if *index == self.focused {
                         TabButtonStyle::Focused
@@ -205,7 +211,7 @@ impl Pane {
             .width(Length::Units(24)),
         )
         .style(TabButtonStyle::Default.into())
-        .on_press(Message::Tab(TabMessage::New, None));
+        .on_press(Message::New(None, true));
 
         tab_list = tab_list.push(new_tab);
 
@@ -214,10 +220,7 @@ impl Pane {
 
     pub fn view(&self, opts: ViewOpts) -> Element<Message> {
         // Focused tab view
-        let view = self
-            .focused()
-            .view(opts.tab)
-            .map(|i| Message::Tab(TabMessage::Internal(i), None));
+        let view = self.focused().view(opts.tab).map(|i| Message::Tab(i, None));
 
         view
     }
