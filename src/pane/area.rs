@@ -57,6 +57,12 @@ impl Area {
         }
     }
 
+    /// Get the currently focused tab of the currently focused pane.
+    #[inline]
+    pub fn focused(&self) -> &Tab {
+        self.panes.get(&self.focused.unwrap()).unwrap().focused()
+    }
+
     pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
         match message {
             Message::Pane(m, id) => {

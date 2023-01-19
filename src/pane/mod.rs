@@ -118,9 +118,6 @@ impl Pane {
                 }
                 TabMessage::Replace(tab) => self.replace_focused(Tab::new_with(tab)?),
             },
-            _ => {
-                tracing::error!("invalid message received: {:?}", message);
-            }
         }
 
         Ok(())

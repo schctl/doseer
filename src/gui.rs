@@ -1,11 +1,11 @@
 //! The GUI app.
 
-use iced::widget::row;
-use iced::{executor, Application, Command, Length};
-use sleet::stylesheet::Wrap;
-
 use m7_core::config::Config;
 use m7_core::path::PathWrap;
+use m7_ui_ext::components::panelled::{self, Panelled};
+
+use iced::{executor, Application, Command, Length};
+use sleet::stylesheet::Wrap;
 
 use crate::pane::{self, Pane};
 use crate::{SideBar, Tab, Theme};
@@ -17,15 +17,14 @@ pub type Element<'a, T> = iced::Element<'a, T, Renderer>;
 #[derive(Debug, Clone)]
 pub enum Message {
     PaneArea(pane::area::Message),
+    ResizeMain(panelled::pane_grid::ResizeEvent),
     IcedEvent(iced::Event),
 }
 
 /// The UI state.
 pub struct Gui {
     /// File pane grid area.
-    pane_area: pane::Area,
-    /// The side bar.
-    side_bar: SideBar,
+    main_area: panelled::State<SideBar, pane::Area>,
     /// Current configurations.
     _config: Config,
 }
@@ -53,11 +52,14 @@ impl Application for Gui {
                 .collect(),
         };
 
+        let mut main_area = panelled::State::new(pane_area);
+        main_area.add_panel(side_bar, panelled::PanelPosition::Left);
+        main_area.resize_panel(0.2);
+
         (
             Self {
+                main_area,
                 _config: flags,
-                side_bar,
-                pane_area,
             },
             Command::none(),
         )
@@ -73,7 +75,8 @@ impl Application for Gui {
 
     fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
         match message {
-            Message::PaneArea(m) => self.pane_area.update(m).unwrap(),
+            Message::PaneArea(m) => self.main_area.content_mut().update(m).unwrap(),
+            Message::ResizeMain(m) => self.main_area.internal.resize(&m.split, m.ratio),
             _ => {}
         }
 
@@ -81,16 +84,23 @@ impl Application for Gui {
     }
 
     fn view(&self) -> Element<Self::Message> {
-        let side_bar = self
-            .side_bar
-            .view(|_| false)
-            .unwrap()
-            .map(Message::PaneArea);
-        let pane_area = self.pane_area.view().map(Message::PaneArea);
-
-        row!(side_bar, pane_area)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .into()
+        Panelled::new(
+            &self.main_area,
+            |panel| {
+                panel
+                    .view(|path| {
+                        self.main_area.content().base.focused().location().as_ref() == path
+                    })
+                    .unwrap()
+                    .map(Message::PaneArea)
+                    .into()
+            },
+            |content| content.view().map(Message::PaneArea).into(),
+        )
+        .into_inner()
+        .width(Length::Fill)
+        .height(Length::Fill)
+        .on_resize(16, Message::ResizeMain)
+        .into()
     }
 }
