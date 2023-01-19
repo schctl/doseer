@@ -20,6 +20,7 @@ m7_ui_ext = { path = "crates/ui_ext" }
 anyhow = "1"
 indexmap = "1"
 open = "3"
+mimalloc = "0.1"
 
 # Logging
 tracing = "0.1"
@@ -31,9 +32,6 @@ sleet = { git = "https://github.com/schctl/sleet", branch = "rewrite-2", feature
 
 # Macros
 derive_more = "0.99"
-
-[target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = "0.5"
 
 # ---
 

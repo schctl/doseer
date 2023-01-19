@@ -23,9 +23,13 @@ mod item;
 mod side_bar;
 pub use side_bar::SideBar;
 
-#[cfg(not(target_env = "msvc"))]
+/// Use mimalloc as our global allocator.
+///
+/// The benefits of using mimalloc here haven't been tested scientifically, but it seems to be
+/// *generally* more performant, especially when viewing large directories and helps the UI *feel*
+/// more responsive overall, so it is left here for now.
 #[global_allocator]
-static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 fn run() -> anyhow::Result<()> {
     let config = config::read_config().context("failed to get configuration")?;
