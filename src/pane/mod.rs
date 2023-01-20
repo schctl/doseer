@@ -92,10 +92,6 @@ pub enum Message {
     Replace(PathWrap),
 }
 
-pub struct ViewOpts {
-    pub tab: tab::ViewOpts,
-}
-
 impl Pane {
     pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
         match message {
@@ -218,9 +214,9 @@ impl Pane {
         Ok(tab_list.into())
     }
 
-    pub fn view(&self, opts: ViewOpts) -> Element<Message> {
+    pub fn view(&self) -> Element<Message> {
         // Focused tab view
-        let view = self.focused().view(opts.tab).map(|i| Message::Tab(i, None));
+        let view = self.focused().view().map(|i| Message::Tab(i, None));
 
         view
     }

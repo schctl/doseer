@@ -27,6 +27,7 @@ pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
             .width(iced::Length::Fill),
     )
     .width(iced::Length::Fill)
+    .height(iced::Length::Fill)
     .on_press(Message::Click(path))
     .style(theme.into())
     .into()

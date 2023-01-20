@@ -5,7 +5,7 @@ use iced::widget::{button, text, Row};
 use iced::Alignment;
 
 use crate::gui::Element;
-use crate::{tab, Pane, Tab};
+use crate::{Pane, Tab};
 
 /// Grid split option.
 #[derive(Debug, Clone)]
@@ -129,14 +129,8 @@ impl Area {
                 }))
                 .into()]));
 
-            pane_grid::Content::new(
-                state
-                    .view(super::ViewOpts {
-                        tab: tab::ViewOpts { columns: 6 },
-                    })
-                    .map(move |m| Message::Pane(m, Some(id))),
-            )
-            .title_bar(top_bar)
+            pane_grid::Content::new(state.view().map(move |m| Message::Pane(m, Some(id))))
+                .title_bar(top_bar)
         })
         .on_click(Message::Clicked)
         .on_drag(Message::Dragged)

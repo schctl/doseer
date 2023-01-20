@@ -6,8 +6,9 @@ use std::sync::RwLock;
 
 use m7_core::dirs;
 use m7_core::path::PathWrap;
+use m7_ui_ext::widgets::grid::flexbox;
 
-use iced::widget::{container, scrollable, Column, Row};
+use iced::widget::{container, scrollable};
 
 use crate::gui::Element;
 use crate::item;
@@ -64,10 +65,6 @@ pub enum Message {
     // TODO: manual update contents
 }
 
-pub struct ViewOpts {
-    pub columns: usize,
-}
-
 impl Tab {
     fn is_selected<P: AsRef<Path>>(&self, path: P) -> bool {
         if let Some(selected) = &self.selected {
@@ -110,9 +107,7 @@ impl Tab {
         Ok(())
     }
 
-    pub fn view<'a>(&'a self, opts: ViewOpts) -> Element<'a, Message> {
-        let mut columns = Column::new();
-
+    pub fn view<'a>(&'a self) -> Element<'a, Message> {
         // Update contents
         {
             let _write_lock = self.update_lock.write();
@@ -126,40 +121,26 @@ impl Tab {
         // SAFETY: Read lock held
         let contents: &'a [PathWrap] = unsafe { &*self.contents.get() }.contents();
 
-        let mut iter = contents.iter();
+        flexbox::responsive(|_| {
+            let grid = flexbox(contents.iter().map(|path| {
+                container(
+                    item::view(
+                        path.clone(),
+                        if self.is_selected(path) {
+                            item::Style::Selected
+                        } else {
+                            item::Style::Default
+                        },
+                    )
+                    .map(Message::Item),
+                )
+                .width(iced::Length::Units(128))
+                .height(iced::Length::Units(128))
+                .into()
+            }));
 
-        // Grid of items
-        let num_rows = std::cmp::max(contents.len() / opts.columns, 1);
-
-        // Column wise
-        for _ in 0..num_rows {
-            columns = columns.push({
-                // Row wise
-                let mut row = Row::new().width(iced::Length::Fill);
-
-                for path in iter.by_ref().take(opts.columns) {
-                    row = row.push({
-                        let view = item::view(
-                            path.clone(),
-                            if self.is_selected(path) {
-                                item::Style::Selected
-                            } else {
-                                item::Style::Default
-                            },
-                        )
-                        .map(Message::Item);
-
-                        container(view).width(iced::Length::Units(128))
-                    });
-                }
-
-                row
-            });
-        }
-
-        // Scroll state
-        let scrollable = scrollable(container(columns).padding(8));
-
-        scrollable.into()
+            scrollable(container(grid).padding(8).width(iced::Length::Fill)).into()
+        })
+        .into()
     }
 }
