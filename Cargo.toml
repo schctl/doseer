@@ -28,7 +28,7 @@ notify = { version = "5.0.0", default-features = false, features = ["macos_kqueu
 
 # Logging
 tracing = "0.1"
-tracing-subscriber = "0.3"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # GUI
 iced = { version = "0.7", features = ["svg", "tokio"] }
