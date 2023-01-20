@@ -1,68 +1,61 @@
 //! File watcher.
 
-use std::path::Path;
-use std::sync::{Arc, Mutex};
-
 use iced::Command;
 use m7_core::path::PathWrap;
-use notify::{Event, EventKind, RecursiveMode, Watcher};
+use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+use tokio::runtime::Handle;
+use tokio::sync::mpsc::{self, Receiver};
 
 use super::Message;
 
-/// Watch the current location, blocking the current thread until a handled event occurs.
-pub fn watch(path: &Path) -> Message {
-    let message = Arc::new(Mutex::new(None));
+type EventReceiver = Receiver<notify::Result<Event>>;
 
-    // Create our event handler
-    let register = message.clone();
-    let handler = move |res: notify::Result<Event>| {
-        let mut lock = register.lock().unwrap();
+/// Create the watcher.
+fn create_watcher() -> notify::Result<(RecommendedWatcher, EventReceiver)> {
+    let (sender, receiver) = mpsc::channel(16);
 
-        // Watch for the events we need.
-        // This is where we produce the tab messages.
-        match res {
-            Ok(event) => {
-                match event.kind {
-                    EventKind::Create(_) | EventKind::Modify(_) | EventKind::Remove(_) => {
-                        *lock = Some(Message::UpdateContents);
-                    }
-                    _ => {
-                        // Ignore this event
-                    }
-                }
-            }
-            _ => *lock = Some(Message::UpdateFail),
-        }
+    let handle = Handle::current();
+
+    let handler = move |res| {
+        handle.block_on(async {
+            let _ = sender.send(res).await;
+        });
     };
 
-    // Block and watch
-    if let Ok(mut watcher) = notify::recommended_watcher(handler) {
+    notify::recommended_watcher(handler).map(|w| (w, receiver))
+}
+
+/// Handle or ignore an fs event.
+fn handle_notif(result: notify::Result<Event>) -> Option<Message> {
+    match result {
+        Ok(event) => match event.kind {
+            EventKind::Create(_) | EventKind::Remove(_) | EventKind::Modify(_) => {
+                Some(Message::UpdateContents)
+            }
+            _ => None,
+        },
+        _ => Some(Message::UpdateFail),
+    }
+}
+
+/// Watch the current location, producing a [`Message`] when an event occurs.
+pub async fn watch(path: PathWrap) -> Message {
+    if let Ok((mut watcher, mut receiver)) = create_watcher() {
+        if watcher.watch(&path, RecursiveMode::NonRecursive).is_err() {
+            return Message::UpdateFail;
+        }
+
         loop {
-            let ret = watcher.watch(path, RecursiveMode::NonRecursive);
-
-            match ret {
-                Ok(_) => {
-                    let lock = message.lock().unwrap();
-
-                    if let Some(m) = &*lock {
-                        return m.clone();
-                    }
-
-                    // ...
-                    // Keep watching until we get a message from a handled event
-                }
-                // Watch failed: abort
-                _ => return Message::UpdateFail,
+            if let Some(message) = receiver.recv().await.map(handle_notif).flatten() {
+                return message;
             }
         }
-    } else {
-        // Could not create watcher: abort
-        Message::UpdateFail
     }
+
+    Message::UpdateFail
 }
 
 pub fn command(path: &PathWrap) -> Command<Message> {
     let path = path.clone();
-    let task = tokio::task::spawn_blocking(move || watch(&path));
-    Command::perform(task, |res| res.unwrap_or(Message::UpdateFail))
+    Command::perform(watch(path), |x| x)
 }
