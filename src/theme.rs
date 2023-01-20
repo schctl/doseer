@@ -165,3 +165,36 @@ pub mod text {
         }
     }
 }
+
+pub mod fonts {
+    use sleet::fonts::font;
+
+    /// More neutral font for primary contents.
+    #[font(family = "Roboto")]
+    pub enum Content {
+        #[font(variant = "Regular")]
+        #[font(source = "../res/static/fonts/Roboto/Roboto-Regular.ttf")]
+        Regular,
+
+        // Not really the same family but close enough
+        #[font(variant = "Mono Bold")]
+        #[font(source = "../res/static/fonts/Roboto/RobotoMono-Bold.ttf")]
+        MonoBold,
+
+        #[font(variant = "Mono Bold Italic")]
+        #[font(source = "../res/static/fonts/Roboto/RobotoMono-BoldItalic.ttf")]
+        MonoBoldItalic,
+    }
+
+    /// More distinct font for secondary UI elements.
+    #[font(family = "Sofia Sans")]
+    pub enum UI {
+        #[font(variant = "Regular")]
+        #[font(source = "../res/static/fonts/Sofia_Sans/SofiaSans-Regular.ttf")]
+        Regular,
+
+        #[font(variant = "Black")]
+        #[font(source = "../res/static/fonts/Sofia_Sans/SofiaSans-Black.ttf")]
+        Black,
+    }
+}

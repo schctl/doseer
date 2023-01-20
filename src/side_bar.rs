@@ -90,7 +90,9 @@ fn item_button(
                 .svg()
                 .width(Length::Units(22))
                 .height(Length::Units(22)),
-            text(path.display().to_string_lossy()).size(22),
+            text(path.display().to_string_lossy())
+                .size(22)
+                .font(theme::fonts::UI::Regular),
         )
         .spacing(6)
         .align_items(Alignment::Center)
@@ -129,7 +131,7 @@ impl SideBar {
         &self,
         is_open: impl Fn(&Path) -> bool,
     ) -> anyhow::Result<Element<pane::area::Message>> {
-        let title = container(text("Files").size(28))
+        let title = container(text("Files").font(theme::fonts::UI::Black).size(28))
             .height(pane::Pane::TOP_BAR_HEIGHT)
             .align_y(alignment::Vertical::Center)
             .padding([0, 8]);

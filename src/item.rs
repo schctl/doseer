@@ -19,6 +19,7 @@ pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
     let icon = Icon::Directory.svg();
 
     let text = text(path.display().to_string_lossy())
+        .font(theme::fonts::Content::Regular)
         .horizontal_alignment(iced::alignment::Horizontal::Center);
 
     button(

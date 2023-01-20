@@ -149,7 +149,9 @@ impl Pane {
                     .svg()
                     .width(Length::Units(22))
                     .height(Length::Units(22)),
-                text(tab.location().display().to_string_lossy()).size(22),
+                text(tab.location().display().to_string_lossy())
+                    .size(22)
+                    .font(theme::fonts::UI::Regular),
             )
             .spacing(6)
             .align_items(Alignment::Center)
