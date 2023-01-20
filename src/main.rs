@@ -38,7 +38,7 @@ fn run() -> anyhow::Result<()> {
 }
 
 fn main() {
-    tracing_subscriber::fmt::init();
+    // tracing_subscriber::fmt::init();
 
     if let Err(e) = run() {
         tracing::error!("{}", e);

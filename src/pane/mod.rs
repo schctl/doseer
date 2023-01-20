@@ -5,7 +5,7 @@ use std::convert::identity;
 use m7_core::path::PathWrap;
 
 use iced::widget::{button, container, row, text, Row};
-use iced::{alignment, Alignment, Color, Length};
+use iced::{alignment, Alignment, Color, Command, Length};
 use indexmap::IndexMap;
 use sleet::style::ColorScheme;
 
@@ -93,13 +93,18 @@ pub enum Message {
 }
 
 impl Pane {
-    pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
+    pub fn update(&mut self, message: Message) -> anyhow::Result<Command<Message>> {
+        let mut commands = vec![];
+
         match message {
-            Message::Tab(i, index) => {
-                self.tabs
+            Message::Tab(m, index) => {
+                let tab_cmd = self
+                    .tabs
                     .get_mut(&index.map_or(self.focused, identity))
                     .unwrap()
-                    .update(i)?;
+                    .update(m)?;
+
+                commands.push(tab_cmd.map(move |m| Message::Tab(m, index)));
             }
             Message::Focus(index) => {
                 self.focus(index);
@@ -122,7 +127,7 @@ impl Pane {
             Message::Replace(tab) => self.replace_focused(Tab::new_with(tab)?),
         }
 
-        Ok(())
+        Ok(Command::batch(commands))
     }
 
     pub const TOP_BAR_HEIGHT: Length = Length::Units(50);

@@ -21,6 +21,10 @@ anyhow = "1"
 indexmap = "1"
 open = "3"
 mimalloc = "0.1"
+tokio = "1"
+
+# File system stuff
+notify = { version = "5" }
 
 # Logging
 tracing = "0.1"

@@ -8,7 +8,7 @@ use iced::{executor, Application, Command, Length};
 use sleet::stylesheet::Wrap;
 
 use crate::pane::{self, Pane};
-use crate::{SideBar, Tab, Theme};
+use crate::{tab, SideBar, Tab, Theme};
 
 /// Shorthand for an iced element generic over some message.
 pub type Renderer = iced::Renderer<Wrap<Theme>>;
@@ -36,6 +36,8 @@ impl Application for Gui {
     type Theme = Wrap<Theme>;
 
     fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
+        let mut commands = vec![];
+
         let pane = Pane::new(Tab::new().unwrap());
         let pane_area = pane::Area::new(pane);
 
@@ -56,12 +58,19 @@ impl Application for Gui {
         main_area.add_panel(side_bar, panelled::PanelPosition::Left);
         main_area.resize_panel(0.2);
 
+        // :/
+        let tab_init_cmd =
+            tab::watcher::command(main_area.content().focused().focused().location());
+        commands.push(tab_init_cmd.map(|m| {
+            Message::PaneArea(pane::area::Message::Pane(pane::Message::Tab(m, None), None))
+        }));
+
         (
             Self {
                 main_area,
                 _config: flags,
             },
-            Command::none(),
+            Command::batch(commands),
         )
     }
 
@@ -74,13 +83,18 @@ impl Application for Gui {
     }
 
     fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
+        let mut commands = vec![];
+
         match message {
-            Message::PaneArea(m) => self.main_area.content_mut().update(m).unwrap(),
+            Message::PaneArea(m) => {
+                let area_cmd = self.main_area.content_mut().update(m).unwrap();
+                commands.push(area_cmd.map(Message::PaneArea))
+            }
             Message::ResizeMain(m) => self.main_area.internal.resize(&m.split, m.ratio),
             _ => {}
         }
 
-        Command::none()
+        Command::batch(commands)
     }
 
     fn theme(&self) -> Self::Theme {
@@ -93,7 +107,14 @@ impl Application for Gui {
             |panel| {
                 panel
                     .view(|path| {
-                        self.main_area.content().base.focused().location().as_ref() == path
+                        self.main_area
+                            .content()
+                            .base
+                            .focused()
+                            .focused()
+                            .location()
+                            .as_ref()
+                            == path
                     })
                     .unwrap()
                     .map(Message::PaneArea)

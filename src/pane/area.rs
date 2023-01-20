@@ -2,7 +2,7 @@
 
 use iced::widget::pane_grid::{self, Pane as PaneId};
 use iced::widget::{button, text, Row};
-use iced::Alignment;
+use iced::{Alignment, Command};
 
 use crate::gui::Element;
 use crate::{Pane, Tab};
@@ -59,16 +59,19 @@ impl Area {
 
     /// Get the currently focused tab of the currently focused pane.
     #[inline]
-    pub fn focused(&self) -> &Tab {
-        self.panes.get(&self.focused.unwrap()).unwrap().focused()
+    pub fn focused(&self) -> &Pane {
+        self.panes.get(&self.focused.unwrap()).unwrap()
     }
 
-    pub fn update(&mut self, message: Message) -> anyhow::Result<()> {
+    pub fn update(&mut self, message: Message) -> anyhow::Result<Command<Message>> {
+        let mut commands = vec![];
+
         match message {
-            Message::Pane(m, id) => {
-                if let Some(id) = id.map_or(self.focused, Some) {
+            Message::Pane(m, id_or) => {
+                if let Some(id) = id_or.map_or(self.focused, Some) {
                     if let Some(pane) = self.panes.get_mut(&id) {
-                        pane.update(m)?;
+                        let pane_cmd = pane.update(m)?;
+                        commands.push(pane_cmd.map(move |m| Message::Pane(m, id_or)))
                     }
                 }
             }
@@ -97,7 +100,7 @@ impl Area {
             _ => {}
         }
 
-        Ok(())
+        Ok(Command::batch(commands))
     }
 
     pub fn view(&self) -> Element<Message> {
