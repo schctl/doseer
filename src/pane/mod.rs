@@ -132,7 +132,7 @@ impl Pane {
 
     pub const TOP_BAR_HEIGHT: Length = Length::Units(50);
 
-    pub fn top_bar<'a>(&'a self) -> anyhow::Result<Element<'a, Message>> {
+    pub fn top_bar(&self) -> anyhow::Result<Element<Message>> {
         // Pane area provided controllers
 
         // Held tab list

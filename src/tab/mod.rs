@@ -78,7 +78,7 @@ impl Tab {
         let path = path.as_ref();
 
         if path.is_dir() {
-            self.update_location(path)?
+            self.update_location(path)?;
         } else {
             open::that(path)?;
         }
@@ -105,7 +105,7 @@ impl Tab {
             }
             Message::UpdateContents => {
                 self.contents.update_contents()?;
-                Ok(watcher::command(&self.location()))
+                Ok(watcher::command(self.location()))
             }
 
             // Register fail and stop trying
@@ -116,7 +116,7 @@ impl Tab {
         }
     }
 
-    pub fn view<'a>(&'a self) -> Element<'a, Message> {
+    pub fn view(&self) -> Element<Message> {
         flexbox::responsive(|_| {
             let grid = flexbox(self.contents.contents().iter().map(|path| {
                 container(

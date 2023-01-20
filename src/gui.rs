@@ -88,7 +88,7 @@ impl Application for Gui {
         match message {
             Message::PaneArea(m) => {
                 let area_cmd = self.main_area.content_mut().update(m).unwrap();
-                commands.push(area_cmd.map(Message::PaneArea))
+                commands.push(area_cmd.map(Message::PaneArea));
             }
             Message::ResizeMain(m) => self.main_area.internal.resize(&m.split, m.ratio),
             _ => {}

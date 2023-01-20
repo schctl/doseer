@@ -71,7 +71,7 @@ impl Area {
                 if let Some(id) = id_or.map_or(self.focused, Some) {
                     if let Some(pane) = self.panes.get_mut(&id) {
                         let pane_cmd = pane.update(m)?;
-                        commands.push(pane_cmd.map(move |m| Message::Pane(m, id_or)))
+                        commands.push(pane_cmd.map(move |m| Message::Pane(m, id_or)));
                     }
                 }
             }

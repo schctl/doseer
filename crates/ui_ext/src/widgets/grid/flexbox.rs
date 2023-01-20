@@ -44,6 +44,13 @@ pub enum Order {
 ///
 /// Grids have a defined population order and direction, so they can be populated linearly. These
 /// grids also have no defined cell size. Intended to be used as a [`responsive`] widget.
+///
+/// ## Warning!
+///
+/// Even though this widget is called "FlexBox", it implements a jank home-grown version of the algorithm
+/// so don't expect it do exactly what flexbox does. It is just intended to be usable in the main layout
+/// of `m7` and a few smaller areas.
+#[must_use]
 pub struct FlexBox<'a, Message, Renderer> {
     /// X-axis population direction.
     pop_x: direction::Horizontal,
@@ -145,7 +152,7 @@ where
     }
 
     fn diff(&self, state: &mut Tree) {
-        state.diff_children(&self.contents)
+        state.diff_children(&self.contents);
     }
 
     fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
@@ -245,12 +252,12 @@ where
                 // Extended second axis. Stop here.
                 if next_accum > second_axis.max_size {
                     break;
-                } else {
-                    // Reset
-                    first_axis.accum = 0.0;
-                    second_axis.accum = next_accum;
-                    (naive_insert)(&mut layout, &mut first_axis, &second_axis, &mut next_accum);
                 }
+
+                // Reset
+                first_axis.accum = 0.0;
+                second_axis.accum = next_accum;
+                (naive_insert)(&mut layout, &mut first_axis, &second_axis, &mut next_accum);
             }
 
             children.push(layout);
@@ -308,7 +315,7 @@ where
                     child
                         .as_widget()
                         .operate(state, layout, renderer, operation);
-                })
+                });
         });
     }
 

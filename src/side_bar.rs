@@ -78,7 +78,7 @@ fn item_button(
     is_open: impl Fn(&Path) -> bool,
 ) -> anyhow::Result<Element<pane::area::Message>> {
     let style = // We can reuse this
-    if (is_open)(&path) {
+    if (is_open)(path) {
         ButtonStyle::Focused
     } else {
         ButtonStyle::Default

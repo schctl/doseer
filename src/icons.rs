@@ -15,6 +15,7 @@ pub enum Icon {
 }
 
 impl Icon {
+    #[must_use]
     pub fn svg(&self) -> Svg<crate::gui::Renderer> {
         let handle = match self {
             Self::Directory => Handle::from_memory(DIRECTORY),

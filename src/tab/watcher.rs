@@ -46,7 +46,7 @@ pub async fn watch(path: PathWrap) -> Message {
         }
 
         loop {
-            if let Some(message) = receiver.recv().await.map(handle_notif).flatten() {
+            if let Some(message) = receiver.recv().await.and_then(handle_notif) {
                 return message;
             }
         }
