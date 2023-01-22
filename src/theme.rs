@@ -173,16 +173,16 @@ pub mod fonts {
     #[font(family = "Roboto")]
     pub enum Content {
         #[font(variant = "Regular")]
-        #[font(source = "../res/static/fonts/Roboto/Roboto-Regular.ttf")]
+        #[font(source = "../assets/static/fonts/Roboto/Roboto-Regular.ttf")]
         Regular,
 
         // Not really the same family but close enough
         #[font(variant = "Mono Bold")]
-        #[font(source = "../res/static/fonts/Roboto/RobotoMono-Bold.ttf")]
+        #[font(source = "../assets/static/fonts/Roboto/RobotoMono-Bold.ttf")]
         MonoBold,
 
         #[font(variant = "Mono Bold Italic")]
-        #[font(source = "../res/static/fonts/Roboto/RobotoMono-BoldItalic.ttf")]
+        #[font(source = "../assets/static/fonts/Roboto/RobotoMono-BoldItalic.ttf")]
         MonoBoldItalic,
     }
 
@@ -190,11 +190,11 @@ pub mod fonts {
     #[font(family = "Sofia Sans")]
     pub enum UI {
         #[font(variant = "Regular")]
-        #[font(source = "../res/static/fonts/Sofia_Sans/SofiaSans-Regular.ttf")]
+        #[font(source = "../assets/static/fonts/Sofia_Sans/SofiaSans-Regular.ttf")]
         Regular,
 
         #[font(variant = "Black")]
-        #[font(source = "../res/static/fonts/Sofia_Sans/SofiaSans-Black.ttf")]
+        #[font(source = "../assets/static/fonts/Sofia_Sans/SofiaSans-Black.ttf")]
         Black,
     }
 }
