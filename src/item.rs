@@ -4,7 +4,7 @@ use m7_core::path::PathWrap;
 
 use iced::widget::{button, column, text};
 use iced::{Background, Color};
-use sleet::style::ColorScheme;
+use sleet::ColorScheme;
 
 use crate::gui::Element;
 use crate::{theme, Icon};

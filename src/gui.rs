@@ -98,7 +98,7 @@ impl Application for Gui {
     }
 
     fn theme(&self) -> Self::Theme {
-        Wrap(sleet::style::Theme::Catppuccin(sleet::style::catppuccin::Variant::Mocha).into())
+        Wrap(sleet::Theme::Catppuccin(sleet::colorscheme::catppuccin::Variant::Mocha).into())
     }
 
     fn view(&self) -> Element<Self::Message> {

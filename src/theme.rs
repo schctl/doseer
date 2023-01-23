@@ -1,17 +1,17 @@
 //! Global theme.
 
 use derive_more::{Deref, From};
-use sleet::style::ColorScheme;
-use sleet::{style, stylesheet};
+use sleet::stylesheet;
+use sleet::ColorScheme;
 
 use crate::{item, pane, side_bar};
 
 #[derive(Debug, Clone, Default, From, Deref)]
-pub struct Theme(pub style::Theme);
+pub struct Theme(pub sleet::Theme);
 
-impl stylesheet::application::Auto for Theme {}
-impl stylesheet::pane_grid::Auto for Theme {}
-impl stylesheet::scrollable::Auto for Theme {}
+impl stylesheet::application::DevAuto for Theme {}
+impl stylesheet::pane_grid::DevAuto for Theme {}
+impl stylesheet::scrollable::DevAuto for Theme {}
 
 pub mod button {
     use super::*;
@@ -35,7 +35,7 @@ pub mod button {
                 Self::Style::Tab(t) => t.active(self),
                 Self::Style::SideBar(t) => t.active(self),
                 Self::Style::Item(t) => t.active(self),
-                _ => <style::Theme as stylesheet::button::StyleSheet>::active(
+                _ => <sleet::Theme as stylesheet::button::StyleSheet>::active(
                     &self.0,
                     &Default::default(),
                 ),
@@ -47,7 +47,7 @@ pub mod button {
                 Self::Style::Tab(t) => t.hovered(self),
                 Self::Style::SideBar(t) => t.hovered(self),
                 Self::Style::Item(t) => t.hovered(self),
-                _ => <style::Theme as stylesheet::button::StyleSheet>::hovered(
+                _ => <sleet::Theme as stylesheet::button::StyleSheet>::hovered(
                     &self.0,
                     &Default::default(),
                 ),
@@ -59,7 +59,7 @@ pub mod button {
                 Self::Style::Tab(t) => t.pressed(self),
                 Self::Style::SideBar(t) => t.pressed(self),
                 Self::Style::Item(t) => t.pressed(self),
-                _ => <style::Theme as stylesheet::button::StyleSheet>::pressed(
+                _ => <sleet::Theme as stylesheet::button::StyleSheet>::pressed(
                     &self.0,
                     &Default::default(),
                 ),

@@ -6,7 +6,7 @@ use m7_core::path::PathWrap;
 
 use iced::widget::{button, column, container, row, text, Column};
 use iced::{alignment, Alignment, Color, Length, Padding};
-use sleet::style::ColorScheme;
+use sleet::ColorScheme;
 
 use crate::gui::Element;
 use crate::{pane, theme, Icon};
