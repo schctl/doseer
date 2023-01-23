@@ -11,6 +11,7 @@ pub struct Theme(pub sleet::Theme);
 
 impl stylesheet::application::DevAuto for Theme {}
 impl stylesheet::pane_grid::DevAuto for Theme {}
+impl stylesheet::rule::DevAuto for Theme {}
 impl stylesheet::scrollable::DevAuto for Theme {}
 
 pub mod button {

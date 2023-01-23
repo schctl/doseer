@@ -4,7 +4,7 @@ use std::path::Path;
 
 use m7_core::path::PathWrap;
 
-use iced::widget::{button, column, container, row, text, Column};
+use iced::widget::{button, column, container, row, text, Column, Rule};
 use iced::{alignment, Alignment, Color, Length, Padding};
 use sleet::ColorScheme;
 
@@ -112,20 +112,6 @@ fn item_button(
     Ok(item_button.into())
 }
 
-// TODO: probably should replace this with `Canvas`.
-fn separator<'a>() -> Element<'a, pane::area::Message> {
-    container(
-        container(text(""))
-            .style(theme::container::Container::OnBase)
-            .width(Length::Fill)
-            .height(Length::Fill),
-    )
-    .padding(4)
-    .width(Length::Fill)
-    .height(Length::Units(4 * 2 + 1))
-    .into()
-}
-
 impl SideBar {
     pub fn view(
         &self,
@@ -145,7 +131,11 @@ impl SideBar {
             col = col.push(item_button(path, &is_open)?);
         }
 
-        col = col.push(separator());
+        col = col.push(
+            container(Rule::horizontal(1).style(sleet::stylesheet::rule::Rule::Surface))
+                .padding(2)
+                .width(Length::Fill),
+        );
 
         for path in &self.bookmarks {
             col = col.push(item_button(path, &is_open)?);
