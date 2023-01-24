@@ -261,7 +261,7 @@ where
             };
         }
 
-        // Shrink along secondary axis
+        // Shrink along cross axis
         let size = match self.order {
             Order::Horizontal => Size {
                 height: data_y.index as f32 * (self.cell.height + spacing_y) - spacing_y,

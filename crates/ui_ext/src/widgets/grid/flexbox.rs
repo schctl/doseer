@@ -34,9 +34,9 @@ pub struct FlexBox<'a, Message, Renderer> {
     height: Length,
 
     /// X-axis spacing.
-    spacing_x: u16,
+    spacing_x: f32,
     /// Y-axis spacing.
-    spacing_y: u16,
+    spacing_y: f32,
 
     /// Contents of the grid.
     contents: Vec<Element<'a, Message, Renderer>>,
@@ -54,8 +54,8 @@ impl<'a, Message, Renderer> FlexBox<'a, Message, Renderer> {
             order: Default::default(),
             width: Length::Fill,
             height: Length::Fill,
-            spacing_x: 0,
-            spacing_y: 0,
+            spacing_x: 0.0,
+            spacing_y: 0.0,
             contents: contents.collect(),
         }
     }
@@ -92,13 +92,13 @@ impl<'a, Message, Renderer> FlexBox<'a, Message, Renderer> {
 
     /// Sets the horizontal spacing _between_ the cells of the grid.
     pub fn spacing_x(mut self, units: u16) -> Self {
-        self.spacing_x = units;
+        self.spacing_x = units as f32;
         self
     }
 
     /// Sets the vertical spacing _between_ the cells of the grid.
     pub fn spacing_y(mut self, units: u16) -> Self {
-        self.spacing_y = units;
+        self.spacing_y = units as f32;
         self
     }
 }
@@ -129,73 +129,101 @@ where
         // -- Accumulators --
 
         struct AxisData {
-            max_size: f32,
+            /// Spacing along this axis
             spacing: f32,
+            /// Bounds increment factor
             factor: f32,
+            /// Current bounds along this axis.
             accum: f32,
+            /// Starting bounds.
+            reset: f32,
+            /// Max bounds.
+            limiter: f32,
         }
 
-        let x_data = AxisData {
-            max_size: limits.max().width,
-            spacing: self.spacing_x as f32,
-            factor: self.pop_x as i8 as f32,
-            accum: 0.0,
+        let data_x = {
+            let (reset, limiter) = match self.pop_x {
+                direction::Horizontal::LeftToRight => (0.0, limits.max().width),
+                direction::Horizontal::RightToLeft => (limits.max().width, 0.0),
+            };
+            AxisData {
+                spacing: self.spacing_x,
+                factor: self.pop_x as i8 as f32,
+                accum: reset,
+                reset,
+                limiter,
+            }
         };
-        let y_data = AxisData {
-            max_size: limits.max().height,
-            spacing: self.spacing_y as f32,
-            factor: self.pop_y as i8 as f32,
-            accum: 0.0,
+        let data_y = {
+            let (reset, limiter) = match self.pop_y {
+                direction::Vertical::TopToBottom => (0.0, limits.max().height),
+                direction::Vertical::BottomToTop => (limits.max().height, 0.0),
+            };
+            AxisData {
+                spacing: self.spacing_y,
+                factor: self.pop_y as i8 as f32,
+                accum: reset,
+                reset,
+                limiter,
+            }
         };
-        let mut next_accum = 0.0;
 
-        // -- Resolve first and second axes --
-
-        let (mut first_axis, mut second_axis) = match self.order {
-            Order::Horizontal => (x_data, y_data),
-            Order::Vertical => (y_data, x_data),
+        // One more accumulator so we can get the maximum breadth of this section on the cross axis
+        let mut next_accum = match self.order {
+            Order::Horizontal => data_x.accum,
+            Order::Vertical => data_y.accum,
         };
 
-        // Resolve (first, second) into (x, y)
-        let resolve = |first_axis_point, second_axis_point| match self.order {
-            Order::Horizontal => (first_axis_point, second_axis_point),
-            Order::Vertical => (second_axis_point, first_axis_point),
+        // -- Resolve main and cross axes --
+
+        let (mut main_axis, mut cross_axis) = match self.order {
+            Order::Horizontal => (data_x, data_y),
+            Order::Vertical => (data_y, data_x),
         };
-        // Resolve (x, y) into (first, second)
-        let revert = |x, y| match self.order {
-            Order::Horizontal => (x, y),
-            Order::Vertical => (y, x),
+        // Resolve (main, cross) into (x, y)
+        let resolve = match self.order {
+            Order::Horizontal => |main, cross| (main, cross),
+            Order::Vertical => |main, cross| (cross, main),
         };
-        let shrink_second_axis = |limits: layout::Limits, delta: f32| match self.order {
-            Order::Horizontal => limits.max_height((limits.max().height - delta).max(0.0) as u32),
-            Order::Vertical => limits.max_width((limits.max().width - delta).max(0.0) as u32),
+        // Resolve (x, y) into (main, cross)
+        let revert = match self.order {
+            Order::Horizontal => |x, y| (x, y),
+            Order::Vertical => |x, y| (y, x),
+        };
+        // Shrink the cross axis by `delta` units
+        let shrink_cross_axis = match self.order {
+            Order::Horizontal => |limits: layout::Limits, delta: f32| {
+                limits.max_height((limits.max().height - delta).max(0.0) as u32)
+            },
+            Order::Vertical => |limits: layout::Limits, delta: f32| {
+                limits.max_width((limits.max().width - delta).max(0.0) as u32)
+            },
         };
 
         // -- Calculate layout --
 
         // TODO: handle `Length::Fill` and `Length::FilePortion` on children
-        // TODO: actually handle population directions
 
         let naive_insert = |layout: &mut layout::Node,
-                            first_axis: &mut AxisData,
-                            second_axis: &AxisData,
+                            main_axis: &mut AxisData,
+                            cross_axis: &AxisData,
                             next_accum: &mut f32| {
-            let resolved = (resolve)(first_axis.accum, second_axis.accum);
+            let resolved = (resolve)(main_axis.accum, cross_axis.accum);
             layout.move_to(Point::new(resolved.0, resolved.1));
 
             let bounds = layout.bounds();
             let size_along = (revert)(bounds.width, bounds.height);
             let position_along = (revert)(bounds.x, bounds.y);
 
-            // Accumulate along our first axis
-            first_axis.accum += (size_along.0 + first_axis.spacing) * first_axis.factor;
-            // Accumulate along second axis only if it extends it
-            if size_along.1 + second_axis.spacing + position_along.1 > *next_accum {
-                *next_accum += (size_along.1 + second_axis.spacing) + second_axis.factor;
+            // Accumulate along our main axis
+            main_axis.accum += (size_along.0 + main_axis.spacing) * main_axis.factor;
+            // Accumulate along cross axis only if it extends it
+            if size_along.1 + position_along.1 + cross_axis.spacing > *next_accum {
+                *next_accum += (size_along.1 + cross_axis.spacing) + cross_axis.factor;
             }
         };
 
-        let mut children = Vec::new();
+        let mut children = Vec::with_capacity(self.contents.len());
 
         for element in &self.contents {
             let mut layout = element.as_widget().layout(renderer, &limits);
@@ -203,40 +231,39 @@ where
             let size_along = (revert)(bounds.width, bounds.height);
 
             // Try to insert into current row/column
-            if size_along.0 + first_axis.accum < first_axis.max_size {
+            if size_along.0 + main_axis.accum < main_axis.limiter {
                 // Easy!
-                if size_along.1 + second_axis.accum < second_axis.max_size {
-                    (naive_insert)(&mut layout, &mut first_axis, &second_axis, &mut next_accum);
+                if size_along.1 + cross_axis.accum < cross_axis.limiter {
+                    (naive_insert)(&mut layout, &mut main_axis, &cross_axis, &mut next_accum);
                 }
-                // Our element extends the second axis.
-                // So shrink the limits so it doesn't, and recalculate layout.
+                // Our element extends the cross axis limits.
+                // So shrink them and recalculate layout.
                 else {
                     let mut shrunk_limits = limits;
-                    let delta = (size_along.1 + second_axis.accum) - second_axis.max_size;
-                    shrunk_limits = (shrink_second_axis)(shrunk_limits, delta);
+                    let delta = (size_along.1 + cross_axis.accum) - cross_axis.limiter;
+                    shrunk_limits = (shrink_cross_axis)(shrunk_limits, delta);
 
                     layout = element.as_widget().layout(renderer, &shrunk_limits);
-                    let resolved = (resolve)(first_axis.accum, second_axis.accum);
+                    let resolved = (resolve)(main_axis.accum, cross_axis.accum);
                     layout.move_to(Point::new(resolved.0, resolved.1));
-                    next_accum = second_axis.max_size;
+                    next_accum = cross_axis.limiter;
                 }
             // Move to next row/column
             } else {
-                // Extended second axis. Stop here.
-                if next_accum > second_axis.max_size {
+                // Extended cross axis. Stop here.
+                if next_accum >= cross_axis.limiter {
                     break;
                 }
-
                 // Reset
-                first_axis.accum = 0.0;
-                second_axis.accum = next_accum;
-                (naive_insert)(&mut layout, &mut first_axis, &second_axis, &mut next_accum);
+                main_axis.accum = main_axis.reset;
+                cross_axis.accum = next_accum;
+                (naive_insert)(&mut layout, &mut main_axis, &cross_axis, &mut next_accum);
             }
 
             children.push(layout);
         }
 
-        let resolved = (resolve)(first_axis.accum, next_accum);
+        let resolved = (resolve)(main_axis.accum, next_accum);
         let size = Size::new(resolved.0, resolved.1);
 
         layout::Node::with_children(size, children)
