@@ -1,6 +1,7 @@
 //! Grid with a flexbox layout.
 
 pub use iced_lazy::responsive;
+use iced_native::layout::Limits;
 use iced_native::widget::{Operation, Tree};
 use iced_native::{
     event, layout, mouse, Clipboard, Element, Event, Length, Point, Rectangle, Shell, Size, Widget,
@@ -9,18 +10,9 @@ use iced_native::{overlay, renderer};
 
 use super::{direction, Order};
 
-/// A dynamic linearly-populated grid with a flexbox layout.
-///
-/// Grids have a defined population order and direction, so they can be populated linearly. These
-/// grids also have no defined cell size. Intended to be used as a [`responsive`] widget.
-///
-/// ## Warning!
-///
-/// Even though this widget is called "FlexBox", it implements a jank home-grown version of the algorithm
-/// so don't expect it do exactly what flexbox does. It is just intended to be usable in the main layout
-/// of `m7` and a few smaller areas.
+/// A linearly-populated grid with a fixed cell size.
 #[must_use]
-pub struct FlexBox<'a, Message, Renderer> {
+pub struct Uniform<'a, Message, Renderer> {
     /// X-axis population direction.
     pop_x: direction::Horizontal,
     /// Y-axis population direction.
@@ -32,31 +24,43 @@ pub struct FlexBox<'a, Message, Renderer> {
     width: Length,
     /// Height of the whole grid widget.
     height: Length,
+    /// Cell dimensions.
+    cell: Size<f32>,
 
     /// X-axis spacing.
-    spacing_x: u16,
+    spacing_x: f32,
     /// Y-axis spacing.
-    spacing_y: u16,
+    spacing_y: f32,
+    /// Allow spacing to be increased if possible.
+    allow_more_spacing: bool,
 
     /// Contents of the grid.
     contents: Vec<Element<'a, Message, Renderer>>,
 }
 
-impl<'a, Message, Renderer> FlexBox<'a, Message, Renderer> {
+impl<'a, Message, Renderer> Uniform<'a, Message, Renderer> {
     /// Construct a new linear grid with the given contents.
     ///
     /// The grid will be populated will elements in the same order as the given iterator.
     #[inline]
-    pub fn new(contents: impl Iterator<Item = Element<'a, Message, Renderer>>) -> Self {
+    pub fn new(
+        contents: impl Iterator<Item = Element<'a, Message, Renderer>>,
+        cell: Size<u16>,
+    ) -> Self {
         Self {
             pop_x: Default::default(),
             pop_y: Default::default(),
             order: Default::default(),
             width: Length::Fill,
             height: Length::Fill,
-            spacing_x: 0,
-            spacing_y: 0,
+            cell: Size {
+                width: cell.width as f32,
+                height: cell.height as f32,
+            },
+            spacing_x: 0.0,
+            spacing_y: 0.0,
             contents: contents.collect(),
+            allow_more_spacing: false,
         }
     }
 
@@ -92,18 +96,36 @@ impl<'a, Message, Renderer> FlexBox<'a, Message, Renderer> {
 
     /// Sets the horizontal spacing _between_ the cells of the grid.
     pub fn spacing_x(mut self, units: u16) -> Self {
-        self.spacing_x = units;
+        self.spacing_x = units as f32;
         self
     }
 
     /// Sets the vertical spacing _between_ the cells of the grid.
     pub fn spacing_y(mut self, units: u16) -> Self {
-        self.spacing_y = units;
+        self.spacing_y = units as f32;
+        self
+    }
+
+    /// Sets the width of each cell.
+    pub fn cell_width(mut self, units: u16) -> Self {
+        self.cell.width = units as f32;
+        self
+    }
+
+    /// Sets the width of each cell.
+    pub fn cell_height(mut self, units: u16) -> Self {
+        self.cell.height = units as f32;
+        self
+    }
+
+    /// Allow spacing on the main axis to be increased if possible.
+    pub fn allow_more_spacing(mut self, allow: bool) -> Self {
+        self.allow_more_spacing = allow;
         self
     }
 }
 
-impl<'a, Renderer, Message> Widget<Message, Renderer> for FlexBox<'a, Message, Renderer>
+impl<'a, Renderer, Message> Widget<Message, Renderer> for Uniform<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer,
 {
@@ -125,119 +147,131 @@ where
 
     fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
         let limits = limits.width(self.width).height(self.height);
+        let total_size = limits.max();
+
+        // -- Initial calculations --
+
+        // Calculate number of rows and columns
+        let rows = ((total_size.width + self.spacing_x) / (self.cell.width + self.spacing_x))
+            .floor() as u16;
+        let cols = ((total_size.height + self.spacing_y) / (self.cell.height + self.spacing_y))
+            .floor() as u16;
+
+        // Calculate dynamic spacing if any
+        let (mut spacing_x, mut spacing_y) = (self.spacing_x, self.spacing_y);
+
+        if self.allow_more_spacing {
+            match self.order {
+                // Allocate any extra space to more spacing
+                Order::Horizontal => {
+                    let remaining_space = (total_size.width) - (rows as f32 * self.cell.width);
+                    spacing_x = (remaining_space / ((rows - 1) as f32)).max(self.spacing_x);
+                }
+                Order::Vertical => {
+                    let remaining_space = (total_size.height) - (cols as f32 * self.cell.height);
+                    spacing_y = (remaining_space / ((cols - 1) as f32)).max(self.spacing_y);
+                }
+            }
+        }
 
         // -- Accumulators --
 
         struct AxisData {
-            max_size: f32,
+            /// Spacing along this axis
             spacing: f32,
-            factor: f32,
-            accum: f32,
+            /// Index multiplication factor
+            factor: i32,
+            /// Current row/column
+            /// - This is what should be tracked
+            index: u16,
+            /// Starting row/column
+            reset: u16,
+            /// Max row/column
+            limiter: u16,
         }
 
-        let x_data = AxisData {
-            max_size: limits.max().width,
-            spacing: self.spacing_x as f32,
-            factor: self.pop_x as i8 as f32,
-            accum: 0.0,
-        };
-        let y_data = AxisData {
-            max_size: limits.max().height,
-            spacing: self.spacing_y as f32,
-            factor: self.pop_y as i8 as f32,
-            accum: 0.0,
-        };
-        let mut next_accum = 0.0;
+        impl AxisData {
+            pub fn increment(&mut self, other: &mut Self) -> bool {
+                let new_self = (self.index as i32 + self.factor) as u16;
 
-        // -- Resolve first and second axes --
+                // Extends the y-axis
+                if new_self >= self.limiter {
+                    // Extends the x-axis. Stop here.
+                    if other.index + 1 > other.limiter {
+                        return false;
+                    }
 
-        let (mut first_axis, mut second_axis) = match self.order {
-            Order::Horizontal => (x_data, y_data),
-            Order::Vertical => (y_data, x_data),
-        };
+                    self.index = self.reset;
+                    other.index = (other.index as i32 + other.factor) as u16;
+                } else {
+                    self.index = new_self;
+                }
 
-        // Resolve (first, second) into (x, y)
-        let resolve = |first_axis_point, second_axis_point| match self.order {
-            Order::Horizontal => (first_axis_point, second_axis_point),
-            Order::Vertical => (second_axis_point, first_axis_point),
+                true
+            }
+        }
+
+        let mut data_x = {
+            let (reset, limiter) = match self.pop_x {
+                direction::Horizontal::LeftToRight => (0, rows),
+                direction::Horizontal::RightToLeft => (rows, 0),
+            };
+            AxisData {
+                spacing: spacing_x,
+                factor: self.pop_x as i8 as i32,
+                index: reset,
+                reset,
+                limiter,
+            }
         };
-        // Resolve (x, y) into (first, second)
-        let revert = |x, y| match self.order {
-            Order::Horizontal => (x, y),
-            Order::Vertical => (y, x),
-        };
-        let shrink_second_axis = |limits: layout::Limits, delta: f32| match self.order {
-            Order::Horizontal => limits.max_height((limits.max().height - delta).max(0.0) as u32),
-            Order::Vertical => limits.max_width((limits.max().width - delta).max(0.0) as u32),
+        let mut data_y = {
+            let (reset, limiter) = match self.pop_y {
+                direction::Vertical::TopToBottom => (0, cols),
+                direction::Vertical::BottomToTop => (cols, 0),
+            };
+            AxisData {
+                spacing: spacing_y,
+                factor: self.pop_y as i8 as i32,
+                index: reset,
+                reset,
+                limiter,
+            }
         };
 
         // -- Calculate layout --
 
-        // TODO: handle `Length::Fill` and `Length::FilePortion` on children
-        // TODO: actually handle population directions
-
-        let naive_insert = |layout: &mut layout::Node,
-                            first_axis: &mut AxisData,
-                            second_axis: &AxisData,
-                            next_accum: &mut f32| {
-            let resolved = (resolve)(first_axis.accum, second_axis.accum);
-            layout.move_to(Point::new(resolved.0, resolved.1));
-
-            let bounds = layout.bounds();
-            let size_along = (revert)(bounds.width, bounds.height);
-            let position_along = (revert)(bounds.x, bounds.y);
-
-            // Accumulate along our first axis
-            first_axis.accum += (size_along.0 + first_axis.spacing) * first_axis.factor;
-            // Accumulate along second axis only if it extends it
-            if size_along.1 + second_axis.spacing + position_along.1 > *next_accum {
-                *next_accum += (size_along.1 + second_axis.spacing) + second_axis.factor;
-            }
-        };
-
-        let mut children = Vec::new();
+        let mut children = Vec::with_capacity(self.contents.len());
 
         for element in &self.contents {
-            let mut layout = element.as_widget().layout(renderer, &limits);
-            let bounds = layout.bounds();
-            let size_along = (revert)(bounds.width, bounds.height);
+            let child_limits = Limits::new(Size::ZERO, self.cell);
 
-            // Try to insert into current row/column
-            if size_along.0 + first_axis.accum < first_axis.max_size {
-                // Easy!
-                if size_along.1 + second_axis.accum < second_axis.max_size {
-                    (naive_insert)(&mut layout, &mut first_axis, &second_axis, &mut next_accum);
-                }
-                // Our element extends the second axis.
-                // So shrink the limits so it doesn't, and recalculate layout.
-                else {
-                    let mut shrunk_limits = limits;
-                    let delta = (size_along.1 + second_axis.accum) - second_axis.max_size;
-                    shrunk_limits = (shrink_second_axis)(shrunk_limits, delta);
+            // Layout child
+            let mut layout = element.as_widget().layout(renderer, &child_limits);
 
-                    layout = element.as_widget().layout(renderer, &shrunk_limits);
-                    let resolved = (resolve)(first_axis.accum, second_axis.accum);
-                    layout.move_to(Point::new(resolved.0, resolved.1));
-                    next_accum = second_axis.max_size;
-                }
-            // Move to next row/column
-            } else {
-                // Extended second axis. Stop here.
-                if next_accum > second_axis.max_size {
-                    break;
-                }
+            let point_x = data_x.index as f32 * (self.cell.width + data_x.spacing);
+            let point_y = data_y.index as f32 * (self.cell.height + data_y.spacing);
 
-                // Reset
-                first_axis.accum = 0.0;
-                second_axis.accum = next_accum;
-                (naive_insert)(&mut layout, &mut first_axis, &second_axis, &mut next_accum);
-            }
-
+            layout.move_to(Point::new(point_x, point_y));
             children.push(layout);
+
+            // Increment accumulators
+            match self.order {
+                Order::Horizontal => data_x.increment(&mut data_y),
+                Order::Vertical => data_y.increment(&mut data_x),
+            };
         }
 
-        let resolved = (resolve)(first_axis.accum, next_accum);
-        let size = Size::new(resolved.0, resolved.1);
+        // Shrink along secondary axis
+        let size = match self.order {
+            Order::Horizontal => Size {
+                height: data_y.index as f32 * (self.cell.height + spacing_y) - spacing_y,
+                ..total_size
+            },
+            Order::Vertical => Size {
+                width: data_x.index as f32 * (self.cell.width + spacing_x) - spacing_x,
+                ..total_size
+            },
+        };
 
         layout::Node::with_children(size, children)
     }
@@ -355,21 +389,22 @@ where
     }
 }
 
-impl<'a, Message, Renderer> From<FlexBox<'a, Message, Renderer>> for Element<'a, Message, Renderer>
+impl<'a, Message, Renderer> From<Uniform<'a, Message, Renderer>> for Element<'a, Message, Renderer>
 where
     Message: 'a,
     Renderer: 'a + renderer::Renderer,
 {
     #[inline]
-    fn from(value: FlexBox<'a, Message, Renderer>) -> Self {
+    fn from(value: Uniform<'a, Message, Renderer>) -> Self {
         Element::new(value)
     }
 }
 
 /// Construct a new [`FlexBox`].
 #[inline]
-pub fn flexbox<'a, Message, Renderer>(
+pub fn uniform<'a, Message, Renderer>(
     contents: impl Iterator<Item = Element<'a, Message, Renderer>>,
-) -> FlexBox<'a, Message, Renderer> {
-    FlexBox::new(contents)
+    cell: Size<u16>,
+) -> Uniform<'a, Message, Renderer> {
+    Uniform::new(contents, cell)
 }

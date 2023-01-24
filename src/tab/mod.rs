@@ -2,10 +2,10 @@
 
 use std::path::Path;
 
-use iced::Command;
+use iced::{Command, Length, Size};
 use m7_core::dirs;
 use m7_core::path::PathWrap;
-use m7_ui_ext::widgets::grid::flexbox;
+use m7_ui_ext::widgets::grid::{flexbox, uniform};
 
 use iced::widget::{container, scrollable};
 
@@ -118,22 +118,29 @@ impl Tab {
 
     pub fn view(&self) -> Element<Message> {
         flexbox::responsive(|_| {
-            let grid = flexbox(self.contents.contents().iter().map(|path| {
-                container(
-                    item::view(
-                        path.clone(),
-                        if self.is_selected(path) {
-                            item::Style::Selected
-                        } else {
-                            item::Style::Default
-                        },
+            let grid = uniform(
+                self.contents.contents().iter().map(|path| {
+                    container(
+                        item::view(
+                            path.clone(),
+                            if self.is_selected(path) {
+                                item::Style::Selected
+                            } else {
+                                item::Style::Default
+                            },
+                        )
+                        .map(Message::Item),
                     )
-                    .map(Message::Item),
-                )
-                .width(iced::Length::Units(128))
-                .height(iced::Length::Units(128))
-                .into()
-            }));
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                    .into()
+                }),
+                Size {
+                    width: 128,
+                    height: 128,
+                },
+            )
+            .allow_more_spacing(true);
 
             scrollable(container(grid).padding(8).width(iced::Length::Fill)).into()
         })
