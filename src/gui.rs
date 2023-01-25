@@ -16,7 +16,7 @@ pub type Element<'a, T> = iced::Element<'a, T, Renderer>;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    PaneArea(pane::area::Message),
+    Pane(pane::Message),
     ResizeMain(panelled::pane_grid::ResizeEvent),
     IcedEvent(iced::Event),
 }
@@ -24,7 +24,7 @@ pub enum Message {
 /// The UI state.
 pub struct Gui {
     /// File pane grid area.
-    main_area: panelled::State<SideBar, pane::Area>,
+    main_area: panelled::State<SideBar, Pane>,
     /// Current configurations.
     _config: Config,
 }
@@ -39,7 +39,6 @@ impl Application for Gui {
         let mut commands = vec![];
 
         let pane = Pane::new(Tab::new().unwrap());
-        let pane_area = pane::Area::new(pane);
 
         let side_bar = SideBar {
             default: flags
@@ -54,16 +53,13 @@ impl Application for Gui {
                 .collect(),
         };
 
-        let mut main_area = panelled::State::new(pane_area);
+        let mut main_area = panelled::State::new(pane);
         main_area.add_panel(side_bar, panelled::PanelPosition::Left);
         main_area.resize_panel(0.2);
 
         // :/
-        let tab_init_cmd =
-            tab::watcher::command(main_area.content().focused().focused().location());
-        commands.push(tab_init_cmd.map(|m| {
-            Message::PaneArea(pane::area::Message::Pane(pane::Message::Tab(m, None), None))
-        }));
+        let tab_init_cmd = tab::watcher::command(main_area.content().focused().location());
+        commands.push(tab_init_cmd.map(|m| Message::Pane(pane::Message::Tab(m, None))));
 
         (
             Self {
@@ -86,9 +82,9 @@ impl Application for Gui {
         let mut commands = vec![];
 
         match message {
-            Message::PaneArea(m) => {
+            Message::Pane(m) => {
                 let area_cmd = self.main_area.content_mut().update(m).unwrap();
-                commands.push(area_cmd.map(Message::PaneArea));
+                commands.push(area_cmd.map(Message::Pane));
             }
             Message::ResizeMain(m) => self.main_area.internal.resize(&m.split, m.ratio),
             _ => {}
@@ -107,20 +103,13 @@ impl Application for Gui {
             |panel| {
                 panel
                     .view(|path| {
-                        self.main_area
-                            .content()
-                            .base
-                            .focused()
-                            .focused()
-                            .location()
-                            .as_ref()
-                            == path
+                        self.main_area.content().base.focused().location().as_ref() == path
                     })
                     .unwrap()
-                    .map(Message::PaneArea)
+                    .map(Message::Pane)
                     .into()
             },
-            |content| content.view().map(Message::PaneArea).into(),
+            |content| content.view().map(Message::Pane).into(),
         )
         .into_inner()
         .width(Length::Fill)

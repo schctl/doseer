@@ -12,9 +12,6 @@ use sleet::ColorScheme;
 use crate::gui::Element;
 use crate::{tab, theme, Icon, Tab, Theme};
 
-pub mod area;
-pub use area::Area;
-
 /// A pane contains many tabs, but displays only one at a time.
 #[derive(Debug)]
 pub struct Pane {

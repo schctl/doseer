@@ -76,7 +76,7 @@ impl ButtonStyle {
 fn item_button(
     path: &PathWrap,
     is_open: impl Fn(&Path) -> bool,
-) -> anyhow::Result<Element<pane::area::Message>> {
+) -> anyhow::Result<Element<pane::Message>> {
     let style = // We can reuse this
     if (is_open)(path) {
         ButtonStyle::Focused
@@ -100,10 +100,7 @@ fn item_button(
         .height(Length::Fill),
     )
     // focus tab when the button is pressed
-    .on_press(pane::area::Message::Pane(
-        pane::Message::Replace(PathWrap::from_path(path)?),
-        None,
-    ))
+    .on_press(pane::Message::Replace(PathWrap::from_path(path)?))
     .width(Length::Fill)
     .height(Length::Units(38))
     .padding(Padding::from([4, 8]))
@@ -113,10 +110,7 @@ fn item_button(
 }
 
 impl SideBar {
-    pub fn view(
-        &self,
-        is_open: impl Fn(&Path) -> bool,
-    ) -> anyhow::Result<Element<pane::area::Message>> {
+    pub fn view(&self, is_open: impl Fn(&Path) -> bool) -> anyhow::Result<Element<pane::Message>> {
         let title = container(text("Files").font(theme::fonts::UI::Black).size(28))
             .height(pane::Pane::TOP_BAR_HEIGHT)
             .align_y(alignment::Vertical::Center)
