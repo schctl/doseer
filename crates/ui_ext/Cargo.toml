@@ -9,4 +9,3 @@ publish = false
 [dependencies]
 iced_native = "0.8"
 iced_lazy = "0.4"
-derive_more = "0.99"

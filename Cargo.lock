@@ -1368,7 +1368,6 @@ dependencies = [
 name = "m7_ui_ext"
 version = "0.0.1"
 dependencies = [
- "derive_more",
  "iced_lazy",
  "iced_native",
 ]

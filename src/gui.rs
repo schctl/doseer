@@ -2,7 +2,7 @@
 
 use m7_core::config::Config;
 use m7_core::path::PathWrap;
-use m7_ui_ext::components::panelled::{self, Panelled};
+use m7_ui_ext::components::panelled::{self, unpanelled};
 
 use iced::{executor, Application, Command, Length};
 use sleet::stylesheet::Wrap;
@@ -23,8 +23,12 @@ pub enum Message {
 
 /// The UI state.
 pub struct Gui {
-    /// File pane grid area.
-    main_area: panelled::State<SideBar, Pane>,
+    /// Sidebar split tracker.
+    split_state: panelled::State,
+    /// Sidebar state.
+    side_bar: SideBar,
+    /// Pane state.
+    pane: Pane,
     /// Current configurations.
     _config: Config,
 }
@@ -53,17 +57,18 @@ impl Application for Gui {
                 .collect(),
         };
 
-        let mut main_area = panelled::State::new(pane);
-        main_area.add_panel(side_bar, panelled::PanelPosition::Left);
-        main_area.resize_panel(0.2);
+        let mut split_state = panelled::State::new();
+        split_state.resize(0.2);
 
         // :/
-        let tab_init_cmd = tab::watcher::command(main_area.content().focused().location());
+        let tab_init_cmd = tab::watcher::command(pane.focused().location());
         commands.push(tab_init_cmd.map(|m| Message::Pane(pane::Message::Tab(m, None))));
 
         (
             Self {
-                main_area,
+                split_state,
+                side_bar,
+                pane,
                 _config: flags,
             },
             Command::batch(commands),
@@ -83,10 +88,10 @@ impl Application for Gui {
 
         match message {
             Message::Pane(m) => {
-                let area_cmd = self.main_area.content_mut().update(m).unwrap();
-                commands.push(area_cmd.map(Message::Pane));
+                let pane_cmd = self.pane.update(m).unwrap();
+                commands.push(pane_cmd.map(Message::Pane));
             }
-            Message::ResizeMain(m) => self.main_area.internal.resize(&m.split, m.ratio),
+            Message::ResizeMain(m) => self.split_state.resize(m.ratio),
             _ => {}
         }
 
@@ -98,23 +103,19 @@ impl Application for Gui {
     }
 
     fn view(&self) -> Element<Self::Message> {
-        Panelled::new(
-            &self.main_area,
-            |panel| {
-                panel
-                    .view(|path| {
-                        self.main_area.content().base.focused().location().as_ref() == path
-                    })
+        unpanelled(|| self.pane.view().map(Message::Pane))
+            // add side panel
+            .panel(&self.split_state, |_| {
+                self.side_bar
+                    .view(|path| self.pane.focused().location().as_ref() == path)
                     .unwrap()
                     .map(Message::Pane)
-                    .into()
-            },
-            |content| content.view().map(Message::Pane).into(),
-        )
-        .into_inner()
-        .width(Length::Fill)
-        .height(Length::Fill)
-        .on_resize(16, Message::ResizeMain)
-        .into()
+            })
+            // configure inner pane_grid
+            .into_inner()
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .on_resize(16, Message::ResizeMain)
+            .into()
     }
 }
