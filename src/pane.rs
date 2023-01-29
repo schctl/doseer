@@ -7,6 +7,7 @@ use m7_core::path::PathWrap;
 use iced::widget::{button, container, row, text, Row};
 use iced::{alignment, Alignment, Color, Command, Length};
 use indexmap::IndexMap;
+use m7_ui_ext::widgets::only_one;
 use sleet::ColorScheme;
 
 use crate::gui::Element;
@@ -220,9 +221,14 @@ impl Pane {
 
     pub fn view(&self) -> Element<Message> {
         // Focused tab view
-        let view = self.focused().view().map(|i| Message::Tab(i, None));
-
-        view
+        only_one(
+            self.tabs
+                .values()
+                .enumerate()
+                .map(|(n, t)| t.view().map(move |i| Message::Tab(i, Some(n)))),
+        )
+        .focus(self.focused)
+        .into()
     }
 }
 
