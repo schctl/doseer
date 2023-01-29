@@ -2,11 +2,11 @@
 
 use std::path::Path;
 
-use iced::{Command, Length, Size};
 use m7_core::dirs;
 use m7_core::path::PathWrap;
 use m7_ui_ext::widgets::grid::{flexbox, uniform};
 
+use iced::{Command, Length, Size};
 use iced::widget::{container, scrollable};
 
 use crate::gui::Element;

@@ -1,10 +1,10 @@
 //! Grid widgets.
 
 pub mod flexbox;
-pub use flexbox::flexbox;
+pub use flexbox::{flexbox, FlexBox};
 
 pub mod uniform;
-pub use uniform::uniform;
+pub use uniform::{uniform, Uniform};
 
 /// Defines the direction of population.
 pub mod direction {

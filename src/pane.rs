@@ -1,13 +1,11 @@
 //! Pane widget.
 
-use std::convert::identity;
-
 use m7_core::path::PathWrap;
+use m7_ui_ext::widgets::only_one;
 
 use iced::widget::{button, container, row, text, Row};
 use iced::{alignment, Alignment, Color, Command, Length};
 use indexmap::IndexMap;
-use m7_ui_ext::widgets::only_one;
 use sleet::ColorScheme;
 
 use crate::gui::Element;
@@ -90,6 +88,16 @@ pub enum Message {
     Replace(PathWrap),
 }
 
+impl Message {
+    /// Create a new tab message for the given tab.
+    ///
+    /// Shorthand constructor so usage is less noisy.
+    #[inline]
+    pub const fn with_tab(index: usize, message: tab::Message) -> Self {
+        Self::Tab(message, Some(index))
+    }
+}
+
 impl Pane {
     pub fn update(&mut self, message: Message) -> anyhow::Result<Command<Message>> {
         let mut commands = vec![];
@@ -98,7 +106,7 @@ impl Pane {
             Message::Tab(m, index) => {
                 let tab_cmd = self
                     .tabs
-                    .get_mut(&index.map_or(self.focused, identity))
+                    .get_mut(&index.unwrap_or(self.focused))
                     .unwrap()
                     .update(m)?;
 
@@ -224,8 +232,7 @@ impl Pane {
         only_one(
             self.tabs
                 .values()
-                .enumerate()
-                .map(|(n, t)| t.view().map(move |i| Message::Tab(i, Some(n)))),
+                .map(|t| t.view().map(move |m| Message::Tab(m, None))),
         )
         .focus(self.focused)
         .into()

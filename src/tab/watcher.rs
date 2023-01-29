@@ -1,7 +1,8 @@
 //! File watcher.
 
-use iced::Command;
 use m7_core::path::PathWrap;
+
+use iced::Command;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use tokio::runtime::Handle;
 use tokio::sync::mpsc::{self, Receiver};

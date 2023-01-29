@@ -400,7 +400,7 @@ where
     }
 }
 
-/// Construct a new [`FlexBox`].
+/// Construct a new [`Uniform`] grid.
 #[inline]
 pub fn uniform<'a, Message, Renderer>(
     contents: impl Iterator<Item = Element<'a, Message, Renderer>>,

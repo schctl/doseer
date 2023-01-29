@@ -393,7 +393,7 @@ where
     }
 }
 
-/// Construct a new [`FlexBox`].
+/// Construct a new [`FlexBox`] grid.
 #[inline]
 pub fn flexbox<'a, Message, Renderer>(
     contents: impl Iterator<Item = Element<'a, Message, Renderer>>,
