@@ -1,9 +1,9 @@
-//! Pane widget.
+//! Pane view.
 
 use m7_core::path::PathWrap;
 use m7_ui_ext::widgets::only_one;
 
-use iced::widget::{button, container, row, text, Row};
+use iced::widget::{button, column, container, row, text, Row};
 use iced::{alignment, Alignment, Color, Command, Length};
 use indexmap::IndexMap;
 use sleet::ColorScheme;
@@ -11,7 +11,7 @@ use sleet::ColorScheme;
 use crate::gui::Element;
 use crate::{tab, theme, Icon, Tab, Theme};
 
-/// A pane contains many tabs, but displays only one at a time.
+/// A collection of tabs.
 #[derive(Debug)]
 pub struct Pane {
     /// Tabs held by this pane.
@@ -138,18 +138,17 @@ impl Pane {
 
     pub const TOP_BAR_HEIGHT: Length = Length::Units(50);
 
-    pub fn top_bar(&self) -> anyhow::Result<Element<Message>> {
-        // Pane area provided controllers
-
-        // Held tab list
+    /// Tab switcher and controls.
+    fn tab_controls(&self) -> Element<Message> {
         let mut tab_list = Row::new()
             .align_items(Alignment::Center)
             .padding(6)
             .spacing(4)
             .height(Self::TOP_BAR_HEIGHT);
 
+        // --- Generate tab buttons ---
+
         for (index, tab) in &self.tabs {
-            // the name and icon of the tab
             let folder_name = row!(
                 Icon::Directory
                     .svg()
@@ -206,36 +205,43 @@ impl Pane {
             tab_list = tab_list.push(tab);
         }
 
-        let new_tab = button(
-            container(
-                Icon::Plus
-                    .svg()
-                    .height(Length::Units(18))
-                    .width(Length::Units(18))
-                    .style(theme::svg::Neutral::Bright1.into()),
+        // --- New tab button ---
+
+        tab_list = tab_list.push(
+            button(
+                container(
+                    Icon::Plus
+                        .svg()
+                        .height(Length::Units(18))
+                        .width(Length::Units(18))
+                        .style(theme::svg::Neutral::Bright1.into()),
+                )
+                .align_x(alignment::Horizontal::Center)
+                .align_y(alignment::Vertical::Center)
+                .height(Length::Units(24))
+                .width(Length::Units(24)),
             )
-            .align_x(alignment::Horizontal::Center)
-            .align_y(alignment::Vertical::Center)
-            .height(Length::Units(24))
-            .width(Length::Units(24)),
-        )
-        .style(TabButtonStyle::Default.into())
-        .on_press(Message::New(None, true));
+            .style(TabButtonStyle::Default.into())
+            .on_press(Message::New(None, true)),
+        );
 
-        tab_list = tab_list.push(new_tab);
-
-        Ok(tab_list.into())
+        tab_list.into()
     }
 
     pub fn view(&self) -> Element<Message> {
+        // Tab switcher
+        let panel = self.tab_controls();
+
         // Focused tab view
-        only_one(
+        let contents = only_one(
             self.tabs
                 .values()
                 .map(|t| t.view().map(move |m| Message::Tab(m, None))),
         )
-        .focus(self.focused)
-        .into()
+        .focus(self.focused);
+
+        // TODO: define panel position at runtime
+        column!(panel, contents).into()
     }
 }
 

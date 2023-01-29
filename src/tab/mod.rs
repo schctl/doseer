@@ -6,8 +6,8 @@ use m7_core::dirs;
 use m7_core::path::PathWrap;
 use m7_ui_ext::widgets::grid::{flexbox, uniform};
 
-use iced::{Command, Length, Size};
 use iced::widget::{container, scrollable};
+use iced::{Command, Length, Size};
 
 use crate::gui::Element;
 use crate::item;
