@@ -100,7 +100,7 @@ fn item_button(
         .height(Length::Fill),
     )
     // focus tab when the button is pressed
-    .on_press(pane::Message::Replace(PathWrap::from_path(path)?))
+    .on_press(pane::Message::Replace(path.clone()))
     .width(Length::Fill)
     .height(Length::Units(38))
     .padding(Padding::from([4, 8]))

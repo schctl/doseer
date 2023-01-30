@@ -2,23 +2,26 @@
 
 use std::fs::File;
 use std::io::{Read, Write};
-use std::path::PathBuf;
 
 use crate::dirs;
+use crate::path::PathWrap;
 use crate::{resource, resource_make};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 pub struct Config {
     /// Side bar folder list.
-    pub side_bar: Vec<PathBuf>,
+    pub side_bar: Vec<PathWrap>,
     /// Bookmark folder list.
-    pub bookmarks: Vec<PathBuf>,
+    pub bookmarks: Vec<PathWrap>,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
-            side_bar: vec![dirs::BASE.home_dir().to_owned()],
+            side_bar: [dirs::BASE.home_dir()]
+                .into_iter()
+                .map(PathWrap::from_path)
+                .collect(),
             bookmarks: vec![],
         }
     }

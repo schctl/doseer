@@ -60,7 +60,7 @@ pub struct Contents {
 
 impl Contents {
     pub fn new<P: AsRef<Path>>(path: P) -> anyhow::Result<Self> {
-        let location = PathWrap::from_path(path)?;
+        let location = PathWrap::from_path(path);
 
         let mut items = Vec::new();
         Self::read_items_into(&location, &mut items)?;
@@ -97,7 +97,7 @@ impl Contents {
             Ok(entry) => Some(entry.path()),
             _ => None,
         }) {
-            buf.push(PathWrap::from_path(entry)?);
+            buf.push(PathWrap::from_into_path(entry));
         }
 
         Ok(())

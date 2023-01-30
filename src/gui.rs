@@ -1,7 +1,6 @@
 //! The GUI app.
 
 use m7_core::config::Config;
-use m7_core::path::PathWrap;
 use m7_ui_ext::components::panelled::{self, unpanelled};
 
 use iced::{executor, Application, Command, Length};
@@ -45,16 +44,8 @@ impl Application for Gui {
         let pane = Pane::new(Tab::new().unwrap());
 
         let side_bar = SideBar {
-            default: flags
-                .side_bar
-                .iter()
-                .map(|p| PathWrap::from_path(p).unwrap())
-                .collect(),
-            bookmarks: flags
-                .bookmarks
-                .iter()
-                .map(|p| PathWrap::from_path(p).unwrap())
-                .collect(),
+            default: flags.side_bar.clone(),
+            bookmarks: flags.bookmarks.clone(),
         };
 
         let mut split_state = panelled::State::new();
