@@ -238,7 +238,8 @@ impl Pane {
                 .values()
                 .map(|t| t.view().map(move |m| Message::Tab(m, None))),
         )
-        .focus(self.focused);
+        // We need to get the _index_ of the focused tab
+        .focus(self.tabs.keys().position(|k| *k == self.focused).unwrap());
 
         // TODO: define panel position at runtime
         column!(panel, contents).into()

@@ -28,9 +28,8 @@ impl<'a, Message, Renderer> OnlyOne<'a, Message, Renderer> {
     /// to display.
     #[inline]
     pub fn focus(mut self, focus: usize) -> Self {
-        if focus < self.contents.len() {
-            self.focused = focus;
-        }
+        assert!(focus < self.contents.len());
+        self.focused = focus;
         self
     }
 }
