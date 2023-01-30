@@ -2,9 +2,10 @@
 
 use std::path::Path;
 
+use m7_core::config;
 use m7_core::path::PathWrap;
 
-use iced::widget::{button, column, container, row, text, Column, Rule};
+use iced::widget::{button, column, container, row, text, Column};
 use iced::{alignment, Alignment, Color, Length, Padding};
 use sleet::ColorScheme;
 
@@ -14,10 +15,15 @@ use crate::{pane, theme, Icon};
 /// The file picker side bar.
 #[derive(Debug)]
 pub struct SideBar {
-    /// Section of the sidebar which contains a set of default paths.
-    pub default: Vec<PathWrap>,
-    /// Customizable section.
-    pub bookmarks: Vec<PathWrap>,
+    /// User configuration.
+    config: config::SideBar,
+}
+
+impl SideBar {
+    #[inline]
+    pub fn new(config: config::SideBar) -> Self {
+        Self { config }
+    }
 }
 
 /// Tab button theme.
@@ -116,24 +122,17 @@ impl SideBar {
             .align_y(alignment::Vertical::Center)
             .padding([0, 8]);
 
+        // Bookmarks column
         let mut col = Column::new()
             .align_items(Alignment::Center)
             .padding(8)
             .spacing(4);
 
-        for path in &self.default {
+        for path in &self.config.bookmarks {
             col = col.push(item_button(path, &is_open)?);
         }
 
-        col = col.push(
-            container(Rule::horizontal(1).style(sleet::stylesheet::rule::Rule::Surface))
-                .padding(2)
-                .width(Length::Fill),
-        );
-
-        for path in &self.bookmarks {
-            col = col.push(item_button(path, &is_open)?);
-        }
+        // TODO: Network column, Other locations
 
         Ok(container(column!(title, col))
             .style(theme::container::Container::Weak)

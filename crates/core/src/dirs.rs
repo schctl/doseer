@@ -2,15 +2,15 @@
 
 use std::path::Path;
 
-use directories::{BaseDirs, ProjectDirs};
+use directories::{BaseDirs, ProjectDirs, UserDirs};
 
 use crate::path::PathWrap;
 
 lazy_static::lazy_static! {
     pub static ref PROJECT: ProjectDirs
                                 = ProjectDirs::from("io", "schctl", "m7").unwrap();
-
     pub static ref BASE: BaseDirs = BaseDirs::new().unwrap();
+    pub static ref USER: UserDirs = UserDirs::new().unwrap();
 }
 
 /// Access a specific file or resource, based on required type.

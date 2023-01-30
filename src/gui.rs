@@ -28,8 +28,6 @@ pub struct Gui {
     side_bar: SideBar,
     /// Pane state.
     pane: Pane,
-    /// Current configurations.
-    _config: Config,
 }
 
 impl Application for Gui {
@@ -42,11 +40,7 @@ impl Application for Gui {
         let mut commands = vec![];
 
         let pane = Pane::new(Tab::new().unwrap());
-
-        let side_bar = SideBar {
-            default: flags.side_bar.clone(),
-            bookmarks: flags.bookmarks.clone(),
-        };
+        let side_bar = SideBar::new(flags.side_bar);
 
         let mut split_state = panelled::State::new();
         split_state.resize(0.2);
@@ -60,7 +54,6 @@ impl Application for Gui {
                 split_state,
                 side_bar,
                 pane,
-                _config: flags,
             },
             Command::batch(commands),
         )

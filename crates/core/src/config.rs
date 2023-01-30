@@ -7,22 +7,43 @@ use crate::dirs;
 use crate::path::PathWrap;
 use crate::{resource, resource_make};
 
+/// The sidebar configuration.
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
-pub struct Config {
-    /// Side bar folder list.
-    pub side_bar: Vec<PathWrap>,
+pub struct SideBar {
     /// Bookmark folder list.
     pub bookmarks: Vec<PathWrap>,
 }
 
-impl Default for Config {
-    fn default() -> Self {
+impl SideBar {
+    /// Generate default set of [`SideBar`] configurations.
+    pub fn generate() -> Self {
+        let bookmarks = [
+            Some(dirs::USER.home_dir()),
+            dirs::USER.desktop_dir(),
+            dirs::USER.document_dir(),
+            dirs::USER.download_dir(),
+            dirs::USER.picture_dir(),
+        ]
+        .into_iter()
+        .filter_map(|p| p.map(PathWrap::from_path))
+        .collect();
+
+        Self { bookmarks }
+    }
+}
+
+/// Global application configuration.
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+pub struct Config {
+    /// Side bar configuration.
+    pub side_bar: SideBar,
+}
+
+impl Config {
+    /// Generate default set of application configurations.
+    pub fn generate() -> Self {
         Self {
-            side_bar: [dirs::BASE.home_dir()]
-                .into_iter()
-                .map(PathWrap::from_path)
-                .collect(),
-            bookmarks: vec![],
+            side_bar: SideBar::generate(),
         }
     }
 }
@@ -33,9 +54,8 @@ pub fn read_config() -> anyhow::Result<Config> {
 
     // Return and write default config if none exists
     if !path.exists() {
-        let config = Config::default();
+        let config = Config::generate();
         write_config(&config)?;
-
         return Ok(config);
     }
 
