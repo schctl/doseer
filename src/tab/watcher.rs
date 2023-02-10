@@ -1,6 +1,6 @@
 //! File watcher.
 
-use m7_core::path::PathWrap;
+use doseer_core::path::PathWrap;
 
 use iced::Command;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};

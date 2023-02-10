@@ -2,9 +2,9 @@
 
 use std::path::Path;
 
-use m7_core::dirs;
-use m7_core::path::PathWrap;
-use m7_ui_ext::widgets::grid::{flexbox, uniform};
+use doseer_core::dirs;
+use doseer_core::path::PathWrap;
+use doseer_ui_ext::widgets::grid::{flexbox, uniform};
 
 use iced::widget::{container, scrollable};
 use iced::{Command, Length, Size};

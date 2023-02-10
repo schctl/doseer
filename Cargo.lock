@@ -541,6 +541,45 @@ dependencies = [
 ]
 
 [[package]]
+name = "doseer"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "derive_more",
+ "doseer_core",
+ "doseer_ui_ext",
+ "iced",
+ "indexmap",
+ "mimalloc",
+ "notify",
+ "open",
+ "sleet",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "doseer_core"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "directories",
+ "lazy_static",
+ "paste",
+ "serde",
+ "toml",
+]
+
+[[package]]
+name = "doseer_ui_ext"
+version = "0.0.1"
+dependencies = [
+ "iced_lazy",
+ "iced_native",
+]
+
+[[package]]
 name = "downcast-rs"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1331,45 +1370,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
-]
-
-[[package]]
-name = "m7"
-version = "0.0.1"
-dependencies = [
- "anyhow",
- "derive_more",
- "iced",
- "indexmap",
- "m7_core",
- "m7_ui_ext",
- "mimalloc",
- "notify",
- "open",
- "sleet",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "m7_core"
-version = "0.0.1"
-dependencies = [
- "anyhow",
- "directories",
- "lazy_static",
- "paste",
- "serde",
- "toml",
-]
-
-[[package]]
-name = "m7_ui_ext"
-version = "0.0.1"
-dependencies = [
- "iced_lazy",
- "iced_native",
 ]
 
 [[package]]

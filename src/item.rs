@@ -1,6 +1,6 @@
 //! A single item (file/folder/whatever) in a directory.
 
-use m7_core::path::PathWrap;
+use doseer_core::path::PathWrap;
 
 use iced::widget::{button, column, text};
 use iced::{Background, Color};

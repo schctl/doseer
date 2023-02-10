@@ -8,7 +8,7 @@ use crate::path::PathWrap;
 
 lazy_static::lazy_static! {
     pub static ref PROJECT: ProjectDirs
-                                = ProjectDirs::from("io", "schctl", "m7").unwrap();
+                                = ProjectDirs::from("io", "schctl", "doseer").unwrap();
     pub static ref BASE: BaseDirs = BaseDirs::new().unwrap();
     pub static ref USER: UserDirs = UserDirs::new().unwrap();
 }

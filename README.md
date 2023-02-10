@@ -1,11 +1,11 @@
-# m7
+# doseer
 
-`m7` is an graphical file manager created for my own personal use.
+`doseer` is an graphical file manager created for my own personal use.
 
 It was born out of some mild annoyances with the file manager I already use, and the fact that I
 couldn't find anything I liked better.
 
-The main *raison d'être* of `m7` is experimentation — it aims to add features that are typically not
+The main *raison d'être* of `doseer` is experimentation — it aims to add features that are typically not
 seen in file managers, and be more than *just* a file manager. I don't know how much innovation can
 be done in a file manager, but it will live on if it succeeds in its goal. It is also an excuse for
 me to write code and play around with [`iced`] :)

@@ -4,7 +4,7 @@ members = [
 ]
 
 [package]
-name = "m7"
+name = "doseer"
 edition = "2021"
 version = "0.0.1"
 authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
@@ -14,8 +14,8 @@ publish = false
 # ---
 
 [dependencies]
-m7_core = { path = "crates/core" }
-m7_ui_ext = { path = "crates/ui_ext" }
+doseer_core = { path = "crates/core" }
+doseer_ui_ext = { path = "crates/ui_ext" }
 
 anyhow = "1"
 indexmap = "1"

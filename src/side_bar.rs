@@ -2,8 +2,8 @@
 
 use std::path::Path;
 
-use m7_core::config;
-use m7_core::path::PathWrap;
+use doseer_core::config;
+use doseer_core::path::PathWrap;
 
 use iced::widget::{button, column, container, row, text, Column};
 use iced::{alignment, Alignment, Color, Length, Padding};

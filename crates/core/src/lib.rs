@@ -1,4 +1,4 @@
-//! Core functionality for `m7`. Basically anything that's not UI.
+//! Core functionality for `doseer`. Basically anything that's not UI.
 
 pub mod config;
 pub mod dirs;

@@ -2,7 +2,7 @@
 
 use anyhow::Context;
 use iced::{Application, Settings};
-use m7_core::config;
+use doseer_core::config;
 
 mod gui;
 
@@ -37,18 +37,18 @@ fn setup_tracing() {
 
     let mut env_filter = EnvFilter::from_default_env()
         // Default -> WARN
-        .add_directive("m7=warn".parse().unwrap());
+        .add_directive("doseer=warn".parse().unwrap());
 
     #[cfg(debug_assertions)]
     {
         // Debug mode -> INFO
-        env_filter = env_filter.add_directive("m7=info".parse().unwrap());
+        env_filter = env_filter.add_directive("doseer=info".parse().unwrap());
     }
     #[cfg(feature = "debug")]
     {
         // Full debug -> DEBUG
         env_filter = env_filter
-            .add_directive("m7=debug".parse().unwrap())
+            .add_directive("doseer=debug".parse().unwrap())
             .add_directive("iced=info".parse().unwrap());
     }
 

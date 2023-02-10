@@ -1,7 +1,7 @@
 //! The GUI app.
 
-use m7_core::config::Config;
-use m7_ui_ext::components::panelled::{self, unpanelled};
+use doseer_core::config::Config;
+use doseer_ui_ext::components::panelled::{self, unpanelled};
 
 use iced::{executor, Application, Command, Length};
 use sleet::stylesheet::Wrap;
@@ -60,7 +60,7 @@ impl Application for Gui {
     }
 
     fn title(&self) -> String {
-        String::from("m7")
+        String::from("doseer")
     }
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {

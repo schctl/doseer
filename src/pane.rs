@@ -1,7 +1,7 @@
 //! Pane view.
 
-use m7_core::path::PathWrap;
-use m7_ui_ext::widgets::only_one;
+use doseer_core::path::PathWrap;
+use doseer_ui_ext::widgets::only_one;
 
 use iced::widget::{button, column, container, row, text, Row};
 use iced::{alignment, Alignment, Color, Command, Length};

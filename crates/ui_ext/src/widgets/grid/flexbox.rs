@@ -18,7 +18,7 @@ use super::{direction, Order};
 ///
 /// Even though this widget is called "FlexBox", it implements a jank home-grown version of the algorithm
 /// so don't expect it do exactly what flexbox does. It is just intended to be usable in the main layout
-/// of `m7` and a few smaller areas.
+/// of `doseer` and a few smaller areas.
 #[must_use]
 pub struct FlexBox<'a, Message, Renderer> {
     /// X-axis population direction.

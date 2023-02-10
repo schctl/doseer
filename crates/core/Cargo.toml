@@ -1,5 +1,5 @@
 [package]
-name = "m7_core"
+name = "doseer_core"
 version = "0.0.1"
 authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
 edition = "2021"
