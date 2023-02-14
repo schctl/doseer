@@ -1,8 +1,8 @@
 //! A sensible GUI file manager.
 
 use anyhow::Context;
-use iced::{Application, Settings};
 use doseer_core::config;
+use iced::{Application, Settings};
 
 mod gui;
 

@@ -1,0 +1,13 @@
+[package]
+name = "doseer_icon_loader"
+edition = "2021"
+version = "0.0.1"
+publish = false
+
+[dependencies]
+iced_native = "0.8"
+lazy_static = "1"
+mime_guess = "2"
+parking_lot = "0.12"
+
+doseer_core = { path = "../core" }

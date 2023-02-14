@@ -1,8 +1,11 @@
 //! A single item (file/folder/whatever) in a directory.
 
-use doseer_core::path::PathWrap;
+use std::path::Path;
 
-use iced::widget::{button, column, text};
+use doseer_core::path::PathWrap;
+use doseer_icon_loader::mime::ImageOrSvg;
+
+use iced::widget::{button, column, image, svg, text};
 use iced::{Background, Color};
 use sleet::ColorScheme;
 
@@ -15,8 +18,20 @@ pub enum Message {
     // TODO: Delete, Properties, Copy, Paste, etc
 }
 
+pub fn icon<'a, P: AsRef<Path>>(path: P) -> Element<'a, Message> {
+    let icon = doseer_icon_loader::mime::load(&path);
+
+    match icon {
+        Some(i) => match i.as_ref().clone() {
+            ImageOrSvg::Image(im) => image(im).into(),
+            ImageOrSvg::Svg(s) => svg(s).into(),
+        },
+        None => Icon::Directory.svg().into(),
+    }
+}
+
 pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
-    let icon = Icon::Directory.svg();
+    let icon = icon(&path);
 
     let text = text(path.display().to_string_lossy())
         .font(theme::fonts::Content::Regular)
