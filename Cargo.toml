@@ -43,6 +43,7 @@ lazy_static = "1"
 
 [features]
 debug = ["iced/debug"]
+trace = ["debug"]
 
 # Max OO ┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻
 [profile.release]

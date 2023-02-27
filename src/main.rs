@@ -5,6 +5,7 @@ use doseer_core::config;
 use iced::{Application, Settings};
 
 mod gui;
+mod log;
 
 mod tab;
 pub use tab::Tab;
@@ -31,30 +32,6 @@ pub use side_bar::SideBar;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-#[allow(unused)]
-fn setup_tracing() {
-    use tracing_subscriber::filter::{EnvFilter, LevelFilter};
-
-    let mut env_filter = EnvFilter::from_default_env()
-        // Default -> WARN
-        .add_directive("doseer=warn".parse().unwrap());
-
-    #[cfg(debug_assertions)]
-    {
-        // Debug mode -> INFO
-        env_filter = env_filter.add_directive("doseer=info".parse().unwrap());
-    }
-    #[cfg(feature = "debug")]
-    {
-        // Full debug -> DEBUG
-        env_filter = env_filter
-            .add_directive("doseer=debug".parse().unwrap())
-            .add_directive("iced=info".parse().unwrap());
-    }
-
-    tracing_subscriber::fmt().with_env_filter(env_filter).init();
-}
-
 fn run() -> anyhow::Result<()> {
     let config = config::read_config().context("failed to get configuration")?;
     gui::Gui::run(Settings::with_flags(config))?;
@@ -62,7 +39,7 @@ fn run() -> anyhow::Result<()> {
 }
 
 fn main() {
-    setup_tracing();
+    log::init_tracing();
 
     if let Err(e) = run() {
         tracing::error!("{}", e);
