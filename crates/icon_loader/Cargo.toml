@@ -5,7 +5,7 @@ version = "0.0.1"
 publish = false
 
 [dependencies]
-iced_native = "0.8"
+iced_native = "0.9"
 lazy_static = "1"
 mime_guess = "2"
 moka = "0.10"

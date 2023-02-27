@@ -193,10 +193,10 @@ where
         // Shrink the cross axis by `delta` units
         let shrink_cross_axis = match self.order {
             Order::Horizontal => |limits: layout::Limits, delta: f32| {
-                limits.max_height((limits.max().height - delta).max(0.0) as u32)
+                limits.max_height((limits.max().height - delta).max(0.0))
             },
             Order::Vertical => |limits: layout::Limits, delta: f32| {
-                limits.max_width((limits.max().width - delta).max(0.0) as u32)
+                limits.max_width((limits.max().width - delta).max(0.0))
             },
         };
 

@@ -136,7 +136,7 @@ impl Pane {
         Ok(Command::batch(commands))
     }
 
-    pub const TOP_BAR_HEIGHT: Length = Length::Units(50);
+    pub const TOP_BAR_HEIGHT: Length = Length::Fixed(50.0);
 
     /// Tab switcher and controls.
     fn tab_controls(&self) -> Element<Message> {
@@ -152,8 +152,8 @@ impl Pane {
             let folder_name = row!(
                 Icon::Directory
                     .svg()
-                    .width(Length::Units(22))
-                    .height(Length::Units(22)),
+                    .width(Length::Fixed(22.0))
+                    .height(Length::Fixed(22.0)),
                 text(tab.location().display().to_string_lossy())
                     .size(22)
                     .font(theme::fonts::UI::Regular),
@@ -168,8 +168,8 @@ impl Pane {
                 container(
                     Icon::Cross
                         .svg()
-                        .height(Length::Units(18))
-                        .width(Length::Units(18))
+                        .height(Length::Fixed(18.0))
+                        .width(Length::Fixed(18.0))
                         .style(
                             if *index == self.focused {
                                 theme::svg::Neutral::Bright1
@@ -181,14 +181,14 @@ impl Pane {
                 )
                 .align_x(alignment::Horizontal::Center)
                 .align_y(alignment::Vertical::Center)
-                .height(Length::Units(24))
-                .width(Length::Units(24)),
+                .height(Length::Fixed(24.0))
+                .width(Length::Fixed(24.0)),
             )
             .style(TabButtonStyle::Default.into())
             .on_press(Message::Remove(*index));
 
             // create tab as a button
-            let contents = row!(folder_name.width(Length::Units(186)), close_button);
+            let contents = row!(folder_name.width(Length::Fixed(186.0)), close_button);
 
             let tab = button(contents)
                 // focus tab when the button is pressed
@@ -212,14 +212,14 @@ impl Pane {
                 container(
                     Icon::Plus
                         .svg()
-                        .height(Length::Units(18))
-                        .width(Length::Units(18))
+                        .height(Length::Fixed(18.0))
+                        .width(Length::Fixed(18.0))
                         .style(theme::svg::Neutral::Bright1.into()),
                 )
                 .align_x(alignment::Horizontal::Center)
                 .align_y(alignment::Vertical::Center)
-                .height(Length::Units(24))
-                .width(Length::Units(24)),
+                .height(Length::Fixed(24.0))
+                .width(Length::Fixed(24.0)),
             )
             .style(TabButtonStyle::Default.into())
             .on_press(Message::New(None, true)),

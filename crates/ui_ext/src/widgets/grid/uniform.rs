@@ -25,7 +25,7 @@ pub struct Uniform<'a, Message, Renderer> {
     /// Height of the whole grid widget.
     height: Length,
     /// Cell dimensions.
-    cell: Size<f32>,
+    cell: Size,
 
     /// X-axis spacing.
     spacing_x: f32,
@@ -43,20 +43,14 @@ impl<'a, Message, Renderer> Uniform<'a, Message, Renderer> {
     ///
     /// The grid will be populated will elements in the same order as the given iterator.
     #[inline]
-    pub fn new(
-        contents: impl Iterator<Item = Element<'a, Message, Renderer>>,
-        cell: Size<u16>,
-    ) -> Self {
+    pub fn new(contents: impl Iterator<Item = Element<'a, Message, Renderer>>, cell: Size) -> Self {
         Self {
             pop_x: Default::default(),
             pop_y: Default::default(),
             order: Default::default(),
             width: Length::Fill,
             height: Length::Fill,
-            cell: Size {
-                width: cell.width as f32,
-                height: cell.height as f32,
-            },
+            cell,
             spacing_x: 0.0,
             spacing_y: 0.0,
             contents: contents.collect(),
@@ -404,7 +398,7 @@ where
 #[inline]
 pub fn uniform<'a, Message, Renderer>(
     contents: impl Iterator<Item = Element<'a, Message, Renderer>>,
-    cell: Size<u16>,
+    cell: Size,
 ) -> Uniform<'a, Message, Renderer> {
     Uniform::new(contents, cell)
 }

@@ -94,8 +94,8 @@ fn item_button(
         row!(
             Icon::Directory
                 .svg()
-                .width(Length::Units(22))
-                .height(Length::Units(22)),
+                .width(Length::Fixed(22.0))
+                .height(Length::Fixed(22.0)),
             text(path.display().to_string_lossy())
                 .size(22)
                 .font(theme::fonts::UI::Regular),
@@ -108,7 +108,7 @@ fn item_button(
     // focus tab when the button is pressed
     .on_press(pane::Message::Replace(path.clone()))
     .width(Length::Fill)
-    .height(Length::Units(38))
+    .height(Length::Fixed(38.0))
     .padding(Padding::from([4, 8]))
     .style(style);
 

@@ -7,5 +7,5 @@ license = "Apache-2.0"
 publish = false
 
 [dependencies]
-iced_native = "0.8"
-iced_lazy = "0.4"
+iced_native = "0.9"
+iced_lazy = "0.5"

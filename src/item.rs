@@ -18,14 +18,14 @@ lazy_static! {
 }
 
 /// Dimensions of an item button.
-pub const DIMENSIONS: Size<u16> = Size {
-    width: 128,
-    height: 140,
+pub const DIMENSIONS: Size = Size {
+    width: 128.0,
+    height: 140.0,
 };
 
-pub const ICON_DIMENSIONS: Size<u16> = Size {
-    width: 96,
-    height: 100,
+pub const ICON_DIMENSIONS: Size = Size {
+    width: 96.0,
+    height: 100.0,
 };
 
 #[derive(Debug, Clone)]
@@ -49,8 +49,8 @@ pub fn icon<'a, P: AsRef<Path>>(path: P) -> Element<'a, Message> {
 pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
     let icon = container(
         container(icon(&path))
-            .width(Length::Units(ICON_DIMENSIONS.width))
-            .height(Length::Units(ICON_DIMENSIONS.height)),
+            .width(Length::Fixed(ICON_DIMENSIONS.width))
+            .height(Length::Fixed(ICON_DIMENSIONS.height)),
     )
     .width(Length::Fill)
     .height(Length::Fill)
