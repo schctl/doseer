@@ -8,6 +8,9 @@ publish = false
 iced_native = "0.8"
 lazy_static = "1"
 mime_guess = "2"
-parking_lot = "0.12"
+moka = "0.10"
+rayon = "1"
+rust-ini = "0.18"
+tracing = "0.1"
 
 doseer_core = { path = "../core" }

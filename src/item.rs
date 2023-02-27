@@ -3,14 +3,30 @@
 use std::path::Path;
 
 use doseer_core::path::PathWrap;
-use doseer_icon_loader::mime::ImageOrSvg;
+use doseer_icon_loader::file::{ImageOrSvg, Loader};
 
-use iced::widget::{button, column, image, svg, text};
-use iced::{Background, Color};
+use iced::widget::{button, column, container, image, svg, text};
+use iced::{alignment, Background, Color, Length, Size};
+use lazy_static::lazy_static;
 use sleet::ColorScheme;
 
 use crate::gui::Element;
 use crate::{theme, Icon};
+
+lazy_static! {
+    static ref ICONS: Loader = Loader::new();
+}
+
+/// Dimensions of an item button.
+pub const DIMENSIONS: Size<u16> = Size {
+    width: 128,
+    height: 140,
+};
+
+pub const ICON_DIMENSIONS: Size<u16> = Size {
+    width: 96,
+    height: 100,
+};
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -19,19 +35,27 @@ pub enum Message {
 }
 
 pub fn icon<'a, P: AsRef<Path>>(path: P) -> Element<'a, Message> {
-    let icon = doseer_icon_loader::mime::load(&path);
+    let icon = ICONS.load(path.as_ref());
 
     match icon {
         Some(i) => match i.as_ref().clone() {
-            ImageOrSvg::Image(im) => image(im).into(),
-            ImageOrSvg::Svg(s) => svg(s).into(),
+            ImageOrSvg::Image(im) => image(im).width(Length::Fill).height(Length::Fill).into(),
+            ImageOrSvg::Svg(s) => svg(s).width(Length::Fill).height(Length::Fill).into(),
         },
         None => Icon::Directory.svg().into(),
     }
 }
 
 pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
-    let icon = icon(&path);
+    let icon = container(
+        container(icon(&path))
+            .width(Length::Units(ICON_DIMENSIONS.width))
+            .height(Length::Units(ICON_DIMENSIONS.height)),
+    )
+    .width(Length::Fill)
+    .height(Length::Fill)
+    .align_x(alignment::Horizontal::Center)
+    .align_y(alignment::Vertical::Center);
 
     let text = text(path.display().to_string_lossy())
         .font(theme::fonts::Content::Regular)

@@ -7,7 +7,7 @@ use doseer_core::path::PathWrap;
 use doseer_ui_ext::widgets::grid::{flexbox, uniform};
 
 use iced::widget::{container, scrollable};
-use iced::{Command, Length, Size};
+use iced::{Command, Length};
 
 use crate::gui::Element;
 use crate::item;
@@ -135,10 +135,7 @@ impl Tab {
                     .height(Length::Fill)
                     .into()
                 }),
-                Size {
-                    width: 128,
-                    height: 128,
-                },
+                item::DIMENSIONS,
             )
             .allow_more_spacing(true);
 

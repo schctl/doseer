@@ -37,6 +37,7 @@ sleet = { git = "https://github.com/schctl/sleet", branch = "rewrite-2", feature
 
 # Macros
 derive_more = "0.99"
+lazy_static = "1"
 
 # ---
 
