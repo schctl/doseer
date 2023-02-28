@@ -30,7 +30,8 @@ pub const ICON_DIMENSIONS: Size = Size {
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Click(PathWrap),
+    Select(PathWrap),
+    Deselect,
     // TODO: Delete, Properties, Copy, Paste, etc
 }
 
@@ -68,7 +69,7 @@ pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
     )
     .width(iced::Length::Fill)
     .height(iced::Length::Fill)
-    .on_press(Message::Click(path))
+    .on_press(Message::Select(path))
     .style(theme.into())
     .into()
 }

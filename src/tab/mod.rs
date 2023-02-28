@@ -92,12 +92,15 @@ impl Tab {
         match message {
             Message::Item(m) => {
                 match m {
-                    item::Message::Click(path) => {
+                    item::Message::Select(path) => {
                         if self.is_selected(&path) {
                             self.open(path)?;
                         } else {
                             self.selected = Some(path);
                         }
+                    }
+                    item::Message::Deselect => {
+                        self.selected = None;
                     }
                 }
 
@@ -137,7 +140,10 @@ impl Tab {
                 }),
                 item::DIMENSIONS,
             )
-            .allow_more_spacing(true);
+            .spacing_x(12)
+            .spacing_y(12)
+            .allow_more_spacing(true)
+            .on_empty_click(Message::Item(item::Message::Deselect));
 
             scrollable(container(grid).padding(8).width(iced::Length::Fill)).into()
         })

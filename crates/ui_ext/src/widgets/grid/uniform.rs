@@ -2,13 +2,27 @@
 
 pub use iced_lazy::responsive;
 use iced_native::layout::Limits;
-use iced_native::widget::{Operation, Tree};
+use iced_native::widget::{tree, Operation, Tree};
 use iced_native::{
-    event, layout, mouse, Clipboard, Element, Event, Length, Point, Rectangle, Shell, Size, Widget,
+    event, layout, mouse, touch, Clipboard, Element, Event, Length, Point, Rectangle, Shell, Size,
+    Widget,
 };
 use iced_native::{overlay, renderer};
 
 use super::{direction, Order};
+
+/// Local state of this grid.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct State {
+    empty_space_clicked: bool,
+}
+
+impl State {
+    /// Creates a new [`State`].
+    pub fn new() -> State {
+        State::default()
+    }
+}
 
 /// A linearly-populated grid with a fixed cell size.
 #[must_use]
@@ -34,6 +48,9 @@ pub struct Uniform<'a, Message, Renderer> {
     /// Allow spacing to be increased if possible.
     allow_more_spacing: bool,
 
+    /// A message to emit if empty space was clicked.
+    on_empty_click: Option<Message>,
+
     /// Contents of the grid.
     contents: Vec<Element<'a, Message, Renderer>>,
 }
@@ -53,8 +70,9 @@ impl<'a, Message, Renderer> Uniform<'a, Message, Renderer> {
             cell,
             spacing_x: 0.0,
             spacing_y: 0.0,
-            contents: contents.collect(),
             allow_more_spacing: false,
+            on_empty_click: None,
+            contents: contents.collect(),
         }
     }
 
@@ -117,10 +135,17 @@ impl<'a, Message, Renderer> Uniform<'a, Message, Renderer> {
         self.allow_more_spacing = allow;
         self
     }
+
+    /// Emit a message if empty space between cells was clicked.
+    pub fn on_empty_click(mut self, message: Message) -> Self {
+        self.on_empty_click = Some(message);
+        self
+    }
 }
 
 impl<'a, Renderer, Message> Widget<Message, Renderer> for Uniform<'a, Message, Renderer>
 where
+    Message: Clone,
     Renderer: renderer::Renderer,
 {
     fn width(&self) -> Length {
@@ -129,6 +154,10 @@ where
 
     fn height(&self) -> Length {
         self.height
+    }
+
+    fn state(&self) -> tree::State {
+        tree::State::new(State::new())
     }
 
     fn children(&self) -> Vec<Tree> {
@@ -274,22 +303,72 @@ where
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
     ) -> event::Status {
-        self.contents
-            .iter_mut()
-            .zip(&mut tree.children)
-            .zip(layout.children())
-            .map(|((child, state), layout)| {
-                child.as_widget_mut().on_event(
-                    state,
-                    event.clone(),
-                    layout,
-                    cursor_position,
-                    renderer,
-                    clipboard,
-                    shell,
-                )
-            })
-            .fold(event::Status::Ignored, event::Status::merge)
+        // Let contents handle event first
+        if event::Status::Captured
+            == self
+                .contents
+                .iter_mut()
+                .zip(&mut tree.children)
+                .zip(layout.children())
+                .map(|((child, state), layout)| {
+                    child.as_widget_mut().on_event(
+                        state,
+                        event.clone(),
+                        layout,
+                        cursor_position,
+                        renderer,
+                        clipboard,
+                        shell,
+                    )
+                })
+                .fold(event::Status::Ignored, event::Status::merge)
+        {
+            return event::Status::Captured;
+        }
+
+        match event {
+            // Handle empty space click
+            Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+            | Event::Touch(touch::Event::FingerPressed { .. }) => {
+                let bounds = layout.bounds();
+
+                println!("{:?},  {:?}", bounds, cursor_position);
+
+                if bounds.contains(cursor_position) {
+                    let state = tree.state.downcast_mut::<State>();
+
+                    let mut in_child = false;
+
+                    for child in layout.children() {
+                        if child.bounds().contains(cursor_position) {
+                            in_child = true;
+                            break;
+                        }
+                    }
+
+                    if !in_child {
+                        state.empty_space_clicked = true;
+                        return event::Status::Captured;
+                    }
+                }
+            }
+            // Handle mouse release in empty space
+            Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
+            | Event::Touch(touch::Event::FingerLifted { .. }) => {
+                let state = tree.state.downcast_mut::<State>();
+
+                if state.empty_space_clicked {
+                    if let Some(message) = self.on_empty_click.clone() {
+                        shell.publish(message.clone());
+                        state.empty_space_clicked = false;
+                    }
+                    return event::Status::Captured;
+                }
+            }
+            _ => {}
+        }
+
+        event::Status::Ignored
     }
 
     fn mouse_interaction(
@@ -329,7 +408,7 @@ where
 
 impl<'a, Message, Renderer> From<Uniform<'a, Message, Renderer>> for Element<'a, Message, Renderer>
 where
-    Message: 'a,
+    Message: 'a + Clone,
     Renderer: 'a + renderer::Renderer,
 {
     #[inline]
