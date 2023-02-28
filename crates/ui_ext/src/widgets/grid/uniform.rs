@@ -140,16 +140,18 @@ where
     }
 
     fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
+        let start = std::time::Instant::now();
+
         let limits = limits.width(self.width).height(self.height);
         let total_size = limits.max();
 
         // -- Initial calculations --
 
         // Calculate number of rows and columns
-        let rows = ((total_size.width + self.spacing_x) / (self.cell.width + self.spacing_x))
-            .floor() as u16;
-        let cols = ((total_size.height + self.spacing_y) / (self.cell.height + self.spacing_y))
-            .floor() as u16;
+        let cols = ((total_size.width + self.spacing_x) / (self.cell.width + self.spacing_x))
+            .floor() as usize;
+        let rows = ((total_size.height + self.spacing_y) / (self.cell.height + self.spacing_y))
+            .floor() as usize;
 
         // Calculate dynamic spacing if any
         let (mut spacing_x, mut spacing_y) = (self.spacing_x, self.spacing_y);
@@ -158,116 +160,63 @@ where
             match self.order {
                 // Allocate any extra space to more spacing
                 Order::Horizontal => {
-                    let remaining_space = (total_size.width) - (rows as f32 * self.cell.width);
-                    spacing_x = (remaining_space / ((rows - 1) as f32)).max(self.spacing_x);
+                    let remaining_space = (total_size.width) - (cols as f32 * self.cell.width);
+                    spacing_x = (remaining_space / ((cols - 1) as f32)).max(self.spacing_x);
                 }
                 Order::Vertical => {
-                    let remaining_space = (total_size.height) - (cols as f32 * self.cell.height);
-                    spacing_y = (remaining_space / ((cols - 1) as f32)).max(self.spacing_y);
+                    let remaining_space = (total_size.height) - (rows as f32 * self.cell.height);
+                    spacing_y = (remaining_space / ((rows - 1) as f32)).max(self.spacing_y);
                 }
             }
         }
 
-        // -- Accumulators --
+        // --- Layout cells ---
 
-        struct AxisData {
-            /// Spacing along this axis
-            spacing: f32,
-            /// Index multiplication factor
-            factor: i32,
-            /// Current row/column
-            /// - This is what should be tracked
-            index: u16,
-            /// Starting row/column
-            reset: u16,
-            /// Max row/column
-            limiter: u16,
-        }
-
-        impl AxisData {
-            pub fn increment(&mut self, other: &mut Self) -> bool {
-                let new_self = (self.index as i32 + self.factor) as u16;
-
-                // Extends the y-axis
-                if new_self >= self.limiter {
-                    // Extends the x-axis. Stop here.
-                    if other.index + 1 > other.limiter {
-                        return false;
-                    }
-
-                    self.index = self.reset;
-                    other.index = (other.index as i32 + other.factor) as u16;
-                } else {
-                    self.index = new_self;
-                }
-
-                true
-            }
-        }
-
-        let mut data_x = {
-            let (reset, limiter) = match self.pop_x {
-                direction::Horizontal::LeftToRight => (0, rows),
-                direction::Horizontal::RightToLeft => (rows, 0),
-            };
-            AxisData {
-                spacing: spacing_x,
-                factor: self.pop_x as i8 as i32,
-                index: reset,
-                reset,
-                limiter,
-            }
-        };
-        let mut data_y = {
-            let (reset, limiter) = match self.pop_y {
-                direction::Vertical::TopToBottom => (0, cols),
-                direction::Vertical::BottomToTop => (cols, 0),
-            };
-            AxisData {
-                spacing: spacing_y,
-                factor: self.pop_y as i8 as i32,
-                index: reset,
-                reset,
-                limiter,
-            }
-        };
-
-        // -- Calculate layout --
-
-        let mut children = Vec::with_capacity(self.contents.len());
-
-        for element in &self.contents {
-            let child_limits = Limits::new(Size::ZERO, self.cell);
-
-            // Layout child
-            let mut layout = element.as_widget().layout(renderer, &child_limits);
-
-            let point_x = data_x.index as f32 * (self.cell.width + data_x.spacing);
-            let point_y = data_y.index as f32 * (self.cell.height + data_y.spacing);
-
-            layout.move_to(Point::new(point_x, point_y));
-            children.push(layout);
-
-            // Increment accumulators
-            match self.order {
-                Order::Horizontal => data_x.increment(&mut data_y),
-                Order::Vertical => data_y.increment(&mut data_x),
-            };
-        }
-
-        // Shrink along cross axis
-        let size = match self.order {
-            Order::Horizontal => Size {
-                height: data_y.index as f32 * (self.cell.height + spacing_y) - spacing_y,
-                ..total_size
+        let indexes = |idx| match self.order {
+            Order::Horizontal => match self.pop_x {
+                direction::Horizontal::LeftToRight => (idx / cols, idx % cols),
+                direction::Horizontal::RightToLeft => (idx / cols, cols - (idx % cols)),
             },
-            Order::Vertical => Size {
-                width: data_x.index as f32 * (self.cell.width + spacing_x) - spacing_x,
-                ..total_size
+            Order::Vertical => match self.pop_y {
+                direction::Vertical::TopToBottom => (idx % rows, idx / rows),
+                direction::Vertical::BottomToTop => (rows - (idx % rows), idx / rows),
             },
         };
 
-        layout::Node::with_children(size, children)
+        let child_limits = Limits::new(Size::ZERO, self.cell);
+
+        let children = (0..self.contents.len())
+            .map(|idx| {
+                let (row_idx, col_idx) = (indexes)(idx);
+
+                let point = Point::new(
+                    col_idx as f32 * (self.cell.width + spacing_x),
+                    row_idx as f32 * (self.cell.height + spacing_y),
+                );
+
+                let mut child = self.contents[idx]
+                    .as_widget()
+                    .layout(renderer, &child_limits);
+                child.move_to(point);
+
+                child
+            })
+            .collect::<Vec<_>>();
+
+        // --- Calculate bounded size ---
+
+        let (last_row, last_col) = (indexes)(self.contents.len() - 1);
+
+        let size = Size {
+            width: last_col as f32 * (self.cell.width + spacing_x) + self.cell.width,
+            height: last_row as f32 * (self.cell.height + spacing_y) + self.cell.height,
+        };
+
+        let r = layout::Node::with_children(size, children);
+
+        println!("Uniform took: {}us", start.elapsed().as_micros());
+
+        r
     }
 
     // ˅ All of these are pretty much copied exactly from `Row`'s implementation ˅
