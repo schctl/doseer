@@ -59,61 +59,61 @@ impl<'a, Message, Renderer> Uniform<'a, Message, Renderer> {
     }
 
     /// Sets the horizontal population order of the grid.
-    pub fn pop_x(mut self, dir: direction::Horizontal) -> Self {
+    pub const fn pop_x(mut self, dir: direction::Horizontal) -> Self {
         self.pop_x = dir;
         self
     }
 
     /// Sets the vertical population order of the grid.
-    pub fn pop_y(mut self, dir: direction::Vertical) -> Self {
+    pub const fn pop_y(mut self, dir: direction::Vertical) -> Self {
         self.pop_y = dir;
         self
     }
 
     /// Sets the overall population order of the grid.
-    pub fn pop_order(mut self, order: Order) -> Self {
+    pub const fn pop_order(mut self, order: Order) -> Self {
         self.order = order;
         self
     }
 
     /// Sets the width of the grid.
-    pub fn width(mut self, width: Length) -> Self {
+    pub const fn width(mut self, width: Length) -> Self {
         self.width = width;
         self
     }
 
     /// Sets the height of the grid.
-    pub fn height(mut self, height: Length) -> Self {
+    pub const fn height(mut self, height: Length) -> Self {
         self.height = height;
         self
     }
 
     /// Sets the horizontal spacing _between_ the cells of the grid.
-    pub fn spacing_x(mut self, units: u16) -> Self {
+    pub const fn spacing_x(mut self, units: u16) -> Self {
         self.spacing_x = units as f32;
         self
     }
 
     /// Sets the vertical spacing _between_ the cells of the grid.
-    pub fn spacing_y(mut self, units: u16) -> Self {
+    pub const fn spacing_y(mut self, units: u16) -> Self {
         self.spacing_y = units as f32;
         self
     }
 
     /// Sets the width of each cell.
-    pub fn cell_width(mut self, units: u16) -> Self {
+    pub const fn cell_width(mut self, units: u16) -> Self {
         self.cell.width = units as f32;
         self
     }
 
     /// Sets the width of each cell.
-    pub fn cell_height(mut self, units: u16) -> Self {
+    pub const fn cell_height(mut self, units: u16) -> Self {
         self.cell.height = units as f32;
         self
     }
 
     /// Allow spacing on the main axis to be increased if possible.
-    pub fn allow_more_spacing(mut self, allow: bool) -> Self {
+    pub const fn allow_more_spacing(mut self, allow: bool) -> Self {
         self.allow_more_spacing = allow;
         self
     }
@@ -140,8 +140,6 @@ where
     }
 
     fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
-        let start = std::time::Instant::now();
-
         let limits = limits.width(self.width).height(self.height);
         let total_size = limits.max();
 
@@ -160,11 +158,12 @@ where
             match self.order {
                 // Allocate any extra space to more spacing
                 Order::Horizontal => {
-                    let remaining_space = (total_size.width) - (cols as f32 * self.cell.width);
+                    let remaining_space = (cols as f32).mul_add(-self.cell.width, total_size.width);
                     spacing_x = (remaining_space / ((cols - 1) as f32)).max(self.spacing_x);
                 }
                 Order::Vertical => {
-                    let remaining_space = (total_size.height) - (rows as f32 * self.cell.height);
+                    let remaining_space =
+                        (rows as f32).mul_add(-self.cell.height, total_size.height);
                     spacing_y = (remaining_space / ((rows - 1) as f32)).max(self.spacing_y);
                 }
             }
@@ -208,15 +207,11 @@ where
         let (last_row, last_col) = (indexes)(self.contents.len() - 1);
 
         let size = Size {
-            width: last_col as f32 * (self.cell.width + spacing_x) + self.cell.width,
-            height: last_row as f32 * (self.cell.height + spacing_y) + self.cell.height,
+            width: (last_col as f32).mul_add(self.cell.width + spacing_x, self.cell.width),
+            height: (last_row as f32).mul_add(self.cell.height + spacing_y, self.cell.height),
         };
 
-        let r = layout::Node::with_children(size, children);
-
-        println!("Uniform took: {}us", start.elapsed().as_micros());
-
-        r
+        layout::Node::with_children(size, children)
     }
 
     // ˅ All of these are pretty much copied exactly from `Row`'s implementation ˅

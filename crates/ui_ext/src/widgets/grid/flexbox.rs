@@ -61,43 +61,43 @@ impl<'a, Message, Renderer> FlexBox<'a, Message, Renderer> {
     }
 
     /// Sets the horizontal population order of the grid.
-    pub fn pop_x(mut self, dir: direction::Horizontal) -> Self {
+    pub const fn pop_x(mut self, dir: direction::Horizontal) -> Self {
         self.pop_x = dir;
         self
     }
 
     /// Sets the vertical population order of the grid.
-    pub fn pop_y(mut self, dir: direction::Vertical) -> Self {
+    pub const fn pop_y(mut self, dir: direction::Vertical) -> Self {
         self.pop_y = dir;
         self
     }
 
     /// Sets the overall population order of the grid.
-    pub fn pop_order(mut self, order: Order) -> Self {
+    pub const fn pop_order(mut self, order: Order) -> Self {
         self.order = order;
         self
     }
 
     /// Sets the width of the grid.
-    pub fn width(mut self, width: Length) -> Self {
+    pub const fn width(mut self, width: Length) -> Self {
         self.width = width;
         self
     }
 
     /// Sets the height of the grid.
-    pub fn height(mut self, height: Length) -> Self {
+    pub const fn height(mut self, height: Length) -> Self {
         self.height = height;
         self
     }
 
     /// Sets the horizontal spacing _between_ the cells of the grid.
-    pub fn spacing_x(mut self, units: u16) -> Self {
+    pub const fn spacing_x(mut self, units: u16) -> Self {
         self.spacing_x = units as f32;
         self
     }
 
     /// Sets the vertical spacing _between_ the cells of the grid.
-    pub fn spacing_y(mut self, units: u16) -> Self {
+    pub const fn spacing_y(mut self, units: u16) -> Self {
         self.spacing_y = units as f32;
         self
     }

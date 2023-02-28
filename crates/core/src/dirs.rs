@@ -93,11 +93,8 @@ impl Contents {
         buf.clear();
 
         // TODO: collect_into when its stabilized
-        for entry in path.read_dir()?.filter_map(|e| match e {
-            Ok(entry) => Some(entry.path()),
-            _ => None,
-        }) {
-            buf.push(PathWrap::from_into_path(entry));
+        for entry in path.read_dir()?.filter_map(Result::ok) {
+            buf.push(PathWrap::from_into_path(entry.path()));
         }
 
         Ok(())

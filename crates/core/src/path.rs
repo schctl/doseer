@@ -34,7 +34,9 @@ impl PathWrap {
         Self(path.into())
     }
 
-    /// A *good-enough* "display" name for this path.
+    /// Display the name of this path (ie last component).
+    ///
+    /// **NOTE:** not the same as [`Path::display`] which displays the whole path.
     #[must_use]
     #[inline]
     pub fn display(&self) -> &OsStr {
