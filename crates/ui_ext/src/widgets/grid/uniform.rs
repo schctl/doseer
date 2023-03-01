@@ -1,5 +1,7 @@
 //! Grid with a flexbox layout.
 
+use std::cmp::min;
+
 pub use iced_lazy::responsive;
 use iced_native::layout::Limits;
 use iced_native::widget::{tree, Operation, Tree};
@@ -65,8 +67,8 @@ impl<'a, Message, Renderer> Uniform<'a, Message, Renderer> {
             pop_x: Default::default(),
             pop_y: Default::default(),
             order: Default::default(),
-            width: Length::Fill,
-            height: Length::Fill,
+            width: Length::Shrink,
+            height: Length::Shrink,
             cell,
             spacing_x: 0.0,
             spacing_y: 0.0,
@@ -175,9 +177,9 @@ where
         // -- Initial calculations --
 
         // Calculate number of rows and columns
-        let cols = ((total_size.width + self.spacing_x) / (self.cell.width + self.spacing_x))
+        let max_cols = ((total_size.width + self.spacing_x) / (self.cell.width + self.spacing_x))
             .floor() as usize;
-        let rows = ((total_size.height + self.spacing_y) / (self.cell.height + self.spacing_y))
+        let max_rows = ((total_size.height + self.spacing_y) / (self.cell.height + self.spacing_y))
             .floor() as usize;
 
         // Calculate dynamic spacing if any
@@ -187,13 +189,14 @@ where
             match self.order {
                 // Allocate any extra space to more spacing
                 Order::Horizontal => {
-                    let remaining_space = (cols as f32).mul_add(-self.cell.width, total_size.width);
-                    spacing_x = (remaining_space / ((cols - 1) as f32)).max(self.spacing_x);
+                    let remaining_space =
+                        (max_cols as f32).mul_add(-self.cell.width, total_size.width);
+                    spacing_x = (remaining_space / ((max_cols - 1) as f32)).max(self.spacing_x);
                 }
                 Order::Vertical => {
                     let remaining_space =
-                        (rows as f32).mul_add(-self.cell.height, total_size.height);
-                    spacing_y = (remaining_space / ((rows - 1) as f32)).max(self.spacing_y);
+                        (max_rows as f32).mul_add(-self.cell.height, total_size.height);
+                    spacing_y = (remaining_space / ((max_rows - 1) as f32)).max(self.spacing_y);
                 }
             }
         }
@@ -202,12 +205,12 @@ where
 
         let indexes = |idx| match self.order {
             Order::Horizontal => match self.pop_x {
-                direction::Horizontal::LeftToRight => (idx / cols, idx % cols),
-                direction::Horizontal::RightToLeft => (idx / cols, cols - (idx % cols)),
+                direction::Horizontal::LeftToRight => (idx / max_cols, idx % max_cols),
+                direction::Horizontal::RightToLeft => (idx / max_cols, max_cols - (idx % max_cols)),
             },
             Order::Vertical => match self.pop_y {
-                direction::Vertical::TopToBottom => (idx % rows, idx / rows),
-                direction::Vertical::BottomToTop => (rows - (idx % rows), idx / rows),
+                direction::Vertical::TopToBottom => (idx % max_rows, idx / max_rows),
+                direction::Vertical::BottomToTop => (max_rows - (idx % max_rows), idx / max_rows),
             },
         };
 
@@ -233,7 +236,30 @@ where
 
         // --- Calculate bounded size ---
 
-        let (last_row, last_col) = (indexes)(self.contents.len() - 1);
+        let (last_row, last_col) = match self.order {
+            Order::Horizontal => {
+                let row = children.len() / max_cols;
+
+                // hug contents
+                let col = match self.pop_x {
+                    direction::Horizontal::LeftToRight => min(self.contents.len(), max_cols),
+                    direction::Horizontal::RightToLeft => max_cols,
+                } - 1;
+
+                (row, col)
+            }
+            Order::Vertical => {
+                let col = children.len() / max_rows;
+
+                // hug contents
+                let row = match self.pop_y {
+                    direction::Vertical::TopToBottom => min(self.contents.len(), max_rows),
+                    direction::Vertical::BottomToTop => max_rows,
+                } - 1;
+
+                (row, col)
+            }
+        };
 
         let size = Size {
             width: (last_col as f32).mul_add(self.cell.width + spacing_x, self.cell.width),
