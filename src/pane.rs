@@ -54,7 +54,6 @@ impl Pane {
 
     /// Replace the currently focused tab with another tab.
     pub fn replace_focused(&mut self, tab: Tab) {
-        self.tabs.remove(&self.focused);
         self.tabs.insert(self.focused, tab);
     }
 
