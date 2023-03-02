@@ -1,7 +1,7 @@
 //! A sensible GUI file manager.
 
 use anyhow::Context;
-use doseer_core::config;
+use doseer_core::config::Config;
 use iced::{Application, Settings};
 
 mod gui;
@@ -33,7 +33,7 @@ pub use side_bar::SideBar;
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 fn run() -> anyhow::Result<()> {
-    let config = config::read_config().context("failed to get configuration")?;
+    let config = Config::load().context("failed to get configuration")?;
     gui::Gui::run(Settings::with_flags(config))?;
     Ok(())
 }
@@ -42,7 +42,7 @@ fn main() {
     log::init_tracing();
 
     if let Err(e) = run() {
-        tracing::error!("{}", e);
+        tracing::error!("{:?}", e);
         std::process::exit(-1);
     }
 }

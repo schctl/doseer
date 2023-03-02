@@ -611,6 +611,7 @@ dependencies = [
  "doseer_icon_loader",
  "doseer_ui_ext",
  "iced",
+ "iced_lazy",
  "indexmap",
  "lazy_static",
  "mimalloc",

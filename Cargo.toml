@@ -35,6 +35,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 iced = { version = "0.8", features = ["image", "svg", "tokio"] }
 sleet = { git = "https://github.com/schctl/sleet", branch = "rewrite-2", features = ["all"] }
 
+iced_lazy = "0.5"
+
 # Macros
 derive_more = "0.99"
 lazy_static = "1"

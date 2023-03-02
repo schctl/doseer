@@ -4,10 +4,12 @@ use doseer_core::config::Config;
 use doseer_ui_ext::components::panelled::{self, unpanelled};
 
 use iced::{executor, Application, Command, Length};
+use iced_lazy::component;
 use sleet::stylesheet::Wrap;
 
 use crate::pane::{self, Pane};
-use crate::{tab, SideBar, Tab, Theme};
+use crate::side_bar::side_bar;
+use crate::{tab, Tab, Theme};
 
 /// Shorthand for an iced element generic over some message.
 pub type Renderer = iced::Renderer<Wrap<Theme>>;
@@ -24,10 +26,10 @@ pub enum Message {
 pub struct Gui {
     /// Sidebar split tracker.
     split_state: panelled::State,
-    /// Sidebar state.
-    side_bar: SideBar,
     /// Pane state.
     pane: Pane,
+    /// Configuration.
+    config: Config,
 }
 
 impl Application for Gui {
@@ -36,11 +38,10 @@ impl Application for Gui {
     type Message = Message;
     type Theme = Wrap<Theme>;
 
-    fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
+    fn new(config: Self::Flags) -> (Self, Command<Self::Message>) {
         let mut commands = vec![];
 
         let pane = Pane::new(Tab::new().unwrap());
-        let side_bar = SideBar::new(flags.side_bar);
 
         let mut split_state = panelled::State::new();
         split_state.resize(0.2);
@@ -52,7 +53,7 @@ impl Application for Gui {
         (
             Self {
                 split_state,
-                side_bar,
+                config,
                 pane,
             },
             Command::batch(commands),
@@ -90,10 +91,9 @@ impl Application for Gui {
         unpanelled(|| self.pane.view().map(Message::Pane))
             // add side panel
             .panel(&self.split_state, |_| {
-                self.side_bar
-                    .view(|path| self.pane.focused().location().as_ref() == path)
-                    .unwrap()
-                    .map(Message::Pane)
+                component(side_bar(&self.config, |path| {
+                    self.pane.focused().location().as_ref() == path
+                }))
             })
             // configure inner pane_grid
             .into_inner()
