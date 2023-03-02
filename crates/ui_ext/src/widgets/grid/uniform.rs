@@ -21,8 +21,8 @@ pub struct State {
 
 impl State {
     /// Creates a new [`State`].
-    pub fn new() -> State {
-        State::default()
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 
@@ -358,8 +358,6 @@ where
             | Event::Touch(touch::Event::FingerPressed { .. }) => {
                 let bounds = layout.bounds();
 
-                println!("{:?},  {:?}", bounds, cursor_position);
-
                 if bounds.contains(cursor_position) {
                     let state = tree.state.downcast_mut::<State>();
 
@@ -385,7 +383,7 @@ where
 
                 if state.empty_space_clicked {
                     if let Some(message) = self.on_empty_click.clone() {
-                        shell.publish(message.clone());
+                        shell.publish(message);
                         state.empty_space_clicked = false;
                     }
                     return event::Status::Captured;

@@ -2,8 +2,9 @@
 
 use doseer_core::path::PathWrap;
 use doseer_ui_ext::widgets::only_one;
+use doseer_ui_ext::widgets::reorderable;
 
-use iced::widget::{button, column, container, row, text, Row};
+use iced::widget::{button, column, container, row, text};
 use iced::{alignment, Alignment, Color, Command, Length};
 use indexmap::IndexMap;
 use sleet::ColorScheme;
@@ -86,6 +87,8 @@ pub enum Message {
     New(Option<PathWrap>, bool),
     /// Replace the focused tab with a new tab.
     Replace(PathWrap),
+    /// Reorder two tab positions.
+    Reorder(usize, usize),
 }
 
 impl Message {
@@ -131,6 +134,9 @@ impl Pane {
                 }
             }
             Message::Replace(tab) => self.replace_focused(Tab::new_with(tab)?),
+            Message::Reorder(a, b) => {
+                self.tabs.swap_indices(a, b);
+            }
         }
 
         Ok(Command::batch(commands))
@@ -140,13 +146,13 @@ impl Pane {
 
     /// Tab switcher and controls.
     fn tab_controls(&self) -> Element<Message> {
-        let mut tab_list = Row::new()
+        let mut tab_list = reorderable::Row::new()
             .align_items(Alignment::Center)
-            .padding(6)
             .spacing(4)
-            .height(Self::TOP_BAR_HEIGHT);
+            .height(Length::Fill)
+            .on_reorder(|a, b| Message::Reorder(a, b));
 
-        // --- Generate tab buttons ---
+        // --- Tab Buttons ---
 
         for (index, tab) in &self.tabs {
             let folder_name = row!(
@@ -205,9 +211,15 @@ impl Pane {
             tab_list = tab_list.push(tab);
         }
 
-        // --- New tab button ---
+        // --- Construct Top Bar ---
 
-        tab_list = tab_list.push(
+        let mut elements = row!(tab_list)
+            .align_items(Alignment::Center)
+            .padding(6)
+            .spacing(4)
+            .height(Self::TOP_BAR_HEIGHT);
+
+        elements = elements.push(
             button(
                 container(
                     Icon::Plus
@@ -225,7 +237,7 @@ impl Pane {
             .on_press(Message::New(None, true)),
         );
 
-        tab_list.into()
+        elements.into()
     }
 
     pub fn view(&self) -> Element<Message> {
