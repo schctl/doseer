@@ -1,47 +1,48 @@
-//! Modified [`Row`](iced_native::widget::Row) implementation that allows for re-ordering content.
+//! Modified [`Column`](iced_native::widget::Column) implementation that allows for re-ordering content.
 
 use iced_native::event::{self, Event};
-use iced_native::layout::{self, Layout};
 use iced_native::widget::{tree, Operation, Tree};
 use iced_native::{
-    mouse, overlay, renderer, touch, Alignment, Clipboard, Element, Length, Padding, Pixels, Point,
-    Rectangle, Shell, Vector, Widget,
+    layout, mouse, overlay, renderer, touch, Alignment, Clipboard, Element, Layout, Length,
+    Padding, Pixels, Point, Rectangle, Shell, Vector, Widget,
 };
 
 use super::{Axis, Drag, State};
 
-/// A container that distributes its contents horizontally.
-pub struct Row<'a, Message, Renderer> {
+/// A container that distributes its contents vertically.
+pub struct Column<'a, Message, Renderer> {
     spacing: f32,
     padding: Padding,
     width: Length,
     height: Length,
+    max_width: f32,
     align_items: Alignment,
     children: Vec<Element<'a, Message, Renderer>>,
     /// Message producer for when elements are reordered.
     on_reorder: Option<Box<dyn Fn(usize, usize) -> Message + 'a>>,
 }
 
-impl<'a, Message, Renderer> Row<'a, Message, Renderer> {
-    /// Creates an empty [`Row`].
+impl<'a, Message, Renderer> Column<'a, Message, Renderer> {
+    /// Creates an empty [`Column`].
     pub fn new() -> Self {
         Self::with_children(Vec::new())
     }
 
-    /// Creates a [`Row`] with the given elements.
+    /// Creates a [`Column`] with the given elements.
     pub fn with_children(children: Vec<Element<'a, Message, Renderer>>) -> Self {
-        Row {
+        Column {
             spacing: 0.0,
             padding: Padding::ZERO,
             width: Length::Shrink,
             height: Length::Shrink,
+            max_width: f32::INFINITY,
             align_items: Alignment::Start,
             children,
             on_reorder: None,
         }
     }
 
-    /// Sets the horizontal spacing _between_ elements.
+    /// Sets the vertical spacing _between_ elements.
     ///
     /// Custom margins per element do not exist in iced. You should use this
     /// method instead! While less flexible, it helps you keep spacing between
@@ -51,31 +52,37 @@ impl<'a, Message, Renderer> Row<'a, Message, Renderer> {
         self
     }
 
-    /// Sets the [`Padding`] of the [`Row`].
+    /// Sets the [`Padding`] of the [`Column`].
     pub fn padding<P: Into<Padding>>(mut self, padding: P) -> Self {
         self.padding = padding.into();
         self
     }
 
-    /// Sets the width of the [`Row`].
+    /// Sets the width of the [`Column`].
     pub fn width(mut self, width: impl Into<Length>) -> Self {
         self.width = width.into();
         self
     }
 
-    /// Sets the height of the [`Row`].
+    /// Sets the height of the [`Column`].
     pub fn height(mut self, height: impl Into<Length>) -> Self {
         self.height = height.into();
         self
     }
 
-    /// Sets the vertical alignment of the contents of the [`Row`] .
+    /// Sets the maximum width of the [`Column`].
+    pub fn max_width(mut self, max_width: impl Into<Pixels>) -> Self {
+        self.max_width = max_width.into().0;
+        self
+    }
+
+    /// Sets the horizontal alignment of the contents of the [`Column`] .
     pub fn align_items(mut self, align: Alignment) -> Self {
         self.align_items = align;
         self
     }
 
-    /// Adds an [`Element`] to the [`Row`].
+    /// Adds an element to the [`Column`].
     pub fn push(mut self, child: impl Into<Element<'a, Message, Renderer>>) -> Self {
         self.children.push(child.into());
         self
@@ -88,13 +95,13 @@ impl<'a, Message, Renderer> Row<'a, Message, Renderer> {
     }
 }
 
-impl<'a, Message, Renderer> Default for Row<'a, Message, Renderer> {
+impl<'a, Message, Renderer> Default for Column<'a, Message, Renderer> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<'a, Message, Renderer> Widget<Message, Renderer> for Row<'a, Message, Renderer>
+impl<'a, Message, Renderer> Widget<Message, Renderer> for Column<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer,
 {
@@ -111,7 +118,7 @@ where
     }
 
     fn diff(&self, tree: &mut Tree) {
-        tree.diff_children(&self.children)
+        tree.diff_children(&self.children);
     }
 
     fn width(&self) -> Length {
@@ -123,10 +130,13 @@ where
     }
 
     fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
-        let limits = limits.width(self.width).height(self.height);
+        let limits = limits
+            .max_width(self.max_width)
+            .width(self.width)
+            .height(self.height);
 
         layout::flex::resolve(
-            layout::flex::Axis::Horizontal,
+            layout::flex::Axis::Vertical,
             renderer,
             &limits,
             self.padding,
@@ -205,7 +215,7 @@ where
                     drag_state.currently_at = position;
 
                     // The important part: handle reordering
-                    let with = super::should_swap(layout.children(), drag_state, |p| p.x, Axis::x);
+                    let with = super::should_swap(layout.children(), drag_state, |p| p.y, Axis::y);
 
                     // Perform swap
                     if let Some((with, shift)) = with {
@@ -213,7 +223,7 @@ where
                             let message = (on_reorder)(drag_state.index, with);
                             shell.publish(message);
                         }
-                        drag_state.begun_at.x += shift;
+                        drag_state.begun_at.y += shift;
                         drag_state.index = with;
                     }
 
@@ -298,7 +308,7 @@ where
             _ => &Drag::ZERO,
         };
 
-        for (n, ((child, tree), child_layout)) in self
+        for (n, ((child, state), child_layout)) in self
             .children
             .iter()
             .zip(&tree.children)
@@ -314,8 +324,8 @@ where
                 let mut delta = drag_state.currently_at - drag_state.begun_at;
                 super::bind_delta(&mut delta, child_bounds, bounds);
 
-                // Snap to x-axis
-                let translation = Vector { x: delta.x, y: 0.0 };
+                // Snap to y-axis
+                let translation = Vector { x: 0.0, y: delta.y };
 
                 // Draw on next layer
                 renderer.with_translation(translation, |renderer| {
@@ -336,7 +346,7 @@ where
             }
 
             child.as_widget().draw(
-                tree,
+                state,
                 renderer,
                 theme,
                 style,
@@ -357,12 +367,12 @@ where
     }
 }
 
-impl<'a, Message, Renderer> From<Row<'a, Message, Renderer>> for Element<'a, Message, Renderer>
+impl<'a, Message, Renderer> From<Column<'a, Message, Renderer>> for Element<'a, Message, Renderer>
 where
     Message: 'a,
     Renderer: renderer::Renderer + 'a,
 {
-    fn from(row: Row<'a, Message, Renderer>) -> Self {
-        Self::new(row)
+    fn from(column: Column<'a, Message, Renderer>) -> Self {
+        Self::new(column)
     }
 }
