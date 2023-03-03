@@ -77,8 +77,6 @@ pub mod container {
         /// A transparent box.
         #[default]
         Default,
-        /// A box drawn on the base color.
-        OnBase,
         /// A box with a less emphasized color.
         Weak,
     }
@@ -91,10 +89,6 @@ pub mod container {
 
             match style {
                 Container::Default => Default::default(),
-                Container::OnBase => iced::widget::container::Appearance {
-                    background: palette.primary.base.on_base.into(),
-                    ..Default::default()
-                },
                 Container::Weak => iced::widget::container::Appearance {
                     background: palette.primary.weak.base.into(),
                     ..Default::default()

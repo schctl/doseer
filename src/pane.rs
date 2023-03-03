@@ -90,16 +90,6 @@ pub enum Message {
     Reorder(usize, usize),
 }
 
-impl Message {
-    /// Create a new tab message for the given tab.
-    ///
-    /// Shorthand constructor so usage is less noisy.
-    #[inline]
-    pub const fn with_tab(index: usize, message: tab::Message) -> Self {
-        Self::Tab(message, Some(index))
-    }
-}
-
 impl Pane {
     pub fn update(&mut self, message: Message) -> anyhow::Result<Command<Message>> {
         let mut commands = vec![];
@@ -149,7 +139,7 @@ impl Pane {
             .align_items(Alignment::Center)
             .spacing(4)
             .height(Length::Fill)
-            .on_reorder(|a, b| Message::Reorder(a, b));
+            .on_reorder(Message::Reorder);
 
         // --- Tab Buttons ---
 
