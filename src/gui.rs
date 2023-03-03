@@ -1,6 +1,5 @@
 //! The GUI app.
 
-use doseer_core::config::Config;
 use doseer_ui_ext::components::panelled::{self, unpanelled};
 
 use iced::{executor, Application, Command, Length};
@@ -9,7 +8,7 @@ use sleet::stylesheet::Wrap;
 
 use crate::pane::{self, Pane};
 use crate::side_bar::side_bar;
-use crate::{tab, Tab, Theme};
+use crate::{tab, Config, Tab, Theme};
 
 /// Shorthand for an iced element generic over some message.
 pub type Renderer = iced::Renderer<Wrap<Theme>>;

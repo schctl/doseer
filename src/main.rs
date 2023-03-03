@@ -1,28 +1,22 @@
 //! A sensible GUI file manager.
 
 use anyhow::Context;
-use doseer_core::config::Config;
 use iced::{Application, Settings};
 
+mod config;
 mod gui;
-mod log;
-
-mod tab;
-pub use tab::Tab;
-
-mod pane;
-pub use pane::Pane;
-
-mod theme;
-pub use theme::Theme;
-
 mod icons;
-pub use icons::Icon;
-
 mod item;
-
+mod log;
+mod pane;
 mod side_bar;
-pub use side_bar::SideBar;
+mod tab;
+mod theme;
+
+use config::Config;
+use icons::Icon;
+use tab::Tab;
+use theme::Theme;
 
 /// Use mimalloc as our global allocator.
 ///

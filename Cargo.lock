@@ -617,8 +617,10 @@ dependencies = [
  "mimalloc",
  "notify",
  "open",
+ "serde",
  "sleet",
  "tokio",
+ "toml",
  "tracing",
  "tracing-subscriber",
 ]
@@ -632,7 +634,6 @@ dependencies = [
  "lazy_static",
  "paste",
  "serde",
- "toml",
 ]
 
 [[package]]

@@ -41,6 +41,10 @@ iced_lazy = "0.5"
 derive_more = "0.99"
 lazy_static = "1"
 
+# Serialization
+toml = "0.5"
+serde = { version = "1", features = ["derive"] }
+
 # ---
 
 [features]

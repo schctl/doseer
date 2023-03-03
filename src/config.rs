@@ -3,9 +3,9 @@
 use std::fs::File;
 use std::io::{Read, Write};
 
-use crate::dirs;
-use crate::path::PathWrap;
-use crate::{resource, resource_make};
+use doseer_core::dirs;
+use doseer_core::path::PathWrap;
+use doseer_core::{resource, resource_make};
 
 /// Global application configuration.
 #[derive(Debug, serde::Deserialize, serde::Serialize)]

@@ -2,7 +2,6 @@
 
 use std::path::Path;
 
-use doseer_core::config::Config;
 use doseer_core::path::PathWrap;
 
 use iced::widget::{button, column, container, row, text, Column};
@@ -11,7 +10,7 @@ use iced_lazy::Component;
 use sleet::ColorScheme;
 
 use crate::gui::{self, Element};
-use crate::{pane, theme, Icon};
+use crate::{pane, theme, Config, Icon};
 
 /// Sidebar events.
 #[derive(Debug, Clone)]

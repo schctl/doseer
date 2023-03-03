@@ -18,7 +18,7 @@ lazy_static::lazy_static! {
 macro_rules! resource {
     ($ty:ty, $($path:literal),*) => {
         {
-            let mut res = paste::paste! {
+            let mut res = $crate::__paste::paste! {
                 $crate::dirs::PROJECT.[<$ty _dir>]().to_owned()
             };
 
