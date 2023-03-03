@@ -308,7 +308,7 @@ where
             _ => &Drag::ZERO,
         };
 
-        for (n, ((child, state), child_layout)) in self
+        for (n, ((child, child_state), child_layout)) in self
             .children
             .iter()
             .zip(&tree.children)
@@ -331,7 +331,7 @@ where
                 renderer.with_translation(translation, |renderer| {
                     renderer.with_layer(child_layout.bounds(), |renderer| {
                         child.as_widget().draw(
-                            tree,
+                            child_state,
                             renderer,
                             theme,
                             style,
@@ -346,7 +346,7 @@ where
             }
 
             child.as_widget().draw(
-                state,
+                child_state,
                 renderer,
                 theme,
                 style,
