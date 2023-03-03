@@ -59,3 +59,16 @@ impl Config {
         Ok(())
     }
 }
+
+#[derive(Debug, Clone)]
+pub enum Message {
+    ReorderBookmarks(usize, usize),
+}
+
+impl Config {
+    pub fn process_message(&mut self, message: Message) {
+        match message {
+            Message::ReorderBookmarks(a, b) => self.bookmarks.swap(a, b),
+        }
+    }
+}

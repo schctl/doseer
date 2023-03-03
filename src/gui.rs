@@ -8,7 +8,7 @@ use sleet::stylesheet::Wrap;
 
 use crate::pane::{self, Pane};
 use crate::side_bar::side_bar;
-use crate::{tab, Config, Tab, Theme};
+use crate::{config, tab, Config, Tab, Theme};
 
 /// Shorthand for an iced element generic over some message.
 pub type Renderer = iced::Renderer<Wrap<Theme>>;
@@ -17,6 +17,7 @@ pub type Element<'a, T> = iced::Element<'a, T, Renderer>;
 #[derive(Debug, Clone)]
 pub enum Message {
     Pane(pane::Message),
+    Config(config::Message),
     ResizeMain(panelled::pane_grid::ResizeEvent),
     IcedEvent(iced::Event),
 }
@@ -76,6 +77,7 @@ impl Application for Gui {
                 commands.push(pane_cmd.map(Message::Pane));
             }
             Message::ResizeMain(m) => self.split_state.resize(m.ratio),
+            Message::Config(m) => self.config.process_message(m),
             _ => {}
         }
 
@@ -100,5 +102,14 @@ impl Application for Gui {
             .height(Length::Fill)
             .on_resize(16, Message::ResizeMain)
             .into()
+    }
+}
+
+impl Drop for Gui {
+    fn drop(&mut self) {
+        match self.config.flush() {
+            Ok(_) => tracing::info!("flushed configuration file"),
+            Err(e) => tracing::error!("failed to write configuration: {:?}", e),
+        }
     }
 }

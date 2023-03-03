@@ -3,20 +3,23 @@
 use std::path::Path;
 
 use doseer_core::path::PathWrap;
+use doseer_ui_ext::widgets::reorderable;
 
-use iced::widget::{button, column, container, row, text, Column};
+use iced::widget::{button, column, container, row, text};
 use iced::{alignment, Alignment, Color, Length, Padding};
 use iced_lazy::Component;
 use sleet::ColorScheme;
 
 use crate::gui::{self, Element};
-use crate::{pane, theme, Config, Icon};
+use crate::{config, pane, theme, Config, Icon};
 
 /// Sidebar events.
 #[derive(Debug, Clone)]
 pub enum Message {
     /// An event that indicates a message needs to be sent to the current pane.
     Pane(pane::Message),
+    /// Config modification request.
+    Config(config::Message),
 }
 
 /// Creates the sidebar component.
@@ -60,6 +63,7 @@ where
     fn update(&mut self, _: &mut Self::State, event: Self::Event) -> Option<gui::Message> {
         match event {
             Message::Pane(p) => Some(gui::Message::Pane(p)),
+            Message::Config(c) => Some(gui::Message::Config(c)),
         }
     }
 
@@ -70,10 +74,11 @@ where
             .padding([0, 8]);
 
         // Bookmarks column
-        let mut col = Column::new()
+        let mut col = reorderable::Column::new()
             .align_items(Alignment::Center)
             .padding(8)
-            .spacing(4);
+            .spacing(4)
+            .on_reorder(|a, b| Message::Config(config::Message::ReorderBookmarks(a, b)));
 
         for path in &self.config.bookmarks {
             col = col.push(item_button(path, &self.is_open));
