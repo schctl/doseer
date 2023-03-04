@@ -3,7 +3,6 @@
 use std::cmp::min;
 
 pub use iced_lazy::responsive;
-use iced_native::layout::Limits;
 use iced_native::widget::{tree, Operation, Tree};
 use iced_native::{
     event, layout, mouse, touch, Clipboard, Element, Event, Length, Point, Rectangle, Shell, Size,
@@ -145,6 +144,26 @@ impl<'a, Message, Renderer> Uniform<'a, Message, Renderer> {
     }
 }
 
+impl<'a, Message, Renderer> Uniform<'a, Message, Renderer>
+where
+    Message: Clone,
+    Renderer: renderer::Renderer,
+{
+    /// Return the layout for an empty grid.
+    fn empty_layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
+        // Treat as zero size
+        let child_limits = limits.max_width(0.0).max_height(0.0);
+
+        layout::Node::with_children(
+            Size::ZERO,
+            self.contents
+                .iter()
+                .map(|c| c.as_widget().layout(renderer, &child_limits))
+                .collect(),
+        )
+    }
+}
+
 impl<'a, Renderer, Message> Widget<Message, Renderer> for Uniform<'a, Message, Renderer>
 where
     Message: Clone,
@@ -182,6 +201,11 @@ where
         let max_rows = ((total_size.height + self.spacing_y) / (self.cell.height + self.spacing_y))
             .floor() as usize;
 
+        // Empty grid
+        if self.contents.is_empty() || max_cols == 0 || max_rows == 0 {
+            return self.empty_layout(renderer, &limits);
+        }
+
         // Calculate dynamic spacing if any
         let (mut spacing_x, mut spacing_y) = (self.spacing_x, self.spacing_y);
 
@@ -189,14 +213,18 @@ where
             match self.order {
                 // Allocate any extra space to more spacing
                 Order::Horizontal => {
-                    let remaining_space =
-                        (max_cols as f32).mul_add(-self.cell.width, total_size.width);
-                    spacing_x = (remaining_space / ((max_cols - 1) as f32)).max(self.spacing_x);
+                    if max_cols > 1 {
+                        let remaining_space =
+                            (max_cols as f32).mul_add(-self.cell.width, total_size.width);
+                        spacing_x = (remaining_space / ((max_cols - 1) as f32)).max(self.spacing_x);
+                    }
                 }
                 Order::Vertical => {
-                    let remaining_space =
-                        (max_rows as f32).mul_add(-self.cell.height, total_size.height);
-                    spacing_y = (remaining_space / ((max_rows - 1) as f32)).max(self.spacing_y);
+                    if max_rows > 1 {
+                        let remaining_space =
+                            (max_rows as f32).mul_add(-self.cell.height, total_size.height);
+                        spacing_y = (remaining_space / ((max_rows - 1) as f32)).max(self.spacing_y);
+                    }
                 }
             }
         }
@@ -214,7 +242,9 @@ where
             },
         };
 
-        let child_limits = Limits::new(Size::ZERO, self.cell);
+        let child_limits = limits
+            .max_width(self.cell.width)
+            .max_height(self.cell.height);
 
         let children = (0..self.contents.len())
             .map(|idx| {
