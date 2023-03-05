@@ -6,9 +6,9 @@ use iced::{executor, Application, Command, Length};
 use iced_lazy::component;
 use sleet::stylesheet::Wrap;
 
-use crate::pane::{self, Pane};
+use crate::content::{self, Content};
 use crate::side_bar::side_bar;
-use crate::{config, tab, Config, Tab, Theme};
+use crate::{config, tab, Config, Theme};
 
 /// Shorthand for an iced element generic over some message.
 pub type Renderer = iced::Renderer<Wrap<Theme>>;
@@ -16,7 +16,7 @@ pub type Element<'a, T> = iced::Element<'a, T, Renderer>;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Pane(pane::Message),
+    Content(content::Message),
     Config(config::Message),
     ResizeMain(panelled::pane_grid::ResizeEvent),
     IcedEvent(iced::Event),
@@ -26,8 +26,8 @@ pub enum Message {
 pub struct Gui {
     /// Sidebar split tracker.
     split_state: panelled::State,
-    /// Pane state.
-    pane: Pane,
+    /// Main content.
+    content: Content,
     /// Configuration.
     config: Config,
 }
@@ -41,20 +41,20 @@ impl Application for Gui {
     fn new(config: Self::Flags) -> (Self, Command<Self::Message>) {
         let mut commands = vec![];
 
-        let pane = Pane::new(Tab::new().unwrap());
+        let pane = Content::new();
 
         let mut split_state = panelled::State::new();
         split_state.resize(0.2);
 
         // :/
         let tab_init_cmd = tab::watcher::command(pane.focused().location());
-        commands.push(tab_init_cmd.map(|m| Message::Pane(pane::Message::Tab(m, None))));
+        commands.push(tab_init_cmd.map(|m| Message::Content(content::Message::Tab(m, None))));
 
         (
             Self {
                 split_state,
                 config,
-                pane,
+                content: pane,
             },
             Command::batch(commands),
         )
@@ -72,9 +72,9 @@ impl Application for Gui {
         let mut commands = vec![];
 
         match message {
-            Message::Pane(m) => {
-                let pane_cmd = self.pane.update(m).unwrap();
-                commands.push(pane_cmd.map(Message::Pane));
+            Message::Content(m) => {
+                let pane_cmd = self.content.update(m).unwrap();
+                commands.push(pane_cmd.map(Message::Content));
             }
             Message::ResizeMain(m) => self.split_state.resize(m.ratio),
             Message::Config(m) => self.config.process_message(m),
@@ -89,11 +89,11 @@ impl Application for Gui {
     }
 
     fn view(&self) -> Element<Self::Message> {
-        unpanelled(|| self.pane.view().map(Message::Pane))
+        unpanelled(|| self.content.view().map(Message::Content))
             // add side panel
             .panel(&self.split_state, |_| {
                 component(side_bar(&self.config, |path| {
-                    self.pane.focused().location().as_ref() == path
+                    self.content.focused().location().as_ref() == path
                 }))
             })
             // configure inner pane_grid

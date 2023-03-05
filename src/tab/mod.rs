@@ -2,150 +2,118 @@
 
 use std::path::Path;
 
-use doseer_core::dirs;
 use doseer_core::path::PathWrap;
-use doseer_ui_ext::widgets::grid::{flexbox, uniform};
 
-use iced::widget::{container, scrollable};
-use iced::{Command, Length};
+use iced::widget::pane_grid;
+use iced::Command;
+use iced_lazy::{component, Component};
 
-use crate::gui::Element;
-use crate::item;
+use crate::gui::{self, Element};
 
+use self::content::content;
+
+pub mod content;
 pub mod watcher;
 
-/// A single tab displays a single open location.
-#[derive(Debug)]
-pub struct Tab {
-    /// Contents of the current location.
-    contents: dirs::Contents,
-    /// The currently selected item.
-    selected: Option<PathWrap>,
+/// Create tab widget from given state.
+#[inline]
+pub const fn tab(state: &State) -> Tab {
+    Tab::new(state)
 }
 
-impl Tab {
-    /// Open a new tab with the user's home directory.
-    #[inline]
-    pub fn new() -> anyhow::Result<Self> {
-        Self::new_with(dirs::BASE.home_dir())
-    }
-
-    /// Open a new tab with a specified location.
-    #[inline]
-    pub fn new_with<P: AsRef<Path>>(path: P) -> anyhow::Result<Self> {
-        Ok(Self {
-            contents: dirs::Contents::new(path)?,
-            selected: None,
-        })
-    }
-
-    /// Get the location this tab points to.
-    #[inline]
-    pub fn location(&self) -> &PathWrap {
-        self.contents.location()
-    }
-
-    /// Change this tab to a new location.
-    pub fn update_location<P: AsRef<Path>>(&mut self, new: P) -> anyhow::Result<()> {
-        self.contents = dirs::Contents::new(new)?;
-        Ok(())
-    }
-}
-
-// Widget stuff
-
-/// Internal tab message.
+/// External messages.
 #[derive(Debug, Clone)]
 pub enum Message {
-    Item(item::Message),
-    UpdateContents,
-    UpdateFail,
+    /// Open this location in the current pane.
+    Open(PathWrap),
+    /// Update the contents of the current pane.
+    Update,
+    /// Failed to watch location.
+    WatchFail,
 }
 
-impl Tab {
-    fn is_selected<P: AsRef<Path>>(&self, path: P) -> bool {
-        if let Some(selected) = &self.selected {
-            if selected.as_ref() == path.as_ref() {
-                return true;
-            }
-        }
+/// Externally managed state.
+#[derive(Debug)]
+pub struct State {
+    /// Pane grid managed state.
+    pane_grid: pane_grid::State<content::State>,
+    /// Focused pane.
+    focused: pane_grid::Pane,
+}
 
-        false
+impl State {
+    /// Default tab state.
+    #[inline]
+    pub fn new() -> anyhow::Result<Self> {
+        let (pane_grid, focused) = pane_grid::State::new(content::State::new()?);
+
+        Ok(Self { pane_grid, focused })
     }
 
-    /// Open a path.
-    fn open<P: AsRef<Path>>(&mut self, path: P) -> anyhow::Result<()> {
-        let path = path.as_ref();
+    /// New tab state with specified location for the first pane.
+    #[inline]
+    pub fn new_with<P: AsRef<Path>>(path: P) -> anyhow::Result<Self> {
+        let (pane_grid, focused) = pane_grid::State::new(content::State::new_with(path)?);
 
+        Ok(Self { pane_grid, focused })
+    }
+
+    /// Open a location in the current pane.
+    pub fn open(&mut self, path: &PathWrap) -> anyhow::Result<Command<Message>> {
         if path.is_dir() {
-            self.update_location(path)?;
-        } else {
-            open::that(path)?;
+            self.pane_grid
+                .get_mut(&self.focused)
+                .unwrap()
+                .update_location(&path)?;
+            return Ok(watcher::command(&path));
         }
 
-        Ok(())
+        open::that(path.as_ref())?;
+        Ok(Command::none())
+    }
+
+    /// Get the location of the current pane.
+    #[inline]
+    pub fn location(&self) -> &PathWrap {
+        self.pane_grid.get(&self.focused).unwrap().location()
     }
 }
 
-impl Tab {
-    pub fn update(&mut self, message: Message) -> anyhow::Result<Command<Message>> {
-        match message {
-            Message::Item(m) => {
-                match m {
-                    item::Message::Select(path) => {
-                        if self.is_selected(&path) {
-                            self.open(path)?;
-                        } else {
-                            self.selected = Some(path);
-                        }
-                    }
-                    item::Message::Deselect => {
-                        self.selected = None;
-                    }
-                }
+/// Internal messages.
+#[derive(Debug)]
+pub enum Event {
+    /// Open this location in the current pane.
+    Open(PathWrap),
+}
 
-                Ok(Command::none())
-            }
-            Message::UpdateContents => {
-                self.contents.update_contents()?;
-                Ok(watcher::command(self.location()))
-            }
+/// Tab component.
+pub struct Tab<'app> {
+    state: &'app State,
+}
 
-            // Register fail and stop trying
-            Message::UpdateFail => {
-                tracing::error!("failed to update tab contents");
-                Ok(Command::none())
-            }
+impl<'app> Tab<'app> {
+    /// Create tab widget with given state.
+    #[inline]
+    pub const fn new(state: &'app State) -> Self {
+        Self { state }
+    }
+}
+
+impl<'app> Component<Message, gui::Renderer> for Tab<'app> {
+    type State = ();
+    type Event = Event;
+
+    fn update(&mut self, _: &mut Self::State, event: Self::Event) -> Option<Message> {
+        // TODO: handle pane grid events
+        match event {
+            Event::Open(o) => Some(Message::Open(o)),
         }
     }
 
-    pub fn view(&self) -> Element<Message> {
-        flexbox::responsive(|_| {
-            let grid = uniform(
-                self.contents.contents().iter().map(|path| {
-                    container(
-                        item::view(
-                            path.clone(),
-                            if self.is_selected(path) {
-                                item::Style::Selected
-                            } else {
-                                item::Style::Default
-                            },
-                        )
-                        .map(Message::Item),
-                    )
-                    .width(Length::Fill)
-                    .height(Length::Fill)
-                    .into()
-                }),
-                item::DIMENSIONS,
-            )
-            .spacing_x(12)
-            .spacing_y(12)
-            .allow_more_spacing(true)
-            .on_empty_click(Message::Item(item::Message::Deselect));
-
-            scrollable(container(grid).padding(8).width(iced::Length::Fill)).into()
+    fn view(&self, _: &Self::State) -> Element<'_, Self::Event> {
+        // TODO: top toolkit
+        pane_grid::PaneGrid::new(&self.state.pane_grid, |_, content_state, _| {
+            pane_grid::Content::new(component(content(content_state)))
         })
         .into()
     }

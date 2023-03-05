@@ -1,4 +1,4 @@
-//! Pane view.
+//! Main content area.
 
 use doseer_core::path::PathWrap;
 use doseer_ui_ext::widgets::only_one;
@@ -6,32 +6,34 @@ use doseer_ui_ext::widgets::reorderable;
 
 use iced::widget::{button, column, container, row, text};
 use iced::{alignment, Alignment, Color, Command, Length};
+use iced_lazy::component;
 use indexmap::IndexMap;
 use sleet::ColorScheme;
 
 use crate::gui::Element;
+use crate::tab::tab;
 use crate::{tab, theme, Icon, Tab, Theme};
 
-/// A collection of tabs.
+/// Main content. Essentially just manages tabs.
 #[derive(Debug)]
-pub struct Pane {
+pub struct Content {
     /// Tabs held by this pane.
-    tabs: IndexMap<usize, Tab>,
+    tabs: IndexMap<usize, tab::State>,
     /// Currently open tab.
     focused: usize,
 }
 
-impl Pane {
-    pub fn new(tab: Tab) -> Self {
+impl Content {
+    pub fn new() -> Self {
         let mut tabs = IndexMap::new();
-        tabs.insert(0, tab);
+        tabs.insert(0, tab::State::new().expect("failed to create tab"));
 
         Self { tabs, focused: 0 }
     }
 
     /// Add a new tab to this pane.
     #[inline]
-    pub fn add_tab(&mut self, tab: Tab) -> usize {
+    pub fn add_tab(&mut self, tab: tab::State) -> usize {
         let index = self.tabs.last().unwrap().0 + 1;
         self.tabs.insert(index, tab);
         index
@@ -53,7 +55,7 @@ impl Pane {
     }
 
     /// Replace the currently focused tab with another tab.
-    pub fn replace_focused(&mut self, tab: Tab) {
+    pub fn replace_focused(&mut self, tab: tab::State) {
         self.tabs.insert(self.focused, tab);
     }
 
@@ -69,7 +71,7 @@ impl Pane {
 
     /// Get currently focused tab.
     #[inline]
-    pub fn focused(&self) -> &Tab {
+    pub fn focused(&self) -> &tab::State {
         self.tabs.get(&self.focused).unwrap()
     }
 }
@@ -90,39 +92,42 @@ pub enum Message {
     Reorder(usize, usize),
 }
 
-impl Pane {
+impl Content {
     pub fn update(&mut self, message: Message) -> anyhow::Result<Command<Message>> {
         let mut commands = vec![];
 
         match message {
-            Message::Tab(m, index) => {
-                let tab_cmd = self
-                    .tabs
-                    .get_mut(&index.unwrap_or(self.focused))
-                    .unwrap()
-                    .update(m)?;
+            Message::Tab(m, id) => match m {
+                tab::Message::Open(p) => {
+                    let watcher = self
+                        .tabs
+                        .get_mut(&id.unwrap_or(self.focused))
+                        .unwrap()
+                        .open(&p)?;
 
-                commands.push(tab_cmd.map(move |m| Message::Tab(m, index)));
+                    commands.push(watcher.map(move |m| Message::Tab(m, id)));
+                }
+                _ => {}
+            },
+            Message::Focus(id) => {
+                self.focus(id);
             }
-            Message::Focus(index) => {
-                self.focus(index);
-            }
-            Message::Remove(index) => {
-                self.remove_tab(index);
+            Message::Remove(id) => {
+                self.remove_tab(id);
             }
             Message::New(path, focus) => {
                 let tab = match path {
-                    Some(t) => Tab::new_with(t)?,
-                    None => Tab::new()?,
+                    Some(t) => tab::State::new_with(t)?,
+                    None => tab::State::new()?,
                 };
 
-                let index = self.add_tab(tab);
+                let id = self.add_tab(tab);
 
                 if focus {
-                    self.focus(index);
+                    self.focus(id);
                 }
             }
-            Message::Replace(tab) => self.replace_focused(Tab::new_with(tab)?),
+            Message::Replace(tab) => self.replace_focused(tab::State::new_with(tab)?),
             Message::Reorder(a, b) => {
                 self.tabs.swap_indices(a, b);
             }
@@ -237,7 +242,7 @@ impl Pane {
         let contents = only_one(
             self.tabs
                 .values()
-                .map(|t| t.view().map(move |m| Message::Tab(m, None))),
+                .map(|t| component(tab(t)).map(move |m| Message::Tab(m, None))),
         )
         // We need to get the _index_ of the focused tab
         .focus(self.tabs.keys().position(|k| *k == self.focused).unwrap());
@@ -247,7 +252,7 @@ impl Pane {
     }
 }
 
-/// Tab button theme.
+/// Tab selector button theme.
 #[derive(Debug, Clone, Default)]
 pub enum TabButtonStyle {
     #[default]

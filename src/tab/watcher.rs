@@ -31,11 +31,11 @@ fn handle_notif(result: notify::Result<Event>) -> Option<Message> {
     match result {
         Ok(event) => match event.kind {
             EventKind::Create(_) | EventKind::Remove(_) | EventKind::Modify(_) => {
-                Some(Message::UpdateContents)
+                Some(Message::Update)
             }
             _ => None,
         },
-        _ => Some(Message::UpdateFail),
+        _ => Some(Message::WatchFail),
     }
 }
 
@@ -43,7 +43,7 @@ fn handle_notif(result: notify::Result<Event>) -> Option<Message> {
 pub async fn watch(path: PathWrap) -> Message {
     if let Ok((mut watcher, mut receiver)) = create_watcher() {
         if watcher.watch(&path, RecursiveMode::NonRecursive).is_err() {
-            return Message::UpdateFail;
+            return Message::WatchFail;
         }
 
         loop {
@@ -53,7 +53,7 @@ pub async fn watch(path: PathWrap) -> Message {
         }
     }
 
-    Message::UpdateFail
+    Message::WatchFail
 }
 
 pub fn command(path: &PathWrap) -> Command<Message> {

@@ -11,13 +11,13 @@ use iced_lazy::Component;
 use sleet::ColorScheme;
 
 use crate::gui::{self, Element};
-use crate::{config, pane, theme, Config, Icon};
+use crate::{config, content, theme, Config, Icon};
 
 /// Sidebar events.
 #[derive(Debug, Clone)]
 pub enum Message {
     /// An event that indicates a message needs to be sent to the current pane.
-    Pane(pane::Message),
+    Content(content::Message),
     /// Config modification request.
     Config(config::Message),
 }
@@ -62,14 +62,14 @@ where
 
     fn update(&mut self, _: &mut Self::State, event: Self::Event) -> Option<gui::Message> {
         match event {
-            Message::Pane(p) => Some(gui::Message::Pane(p)),
+            Message::Content(p) => Some(gui::Message::Content(p)),
             Message::Config(c) => Some(gui::Message::Config(c)),
         }
     }
 
     fn view(&self, _: &Self::State) -> Element<'_, Self::Event> {
         let title = container(text("Files").font(theme::fonts::UI::Black).size(28))
-            .height(pane::Pane::TOP_BAR_HEIGHT)
+            .height(content::Content::TOP_BAR_HEIGHT)
             .align_y(alignment::Vertical::Center)
             .padding([0, 8]);
 
@@ -111,7 +111,7 @@ fn item_button(path: &PathWrap, is_open: impl Fn(&Path) -> bool) -> Element<Mess
         .height(Length::Fill),
     )
     // focus tab when the button is pressed
-    .on_press(Message::Pane(pane::Message::Replace(path.clone())))
+    .on_press(Message::Content(content::Message::Replace(path.clone())))
     .width(Length::Fill)
     .height(Length::Fixed(38.0))
     .padding(Padding::from([4, 8]))

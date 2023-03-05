@@ -4,7 +4,7 @@ use derive_more::{Deref, From};
 use sleet::stylesheet;
 use sleet::ColorScheme;
 
-use crate::{item, pane, side_bar};
+use crate::{content, item, side_bar};
 
 #[derive(Debug, Clone, Default, From, Deref)]
 pub struct Theme(pub sleet::Theme);
@@ -23,7 +23,7 @@ pub mod button {
     pub enum Button {
         #[default]
         Default,
-        Tab(pane::TabButtonStyle),
+        Tab(content::TabButtonStyle),
         SideBar(side_bar::ButtonStyle),
         Item(item::Style),
     }

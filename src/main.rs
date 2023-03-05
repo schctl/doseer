@@ -4,11 +4,11 @@ use anyhow::Context;
 use iced::{Application, Settings};
 
 mod config;
+mod content;
 mod gui;
 mod icons;
 mod item;
 mod log;
-mod pane;
 mod side_bar;
 mod tab;
 mod theme;
