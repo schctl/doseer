@@ -1,8 +1,10 @@
 [package]
 name = "doseer_icon_loader"
-edition = "2021"
-version = "0.0.1"
-publish = false
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+publish = { workspace = true }
 
 [dependencies]
 iced_native = "0.9"

@@ -3,20 +3,33 @@ members = [
     "crates/*",
 ]
 
-[package]
-name = "doseer"
+[workspace.dependencies]
+doseer_core = { path = "crates/core" }
+doseer_ui_ext = { path = "crates/ui_ext" }
+doseer_icon_loader = { path = "crates/icon_loader" }
+
+iced_colorschemes = { path = "crates/colorschemes" }
+iced_fonts_ext = { path = "crates/fonts" }
+
+[workspace.package]
 edition = "2021"
-version = "0.0.1"
+version = "0.1.0"
 authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
 license = "Apache-2.0"
 publish = false
 
 # ---
 
+[package]
+name = "doseer"
+edition = { workspace = true }
+version = { workspace = true }
+authors = { workspace = true }
+license = { workspace = true }
+publish = { workspace = true }
+
 [dependencies]
-doseer_core = { path = "crates/core" }
-doseer_ui_ext = { path = "crates/ui_ext" }
-doseer_icon_loader = { path = "crates/icon_loader" }
+doseer_core = { workspace = true }
 
 anyhow = "1"
 indexmap = "1"
@@ -25,16 +38,19 @@ mimalloc = "0.1"
 tokio = { version = "1", features = ["sync"] }
 
 # File system stuff
-notify = { version = "5.0.0", default-features = false, features = ["macos_kqueue"] }
+notify = { version = "5", default-features = false, features = ["macos_kqueue"] }
 
 # Logging
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # GUI
+doseer_ui_ext = { workspace = true }
+doseer_icon_loader = { workspace = true }
+
 iced = { version = "0.8", features = ["image", "svg", "tokio"] }
-iced_colorschemes = { path = "crates/colorschemes", features = ["dev-default"]  }
-iced_fonts_ext = { path = "crates/fonts"  }
+iced_colorschemes = { workspace = true, features = ["dev-default"]  }
+iced_fonts_ext = { workspace = true  }
 iced_lazy = "0.5"
 
 # Macros
@@ -45,11 +61,11 @@ lazy_static = "1"
 toml = "0.5"
 serde = { version = "1", features = ["derive"] }
 
-# ---
-
 [features]
 debug = ["iced/debug"]
 trace = ["debug"]
+
+# ---
 
 # Max OO ┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻
 [profile.release]
