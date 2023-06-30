@@ -6,9 +6,9 @@ use doseer_ui_ext::widgets::reorderable;
 
 use iced::widget::{button, column, container, row, text};
 use iced::{alignment, Alignment, Color, Command, Length};
+use iced_colorschemes::WithColorScheme;
 use iced_lazy::component;
 use indexmap::IndexMap;
-use sleet::ColorScheme;
 
 use crate::gui::Element;
 use crate::tab::tab;

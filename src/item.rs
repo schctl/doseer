@@ -7,8 +7,8 @@ use doseer_icon_loader::file::{ImageOrSvg, Loader};
 
 use iced::widget::{button, column, container, image, svg, text};
 use iced::{alignment, Background, Color, Length, Size};
+use iced_colorschemes::WithColorScheme;
 use lazy_static::lazy_static;
-use sleet::ColorScheme;
 
 use crate::gui::Element;
 use crate::{theme, Icon};

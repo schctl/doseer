@@ -3,8 +3,8 @@
 use doseer_ui_ext::components::panelled::{self, unpanelled};
 
 use iced::{executor, Application, Command, Length};
+use iced_colorschemes::default::Wrap;
 use iced_lazy::component;
-use sleet::stylesheet::Wrap;
 
 use crate::content::{self, Content};
 use crate::side_bar::side_bar;
@@ -82,10 +82,6 @@ impl Application for Gui {
         }
 
         Command::batch(commands)
-    }
-
-    fn theme(&self) -> Self::Theme {
-        Wrap(sleet::Theme::Catppuccin(sleet::colorscheme::catppuccin::Variant::Mocha).into())
     }
 
     fn view(&self) -> Element<Self::Message> {

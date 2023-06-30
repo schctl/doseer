@@ -1,0 +1,18 @@
+[package]
+name = "iced_colorschemes"
+version = "0.1.0"
+authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+enum_dispatch = "0.3"
+iced_core = "0.8"
+iced_style = "0.7"
+paste = "1"
+
+derive_more = "0.99"
+serde = { version = "1", features = ["derive"], optional = true }
+
+[features]
+dev-default = []

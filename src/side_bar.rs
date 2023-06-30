@@ -7,8 +7,8 @@ use doseer_ui_ext::widgets::reorderable;
 
 use iced::widget::{button, column, container, row, text};
 use iced::{alignment, Alignment, Color, Length, Padding};
+use iced_colorschemes::WithColorScheme;
 use iced_lazy::Component;
-use sleet::ColorScheme;
 
 use crate::gui::{self, Element};
 use crate::{config, content, theme, Config, Icon};

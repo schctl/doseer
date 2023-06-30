@@ -1,0 +1,10 @@
+[package]
+name = "iced_fonts_ext"
+version = "0.1.0"
+authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+sleet_font_macro = { path = "./font_macro" }

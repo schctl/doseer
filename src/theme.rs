@@ -1,18 +1,36 @@
 //! Global theme.
 
 use derive_more::{Deref, From};
-use sleet::stylesheet;
-use sleet::ColorScheme;
+use iced_colorschemes::default;
+use iced_colorschemes::{ColorScheme, WithColorScheme};
 
 use crate::{content, item, side_bar};
 
-#[derive(Debug, Clone, Default, From, Deref)]
-pub struct Theme(pub sleet::Theme);
+#[derive(Debug, Clone, From, Deref)]
+pub struct Theme(ColorScheme);
 
-impl stylesheet::application::DevAuto for Theme {}
-impl stylesheet::pane_grid::DevAuto for Theme {}
-impl stylesheet::rule::DevAuto for Theme {}
-impl stylesheet::scrollable::DevAuto for Theme {}
+impl Default for Theme {
+    fn default() -> Self {
+        Self(ColorScheme::Catppuccin(
+            iced_colorschemes::colorschemes::catppuccin::Variant::Mocha,
+        ))
+    }
+}
+
+impl WithColorScheme for Theme {
+    fn palette(&self) -> &iced_colorschemes::ColorPalette {
+        self.0.palette()
+    }
+
+    fn brightness(&self) -> iced_colorschemes::Brightness {
+        self.0.brightness()
+    }
+}
+
+impl default::application::DevAuto for Theme {}
+impl default::pane_grid::DevAuto for Theme {}
+impl default::rule::DevAuto for Theme {}
+impl default::scrollable::DevAuto for Theme {}
 
 pub mod button {
     use super::*;
@@ -28,7 +46,7 @@ pub mod button {
         Item(item::Style),
     }
 
-    impl stylesheet::button::StyleSheet for Theme {
+    impl default::button::StyleSheet for Theme {
         type Style = Button;
 
         fn active(&self, style: &Self::Style) -> button::Appearance {
@@ -36,7 +54,7 @@ pub mod button {
                 Self::Style::Tab(t) => t.active(self),
                 Self::Style::SideBar(t) => t.active(self),
                 Self::Style::Item(t) => t.active(self),
-                _ => <sleet::Theme as stylesheet::button::StyleSheet>::active(
+                _ => <ColorScheme as default::button::StyleSheet>::active(
                     &self.0,
                     &Default::default(),
                 ),
@@ -48,7 +66,7 @@ pub mod button {
                 Self::Style::Tab(t) => t.hovered(self),
                 Self::Style::SideBar(t) => t.hovered(self),
                 Self::Style::Item(t) => t.hovered(self),
-                _ => <sleet::Theme as stylesheet::button::StyleSheet>::hovered(
+                _ => <ColorScheme as default::button::StyleSheet>::hovered(
                     &self.0,
                     &Default::default(),
                 ),
@@ -60,7 +78,7 @@ pub mod button {
                 Self::Style::Tab(t) => t.pressed(self),
                 Self::Style::SideBar(t) => t.pressed(self),
                 Self::Style::Item(t) => t.pressed(self),
-                _ => <sleet::Theme as stylesheet::button::StyleSheet>::pressed(
+                _ => <ColorScheme as default::button::StyleSheet>::pressed(
                     &self.0,
                     &Default::default(),
                 ),
@@ -81,7 +99,7 @@ pub mod container {
         Weak,
     }
 
-    impl stylesheet::container::StyleSheet for Theme {
+    impl default::container::StyleSheet for Theme {
         type Style = Container;
 
         fn appearance(&self, style: &Self::Style) -> iced::widget::container::Appearance {
@@ -118,7 +136,7 @@ pub mod svg {
         Neutral(Neutral),
     }
 
-    impl stylesheet::svg::StyleSheet for Theme {
+    impl default::svg::StyleSheet for Theme {
         type Style = Svg;
 
         fn appearance(&self, style: &Self::Style) -> iced::widget::svg::Appearance {
@@ -146,7 +164,7 @@ pub mod text {
         Default,
     }
 
-    impl stylesheet::text::StyleSheet for Theme {
+    impl default::text::StyleSheet for Theme {
         type Style = Text;
 
         fn appearance(&self, style: Self::Style) -> iced::widget::text::Appearance {
@@ -162,7 +180,7 @@ pub mod text {
 }
 
 pub mod fonts {
-    use sleet::fonts::font;
+    use iced_fonts_ext::font;
 
     /// More neutral font for primary contents.
     #[font(family = "Roboto")]
