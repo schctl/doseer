@@ -8,7 +8,7 @@ publish = { workspace = true }
 
 [dependencies]
 anyhow = "1"
-directories = "4"
+directories = "5"
 serde = { version = "1", features = ["derive"] }
 
 # Macros

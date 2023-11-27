@@ -10,14 +10,14 @@ publish = { workspace = true }
 iced_native = "0.9"
 lazy_static = "1"
 mime_guess = "2"
-moka = "0.10"
+moka = { version = "0.12", features = ["sync"] }
 rayon = "1"
 tracing = "0.1"
 
 doseer_core = { path = "../core" }
 
 [target.'cfg(linux)'.dependencies]
-rust-ini = "0.18"
+rust-ini = "0.20"
 
 [target.'cfg(windows)'.dependencies.windows]
 version = "0.52"
