@@ -16,7 +16,7 @@ tracing = "0.1"
 
 doseer_core = { path = "../core" }
 
-[target.'cfg(linux)'.dependencies]
+[target.'cfg(target_os = "linux")'.dependencies]
 rust-ini = "0.20"
 
 [target.'cfg(windows)'.dependencies.windows]
