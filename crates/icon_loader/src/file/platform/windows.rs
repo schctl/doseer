@@ -48,7 +48,7 @@ impl Loader {
 
     fn load_winicon(&self, path: &Path) -> Option<Icon> {
         let path_c = U16CString::from_os_str(path).ok()?;
-        
+
         let image = hicon::convert_to_image(get_icon(&path_c))?;
 
         Some(Arc::new(ImageOrSvg::Image(

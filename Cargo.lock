@@ -631,12 +631,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "derive_more",
+ "doseer_colorschemes",
  "doseer_core",
+ "doseer_fonts",
  "doseer_icon_loader",
  "doseer_ui_ext",
  "iced 0.8.0",
- "iced_colorschemes",
- "iced_fonts_ext",
  "iced_lazy",
  "indexmap 1.9.3",
  "lazy_static",
@@ -651,6 +651,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "doseer_colorschemes"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "enum_dispatch",
+ "iced_core 0.8.1",
+ "iced_style 0.7.0",
+ "paste",
+ "serde",
+]
+
+[[package]]
 name = "doseer_core"
 version = "0.1.0"
 dependencies = [
@@ -659,6 +671,13 @@ dependencies = [
  "lazy_static",
  "paste",
  "serde",
+]
+
+[[package]]
+name = "doseer_fonts"
+version = "0.1.0"
+dependencies = [
+ "sleet_font_macro",
 ]
 
 [[package]]
@@ -1316,18 +1335,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "iced_colorschemes"
-version = "0.1.0"
-dependencies = [
- "derive_more",
- "enum_dispatch",
- "iced_core 0.8.1",
- "iced_style 0.7.0",
- "paste",
- "serde",
-]
-
-[[package]]
 name = "iced_core"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1347,13 +1354,6 @@ dependencies = [
  "bitflags",
  "instant",
  "palette",
-]
-
-[[package]]
-name = "iced_fonts_ext"
-version = "0.1.0"
-dependencies = [
- "sleet_font_macro",
 ]
 
 [[package]]

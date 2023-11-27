@@ -1,8 +1,8 @@
 //! Global theme.
 
 use derive_more::{Deref, From};
-use iced_colorschemes::default;
-use iced_colorschemes::{ColorScheme, WithColorScheme};
+use doseer_colorschemes::default;
+use doseer_colorschemes::{ColorScheme, WithColorScheme};
 
 use crate::{content, item, side_bar};
 
@@ -12,17 +12,17 @@ pub struct Theme(ColorScheme);
 impl Default for Theme {
     fn default() -> Self {
         Self(ColorScheme::Catppuccin(
-            iced_colorschemes::colorschemes::catppuccin::Variant::Mocha,
+            doseer_colorschemes::colorschemes::catppuccin::Variant::Mocha,
         ))
     }
 }
 
 impl WithColorScheme for Theme {
-    fn palette(&self) -> &iced_colorschemes::ColorPalette {
+    fn palette(&self) -> &doseer_colorschemes::ColorPalette {
         self.0.palette()
     }
 
-    fn brightness(&self) -> iced_colorschemes::Brightness {
+    fn brightness(&self) -> doseer_colorschemes::Brightness {
         self.0.brightness()
     }
 }
@@ -180,7 +180,7 @@ pub mod text {
 }
 
 pub mod fonts {
-    use iced_fonts_ext::font;
+    use doseer_fonts::font;
 
     /// More neutral font for primary contents.
     #[font(family = "Roboto")]

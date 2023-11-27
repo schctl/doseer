@@ -5,11 +5,10 @@ members = [
 
 [workspace.dependencies]
 doseer_core = { path = "crates/core" }
-doseer_ui_ext = { path = "crates/ui_ext" }
+doseer_colorschemes = { path = "crates/colorschemes" }
+doseer_fonts = { path = "crates/fonts" }
 doseer_icon_loader = { path = "crates/icon_loader" }
-
-iced_colorschemes = { path = "crates/colorschemes" }
-iced_fonts_ext = { path = "crates/fonts" }
+doseer_ui_ext = { path = "crates/ui_ext" }
 
 [workspace.package]
 edition = "2021"
@@ -49,8 +48,8 @@ doseer_ui_ext = { workspace = true }
 doseer_icon_loader = { workspace = true }
 
 iced = { version = "0.8", features = ["image", "svg", "tokio"] }
-iced_colorschemes = { workspace = true, features = ["dev-default"]  }
-iced_fonts_ext = { workspace = true  }
+doseer_colorschemes = { workspace = true, features = ["dev-default"]  }
+doseer_fonts = { workspace = true  }
 iced_lazy = "0.5"
 
 # Macros

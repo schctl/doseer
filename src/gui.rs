@@ -1,9 +1,9 @@
 //! The GUI app.
 
+use doseer_colorschemes::default::Wrap;
 use doseer_ui_ext::components::panelled::{self, unpanelled};
 
 use iced::{executor, Application, Command, Length};
-use iced_colorschemes::default::Wrap;
 use iced_lazy::component;
 
 use crate::content::{self, Content};

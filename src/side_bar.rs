@@ -2,12 +2,12 @@
 
 use std::path::Path;
 
+use doseer_colorschemes::WithColorScheme;
 use doseer_core::path::PathWrap;
 use doseer_ui_ext::widgets::reorderable;
 
 use iced::widget::{button, column, container, row, text};
 use iced::{alignment, Alignment, Color, Length, Padding};
-use iced_colorschemes::WithColorScheme;
 use iced_lazy::Component;
 
 use crate::gui::{self, Element};

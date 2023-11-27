@@ -2,12 +2,12 @@
 
 use std::path::Path;
 
+use doseer_colorschemes::WithColorScheme;
 use doseer_core::path::PathWrap;
 use doseer_icon_loader::file::{ImageOrSvg, Loader};
 
 use iced::widget::{button, column, container, image, svg, text};
 use iced::{alignment, Background, Color, Length, Size};
-use iced_colorschemes::WithColorScheme;
 use lazy_static::lazy_static;
 
 use crate::gui::Element;
