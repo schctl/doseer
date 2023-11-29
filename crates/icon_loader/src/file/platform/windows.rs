@@ -52,7 +52,7 @@ impl Loader {
         let image = hicon::convert_to_image(get_icon(&path_c))?;
 
         Some(Arc::new(ImageOrSvg::Image(
-            iced_native::image::Handle::from_pixels(image.width, image.height, image.data),
+            iced_core::image::Handle::from_pixels(image.width, image.height, image.data),
         )))
     }
 }

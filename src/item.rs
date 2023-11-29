@@ -7,7 +7,7 @@ use doseer_core::path::PathWrap;
 use doseer_icon_loader::file::{ImageOrSvg, Loader};
 
 use iced::widget::{button, column, container, image, svg, text};
-use iced::{alignment, Background, Color, Length, Size};
+use iced::{alignment, Background, BorderRadius, Color, Length, Size};
 use lazy_static::lazy_static;
 
 use crate::gui::Element;
@@ -59,7 +59,8 @@ pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
     .align_y(alignment::Vertical::Center);
 
     let text = text(path.display().to_string_lossy())
-        .font(theme::fonts::Content::Regular)
+        .size(20)
+        .font(theme::fonts::Roboto::Regular)
         .horizontal_alignment(iced::alignment::Horizontal::Center);
 
     button(
@@ -94,21 +95,23 @@ impl Style {
 
         match self {
             Self::Selected => iced::widget::button::Appearance {
-                background: Color {
-                    a: 0.7,
-                    ..palette.primary.base.accent
-                }
-                .into(),
+                background: Some(
+                    Color {
+                        a: 0.7,
+                        ..palette.primary.base.accent
+                    }
+                    .into(),
+                ),
                 text_color: palette.primary.base.on_accent,
-                border_radius: 6.0,
+                border_radius: BorderRadius::from(6.0),
                 border_color: palette.primary.strong.accent,
                 border_width: 1.0,
                 ..Default::default()
             },
             Self::Default => iced::widget::button::Appearance {
-                background: Color::TRANSPARENT.into(),
+                background: None,
                 text_color: palette.surface.base.on_base,
-                border_radius: 6.0,
+                border_radius: BorderRadius::from(6.0),
                 ..Default::default()
             },
         }
@@ -120,13 +123,15 @@ impl Style {
         match self {
             Self::Selected => self.active(theme),
             Self::Default => iced::widget::button::Appearance {
-                background: Color {
-                    a: 0.8,
-                    ..palette.surface.base.base
-                }
-                .into(),
+                background: Some(
+                    Color {
+                        a: 0.8,
+                        ..palette.surface.base.base
+                    }
+                    .into(),
+                ),
                 text_color: palette.surface.base.on_base,
-                border_radius: 6.0,
+                border_radius: BorderRadius::from(6.0),
                 ..Default::default()
             },
         }
@@ -136,7 +141,7 @@ impl Style {
         let hovered = self.hovered(theme);
 
         let background = match hovered.background {
-            Some(Background::Color(c)) => {
+            Some(Background::Color(c)) => Some({
                 if theme.brightness().is_light() {
                     Color {
                         r: c.r - 0.07,
@@ -154,7 +159,7 @@ impl Style {
                     }
                     .into()
                 }
-            }
+            }),
             _ => hovered.background,
         };
 

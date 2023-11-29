@@ -4,9 +4,8 @@ use std::path::Path;
 
 use doseer_core::path::PathWrap;
 
-use iced::widget::pane_grid;
+use iced::widget::{component, pane_grid, Component};
 use iced::Command;
-use iced_lazy::{component, Component};
 
 use crate::gui::{self, Element};
 

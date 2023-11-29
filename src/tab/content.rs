@@ -6,9 +6,8 @@ use doseer_core::dirs;
 use doseer_core::path::PathWrap;
 use doseer_ui_ext::widgets::grid::uniform;
 
-use iced::widget::{container, scrollable};
+use iced::widget::{container, scrollable, Component};
 use iced::Length;
-use iced_lazy::Component;
 
 use crate::gui::Element;
 use crate::{gui, item};

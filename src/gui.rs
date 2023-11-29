@@ -3,12 +3,12 @@
 use doseer_colorschemes::default::Wrap;
 use doseer_ui_ext::components::panelled::{self, unpanelled};
 
+use iced::widget::component;
 use iced::{executor, Application, Command, Length};
-use iced_lazy::component;
 
 use crate::content::{self, Content};
 use crate::side_bar::side_bar;
-use crate::{config, tab, Config, Theme};
+use crate::{config, tab, theme, Config, Theme};
 
 /// Shorthand for an iced element generic over some message.
 pub type Renderer = iced::Renderer<Wrap<Theme>>;
@@ -20,6 +20,7 @@ pub enum Message {
     Config(config::Message),
     ResizeMain(panelled::pane_grid::ResizeEvent),
     IcedEvent(iced::Event),
+    FontLoad(Result<(), iced::font::Error>),
 }
 
 /// The UI state.
@@ -49,6 +50,8 @@ impl Application for Gui {
         // :/
         let tab_init_cmd = tab::watcher::command(pane.focused().location());
         commands.push(tab_init_cmd.map(|m| Message::Content(content::Message::Tab(m, None))));
+
+        commands.push(theme::fonts::load_all().map(Message::FontLoad));
 
         (
             Self {

@@ -1,4 +1,5 @@
 use derive_more::From;
+use iced_core::BorderRadius;
 use iced_style::rule::{self, Appearance};
 
 use super::Wrap;
@@ -37,13 +38,13 @@ where
             Rule::Default => Appearance {
                 color: palette.primary.strong.base,
                 width: 1,
-                radius: 0.0,
+                radius: BorderRadius::from(0.0),
                 fill_mode: rule::FillMode::Percent(90.0),
             },
             Rule::Surface => Appearance {
                 color: palette.surface.base.base,
                 width: 1,
-                radius: 0.0,
+                radius: BorderRadius::from(0.0),
                 fill_mode: rule::FillMode::Percent(90.0),
             },
         }

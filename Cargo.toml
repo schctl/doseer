@@ -3,19 +3,23 @@ members = [
     "crates/*",
 ]
 
-[workspace.dependencies]
-doseer_core = { path = "crates/core" }
-doseer_colorschemes = { path = "crates/colorschemes" }
-doseer_fonts = { path = "crates/fonts" }
-doseer_icon_loader = { path = "crates/icon_loader" }
-doseer_ui_ext = { path = "crates/ui_ext" }
-
 [workspace.package]
 edition = "2021"
 version = "0.1.0"
 authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
 license = "Apache-2.0"
 publish = false
+
+[workspace.dependencies]
+doseer_core = { path = "crates/core" }
+doseer_colorschemes = { path = "crates/colorschemes" }
+doseer_icon_loader = { path = "crates/icon_loader" }
+doseer_ui_ext = { path = "crates/ui_ext" }
+
+iced = "0.10"
+iced_core = "0.10"
+iced_style = "0.9"
+iced_widget = "0.1"
 
 # ---
 
@@ -44,13 +48,11 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # GUI
-doseer_ui_ext = { workspace = true }
-doseer_icon_loader = { workspace = true }
 doseer_colorschemes = { workspace = true, features = ["dev-default"]  }
-doseer_fonts = { workspace = true  }
+doseer_icon_loader = { workspace = true }
+doseer_ui_ext = { workspace = true }
 
-iced = { version = "0.8", features = ["image", "svg", "tokio"] }
-iced_lazy = "0.5"
+iced = { workspace = true, features = ["image", "svg", "tokio", "advanced"] }
 
 # Macros
 derive_more = "0.99"

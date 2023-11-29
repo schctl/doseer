@@ -1,11 +1,11 @@
 //! Grid with a flexbox layout.
 
-pub use iced_lazy::responsive;
-use iced_native::widget::{Operation, Tree};
-use iced_native::{
+use iced_core::widget::{Operation, Tree};
+use iced_core::{
     event, layout, mouse, Clipboard, Element, Event, Length, Point, Rectangle, Shell, Size, Widget,
 };
-use iced_native::{overlay, renderer};
+use iced_core::{overlay, renderer};
+pub use iced_widget::responsive;
 
 use super::{direction, Order};
 
@@ -278,7 +278,7 @@ where
         theme: &Renderer::Theme,
         style: &renderer::Style,
         layout: layout::Layout<'_>,
-        cursor_position: Point,
+        cursor: mouse::Cursor,
         viewport: &Rectangle,
     ) {
         for ((child, state), layout) in self
@@ -287,15 +287,9 @@ where
             .zip(&state.children)
             .zip(layout.children())
         {
-            child.as_widget().draw(
-                state,
-                renderer,
-                theme,
-                style,
-                layout,
-                cursor_position,
-                viewport,
-            );
+            child
+                .as_widget()
+                .draw(state, renderer, theme, style, layout, cursor, viewport);
         }
     }
 
@@ -306,7 +300,7 @@ where
         renderer: &Renderer,
         operation: &mut dyn Operation<Message>,
     ) {
-        operation.container(None, &mut |operation| {
+        operation.container(None, layout.bounds(), &mut |operation| {
             self.contents
                 .iter()
                 .zip(&mut tree.children)
@@ -324,10 +318,11 @@ where
         tree: &mut Tree,
         event: Event,
         layout: layout::Layout<'_>,
-        cursor_position: Point,
+        cursor: mouse::Cursor,
         renderer: &Renderer,
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
+        viewport: &Rectangle,
     ) -> event::Status {
         self.contents
             .iter_mut()
@@ -338,10 +333,11 @@ where
                     state,
                     event.clone(),
                     layout,
-                    cursor_position,
+                    cursor,
                     renderer,
                     clipboard,
                     shell,
+                    viewport,
                 )
             })
             .fold(event::Status::Ignored, event::Status::merge)
@@ -351,7 +347,7 @@ where
         &self,
         tree: &Tree,
         layout: layout::Layout<'_>,
-        cursor_position: Point,
+        cursor: mouse::Cursor,
         viewport: &Rectangle,
         renderer: &Renderer,
     ) -> mouse::Interaction {
@@ -360,13 +356,9 @@ where
             .zip(&tree.children)
             .zip(layout.children())
             .map(|((child, state), layout)| {
-                child.as_widget().mouse_interaction(
-                    state,
-                    layout,
-                    cursor_position,
-                    viewport,
-                    renderer,
-                )
+                child
+                    .as_widget()
+                    .mouse_interaction(state, layout, cursor, viewport, renderer)
             })
             .max()
             .unwrap_or_default()
@@ -375,9 +367,9 @@ where
     fn overlay<'overlay>(
         &'overlay mut self,
         state: &'overlay mut Tree,
-        layout: iced_native::Layout<'_>,
+        layout: iced_core::Layout<'_>,
         renderer: &Renderer,
-    ) -> Option<iced_native::overlay::Element<'overlay, Message, Renderer>> {
+    ) -> Option<iced_core::overlay::Element<'overlay, Message, Renderer>> {
         overlay::from_children(&mut self.contents, state, layout, renderer)
     }
 }

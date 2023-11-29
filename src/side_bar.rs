@@ -6,9 +6,8 @@ use doseer_colorschemes::WithColorScheme;
 use doseer_core::path::PathWrap;
 use doseer_ui_ext::widgets::reorderable;
 
-use iced::widget::{button, column, container, row, text};
-use iced::{alignment, Alignment, Color, Length, Padding};
-use iced_lazy::Component;
+use iced::widget::{button, column, container, row, text, Component};
+use iced::{alignment, Alignment, BorderRadius, Length, Padding};
 
 use crate::gui::{self, Element};
 use crate::{config, content, theme, Config, Icon};
@@ -68,7 +67,7 @@ where
     }
 
     fn view(&self, _: &Self::State) -> Element<'_, Self::Event> {
-        let title = container(text("Files").font(theme::fonts::UI::Black).size(28))
+        let title = container(text("Files").font(theme::fonts::SofiaSans::Black).size(28))
             .height(content::Content::TOP_BAR_HEIGHT)
             .align_y(alignment::Vertical::Center)
             .padding([0, 8]);
@@ -102,8 +101,8 @@ fn item_button(path: &PathWrap, is_open: impl Fn(&Path) -> bool) -> Element<Mess
                 .width(Length::Fixed(22.0))
                 .height(Length::Fixed(22.0)),
             text(path.display().to_string_lossy())
-                .size(22)
-                .font(theme::fonts::UI::Regular),
+                .size(18)
+                .font(theme::fonts::SofiaSans::Regular),
         )
         .spacing(6)
         .align_items(Alignment::Center)
@@ -146,15 +145,15 @@ impl ButtonStyle {
 
         match self {
             Self::Focused => iced::widget::button::Appearance {
-                background: palette.surface.base.base.into(),
+                background: Some(palette.surface.base.base.into()),
                 text_color: palette.surface.base.on_base,
-                border_radius: 6.0,
+                border_radius: BorderRadius::from(6.0),
                 ..Default::default()
             },
             Self::Default => iced::widget::button::Appearance {
-                background: Color::TRANSPARENT.into(),
+                background: None,
                 text_color: palette.primary.base.on_base,
-                border_radius: 6.0,
+                border_radius: BorderRadius::from(6.0),
                 ..Default::default()
             },
         }
@@ -166,9 +165,9 @@ impl ButtonStyle {
         match self {
             Self::Focused => self.active(theme),
             Self::Default => iced::widget::button::Appearance {
-                background: palette.surface.weak.base.into(),
+                background: Some(palette.surface.weak.base.into()),
                 text_color: palette.surface.weak.on_base,
-                border_radius: 6.0,
+                border_radius: BorderRadius::from(6.0),
                 ..Default::default()
             },
         }

@@ -11,7 +11,7 @@ use std::sync::{mpsc, Arc};
 
 use doseer_core::dirs;
 use doseer_core::path::PathWrap;
-use iced_native::{image, svg};
+use iced_core::{image, svg};
 use ini::Ini;
 use moka::sync::Cache;
 

@@ -5,9 +5,8 @@ use doseer_core::path::PathWrap;
 use doseer_ui_ext::widgets::only_one;
 use doseer_ui_ext::widgets::reorderable;
 
-use iced::widget::{button, column, container, row, text};
-use iced::{alignment, Alignment, Color, Command, Length};
-use iced_lazy::component;
+use iced::widget::{button, column, component, container, row, text};
+use iced::{alignment, Alignment, BorderRadius, Command, Length};
 use indexmap::IndexMap;
 
 use crate::gui::Element;
@@ -155,8 +154,8 @@ impl Content {
                     .width(Length::Fixed(22.0))
                     .height(Length::Fixed(22.0)),
                 text(tab.location().display().to_string_lossy())
-                    .size(22)
-                    .font(theme::fonts::UI::Regular),
+                    .size(18)
+                    .font(theme::fonts::SofiaSans::Regular),
             )
             .spacing(6)
             .align_items(Alignment::Center)
@@ -272,15 +271,15 @@ impl TabButtonStyle {
 
         match self {
             Self::Focused => iced::widget::button::Appearance {
-                background: palette.surface.base.base.into(),
+                background: Some(palette.surface.base.base.into()),
                 text_color: palette.surface.base.on_base,
-                border_radius: 6.0,
+                border_radius: BorderRadius::from(6.0),
                 ..Default::default()
             },
             Self::Default => iced::widget::button::Appearance {
-                background: Color::TRANSPARENT.into(),
+                background: None,
                 text_color: palette.surface.weak.on_base,
-                border_radius: 6.0,
+                border_radius: BorderRadius::from(6.0),
                 ..Default::default()
             },
         }
@@ -292,9 +291,9 @@ impl TabButtonStyle {
         match self {
             Self::Focused => self.active(theme),
             Self::Default => iced::widget::button::Appearance {
-                background: palette.surface.base.base.into(),
+                background: Some(palette.surface.base.base.into()),
                 text_color: palette.surface.base.on_base,
-                border_radius: 6.0,
+                border_radius: BorderRadius::from(6.0),
                 ..Default::default()
             },
         }

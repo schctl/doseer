@@ -7,5 +7,5 @@ license = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-iced_native = "0.9"
-iced_lazy = "0.5"
+iced_core = { workspace = true }
+iced_widget = { workspace = true, features = ["lazy"] }

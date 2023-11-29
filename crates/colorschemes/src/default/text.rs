@@ -1,4 +1,4 @@
-use iced_style::text::{self, Appearance};
+use iced_core::widget::text::{self, Appearance};
 
 use super::Wrap;
 use crate::{ColorScheme, WithColorScheme};

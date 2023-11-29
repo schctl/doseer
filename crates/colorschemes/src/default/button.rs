@@ -1,4 +1,5 @@
-use iced_core::{Background, Color, Vector};
+use iced_core::gradient::{ColorStop, Linear};
+use iced_core::{Background, BorderRadius, Color, Gradient, Vector};
 use iced_style::button::{self, Appearance};
 
 use super::Wrap;
@@ -29,6 +30,20 @@ pub trait StyleSheet {
                     a: color.a * 0.5,
                     ..color
                 }),
+                Background::Gradient(Gradient::Linear(grad)) => {
+                    Background::Gradient(Gradient::Linear(Linear {
+                        stops: grad.stops.map(|stop| {
+                            stop.map(|stop| ColorStop {
+                                color: Color {
+                                    a: stop.color.a * 0.5,
+                                    ..stop.color
+                                },
+                                ..stop
+                            })
+                        }),
+                        ..grad
+                    }))
+                }
             }),
             text_color: Color {
                 a: active.text_color.a * 0.5,
@@ -61,9 +76,9 @@ where
 
         match style {
             Button::Default => Appearance {
-                background: palette.primary.base.accent.into(),
+                background: Some(palette.primary.base.accent.into()),
                 text_color: palette.primary.base.on_accent,
-                border_radius: 2.0,
+                border_radius: BorderRadius::from(2.0),
                 ..Appearance::default()
             },
         }
@@ -73,7 +88,7 @@ where
         let active = self.active(style);
 
         let background = match active.background {
-            Some(Background::Color(c)) => {
+            Some(Background::Color(c)) => Some({
                 if self.brightness().is_light() {
                     Color {
                         r: c.r - 0.07,
@@ -91,7 +106,7 @@ where
                     }
                     .into()
                 }
-            }
+            }),
             _ => active.background,
         };
 

@@ -1,14 +1,14 @@
-//! Modified [`Row`](iced_native::widget::Row) implementation that allows for re-ordering content.
+//! Modified [`Row`](iced_widget::Row) implementation that allows for re-ordering content.
 
-use iced_native::event::{self, Event};
-use iced_native::layout::{self, Layout};
-use iced_native::widget::{tree, Operation, Tree};
-use iced_native::{
-    mouse, overlay, renderer, touch, Alignment, Clipboard, Element, Length, Padding, Pixels, Point,
+use iced_core::event::{self, Event};
+use iced_core::layout::{self, Layout};
+use iced_core::widget::{tree, Operation, Tree};
+use iced_core::{
+    mouse, overlay, renderer, touch, Alignment, Clipboard, Element, Length, Padding, Pixels,
     Rectangle, Shell, Vector, Widget,
 };
 
-use super::{Axis, Drag, State};
+use super::{set_available_cursor_position, Axis, Drag, State};
 
 /// A container that distributes its contents horizontally.
 pub struct Row<'a, Message, Renderer> {
@@ -143,7 +143,7 @@ where
         renderer: &Renderer,
         operation: &mut dyn Operation<Message>,
     ) {
-        operation.container(None, &mut |operation| {
+        operation.container(None, layout.bounds(), &mut |operation| {
             self.children
                 .iter()
                 .zip(&mut tree.children)
@@ -161,10 +161,11 @@ where
         tree: &mut Tree,
         event: Event,
         layout: Layout<'_>,
-        cursor_position: Point,
+        cursor: mouse::Cursor,
         renderer: &Renderer,
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
+        viewport: &Rectangle,
     ) -> event::Status {
         // --- The main part: Handle dragging ---
 
@@ -176,19 +177,21 @@ where
             | Event::Touch(touch::Event::FingerPressed { .. }) => {
                 let bounds = layout.bounds();
 
-                if bounds.contains(cursor_position) {
-                    for (n, child) in layout.children().enumerate() {
-                        let child_bounds = child.bounds();
+                if let Some(cursor_position) = cursor.position() {
+                    if bounds.contains(cursor_position) {
+                        for (n, child) in layout.children().enumerate() {
+                            let child_bounds = child.bounds();
 
-                        // Begin dragging on a child if it contains the cursor
-                        if child_bounds.contains(cursor_position) {
-                            state.drag_state = Some(Drag {
-                                index: n,
-                                begun_at: cursor_position,
-                                currently_at: cursor_position,
-                            });
+                            // Begin dragging on a child if it contains the cursor
+                            if child_bounds.contains(cursor_position) {
+                                state.drag_state = Some(Drag {
+                                    index: n,
+                                    begun_at: cursor_position,
+                                    currently_at: cursor_position,
+                                });
 
-                            break;
+                                break;
+                            }
                         }
                     }
                 }
@@ -241,10 +244,11 @@ where
                     state,
                     event.clone(),
                     layout,
-                    cursor_position,
+                    cursor,
                     renderer,
                     clipboard,
                     shell,
+                    viewport,
                 )
             })
             .fold(event::Status::Ignored, event::Status::merge)
@@ -254,7 +258,7 @@ where
         &self,
         tree: &Tree,
         layout: Layout<'_>,
-        cursor_position: Point,
+        cursor: mouse::Cursor,
         viewport: &Rectangle,
         renderer: &Renderer,
     ) -> mouse::Interaction {
@@ -263,13 +267,9 @@ where
             .zip(&tree.children)
             .zip(layout.children())
             .map(|((child, state), layout)| {
-                child.as_widget().mouse_interaction(
-                    state,
-                    layout,
-                    cursor_position,
-                    viewport,
-                    renderer,
-                )
+                child
+                    .as_widget()
+                    .mouse_interaction(state, layout, cursor, viewport, renderer)
             })
             .max()
             .unwrap_or_default()
@@ -282,7 +282,7 @@ where
         theme: &Renderer::Theme,
         style: &renderer::Style,
         layout: Layout<'_>,
-        mut cursor_position: Point,
+        mut cursor: mouse::Cursor,
         viewport: &Rectangle,
     ) {
         let state = tree.state.downcast_ref::<State>();
@@ -292,7 +292,7 @@ where
             Some(drag_state) => {
                 // Trick children into thinking cursor is at a different position
                 // This is so widgets don't process cursor positions as being hovered over them, etc.
-                cursor_position = drag_state.begun_at;
+                set_available_cursor_position(&mut cursor, drag_state.begun_at);
                 drag_state
             }
             _ => &Drag::ZERO,
@@ -326,7 +326,7 @@ where
                             theme,
                             style,
                             child_layout,
-                            cursor_position,
+                            cursor,
                             viewport,
                         )
                     })
@@ -341,7 +341,7 @@ where
                 theme,
                 style,
                 child_layout,
-                cursor_position,
+                cursor,
                 viewport,
             );
         }

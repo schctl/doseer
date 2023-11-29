@@ -108,7 +108,7 @@ pub mod container {
             match style {
                 Container::Default => Default::default(),
                 Container::Weak => iced::widget::container::Appearance {
-                    background: palette.primary.weak.base.into(),
+                    background: Some(palette.primary.weak.base.into()),
                     ..Default::default()
                 },
             }
@@ -180,34 +180,77 @@ pub mod text {
 }
 
 pub mod fonts {
-    use doseer_fonts::font;
+    use iced::{font::*, Command};
 
-    /// More neutral font for primary contents.
-    #[font(family = "Roboto")]
-    pub enum Content {
-        #[font(variant = "Regular")]
-        #[font(source = "../assets/static/fonts/Roboto/Roboto-Regular.ttf")]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+    pub enum Roboto {
+        #[default]
         Regular,
-
-        // Not really the same family but close enough
-        #[font(variant = "Mono Bold")]
-        #[font(source = "../assets/static/fonts/Roboto/RobotoMono-Bold.ttf")]
-        MonoBold,
-
-        #[font(variant = "Mono Bold Italic")]
-        #[font(source = "../assets/static/fonts/Roboto/RobotoMono-BoldItalic.ttf")]
-        MonoBoldItalic,
     }
 
-    /// More distinct font for secondary UI elements.
-    #[font(family = "Sofia Sans")]
-    pub enum UI {
-        #[font(variant = "Regular")]
-        #[font(source = "../assets/static/fonts/Sofia_Sans/SofiaSans-Regular.ttf")]
-        Regular,
+    impl From<Roboto> for Font {
+        fn from(value: Roboto) -> Self {
+            match value {
+                Roboto::Regular => Font::with_name("Roboto"),
+            }
+        }
+    }
 
-        #[font(variant = "Black")]
-        #[font(source = "../assets/static/fonts/Sofia_Sans/SofiaSans-Black.ttf")]
+    impl Roboto {
+        pub const BYTES: &'static [u8] =
+            include_bytes!("../assets/static/fonts/Roboto/Roboto-Regular.ttf");
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+    pub enum RobotoMono {
+        #[default]
+        Regular,
+        Bold,
+    }
+
+    impl From<RobotoMono> for Font {
+        fn from(value: RobotoMono) -> Self {
+            match value {
+                RobotoMono::Regular => Font::with_name("Roboto"),
+                RobotoMono::Bold => Font {
+                    weight: Weight::Bold,
+                    ..Font::with_name("Roboto")
+                },
+            }
+        }
+    }
+
+    impl RobotoMono {
+        pub const BYTES: &'static [u8] =
+            include_bytes!("../assets/static/fonts/RobotoMono/RobotoMono-VariableFont_wght.ttf");
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+    pub enum SofiaSans {
+        #[default]
+        Regular,
         Black,
+    }
+
+    impl From<SofiaSans> for Font {
+        fn from(value: SofiaSans) -> Self {
+            match value {
+                SofiaSans::Regular => Font::with_name("Sofia Sans"),
+                SofiaSans::Black => Font {
+                    weight: Weight::Black,
+                    ..Font::with_name("Sofia Sans")
+                },
+            }
+        }
+    }
+
+    impl SofiaSans {
+        pub const BYTES: &'static [u8] =
+            include_bytes!("../assets/static/fonts/Sofia_Sans/SofiaSans-VariableFont_wght.ttf");
+    }
+
+    /// Load all required fonts.
+    pub fn load_all() -> Command<Result<(), Error>> {
+        Command::batch([Roboto::BYTES, RobotoMono::BYTES, SofiaSans::BYTES].map(load))
     }
 }

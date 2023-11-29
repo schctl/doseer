@@ -1,4 +1,5 @@
-use iced_style::pane_grid::{self, Line};
+use iced_core::{BorderRadius, Color};
+use iced_style::pane_grid::{self, Appearance, Line};
 
 use super::Wrap;
 use crate::{ColorScheme, WithColorScheme};
@@ -10,6 +11,7 @@ pub trait StyleSheet {
 
     fn picked_split(&self, style: &Self::Style) -> Option<Line>;
     fn hovered_split(&self, style: &Self::Style) -> Option<Line>;
+    fn hovered_region(&self, style: &Self::Style) -> Appearance;
 }
 
 // ----- DevAuto impl -----
@@ -50,6 +52,19 @@ where
             }),
         }
     }
+
+    fn hovered_region(&self, style: &Self::Style) -> Appearance {
+        let palette = self.palette();
+
+        match style {
+            Self::Style::Default => Appearance {
+                background: palette.surface.base.base.into(),
+                border_width: 0.0,
+                border_radius: BorderRadius::from(0.0),
+                border_color: Color::TRANSPARENT,
+            },
+        }
+    }
 }
 
 // ----- Impl the actual trait -----
@@ -68,5 +83,9 @@ where
     #[inline]
     fn hovered_split(&self, style: &Self::Style) -> Option<Line> {
         T::hovered_split(self, style)
+    }
+
+    fn hovered_region(&self, style: &Self::Style) -> Appearance {
+        T::hovered_region(&self, style)
     }
 }

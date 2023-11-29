@@ -36,7 +36,7 @@ where
         match style {
             Self::Style::Transparent => Default::default(),
             Self::Style::Box => container::Appearance {
-                background: palette.surface.base.base.into(),
+                background: Some(palette.surface.base.base.into()),
                 ..Default::default()
             },
         }

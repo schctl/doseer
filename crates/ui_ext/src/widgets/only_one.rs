@@ -1,7 +1,7 @@
 //! A collection of widgets out of which only one is displayed.
 
-use iced_native::widget::{Operation, Tree};
-use iced_native::{renderer, Element, Length, Widget};
+use iced_core::widget::{Operation, Tree};
+use iced_core::{mouse, renderer, Element, Length, Widget};
 
 /// A wrapper widget that contains multiple widgets, but displays only one at a time.
 pub struct OnlyOne<'a, Message, Renderer> {
@@ -57,8 +57,8 @@ where
     fn layout(
         &self,
         renderer: &Renderer,
-        limits: &iced_native::layout::Limits,
-    ) -> iced_native::layout::Node {
+        limits: &iced_core::layout::Limits,
+    ) -> iced_core::layout::Node {
         self.contents[self.focused]
             .as_widget()
             .layout(renderer, limits)
@@ -68,11 +68,11 @@ where
         &self,
         state: &Tree,
         renderer: &mut Renderer,
-        theme: &<Renderer as iced_native::Renderer>::Theme,
+        theme: &<Renderer as iced_core::Renderer>::Theme,
         style: &renderer::Style,
-        layout: iced_native::Layout<'_>,
-        cursor_position: iced_native::Point,
-        viewport: &iced_native::Rectangle,
+        layout: iced_core::Layout<'_>,
+        cursor: mouse::Cursor,
+        viewport: &iced_core::Rectangle,
     ) {
         self.contents[self.focused].as_widget().draw(
             &state.children[self.focused],
@@ -80,7 +80,7 @@ where
             theme,
             style,
             layout,
-            cursor_position,
+            cursor,
             viewport,
         )
     }
@@ -90,53 +90,59 @@ where
     fn operate(
         &self,
         state: &mut Tree,
-        layout: iced_native::Layout<'_>,
+        layout: iced_core::Layout<'_>,
         renderer: &Renderer,
-        operation: &mut dyn iced_native::widget::Operation<Message>,
+        operation: &mut dyn iced_core::widget::Operation<Message>,
     ) {
-        operation.container(None, &mut |operation: &mut dyn Operation<Message>| {
-            self.contents[self.focused].as_widget().operate(
-                &mut state.children[self.focused],
-                layout,
-                renderer,
-                operation,
-            )
-        })
+        operation.container(
+            None,
+            layout.bounds(),
+            &mut |operation: &mut dyn Operation<Message>| {
+                self.contents[self.focused].as_widget().operate(
+                    &mut state.children[self.focused],
+                    layout,
+                    renderer,
+                    operation,
+                )
+            },
+        )
     }
 
     fn on_event(
         &mut self,
         state: &mut Tree,
-        event: iced_native::Event,
-        layout: iced_native::Layout<'_>,
-        cursor_position: iced_native::Point,
+        event: iced_core::Event,
+        layout: iced_core::Layout<'_>,
+        cursor: mouse::Cursor,
         renderer: &Renderer,
-        clipboard: &mut dyn iced_native::Clipboard,
-        shell: &mut iced_native::Shell<'_, Message>,
-    ) -> iced_native::event::Status {
+        clipboard: &mut dyn iced_core::Clipboard,
+        shell: &mut iced_core::Shell<'_, Message>,
+        viewport: &iced_core::Rectangle,
+    ) -> iced_core::event::Status {
         self.contents[self.focused].as_widget_mut().on_event(
             &mut state.children[self.focused],
             event,
             layout,
-            cursor_position,
+            cursor,
             renderer,
             clipboard,
             shell,
+            viewport,
         )
     }
 
     fn mouse_interaction(
         &self,
         state: &Tree,
-        layout: iced_native::Layout<'_>,
-        cursor_position: iced_native::Point,
-        viewport: &iced_native::Rectangle,
+        layout: iced_core::Layout<'_>,
+        cursor: mouse::Cursor,
+        viewport: &iced_core::Rectangle,
         renderer: &Renderer,
-    ) -> iced_native::mouse::Interaction {
+    ) -> iced_core::mouse::Interaction {
         self.contents[self.focused].as_widget().mouse_interaction(
             &state.children[self.focused],
             layout,
-            cursor_position,
+            cursor,
             viewport,
             renderer,
         )
@@ -145,9 +151,9 @@ where
     fn overlay<'call>(
         &'call mut self,
         state: &'call mut Tree,
-        layout: iced_native::Layout<'_>,
+        layout: iced_core::Layout<'_>,
         renderer: &Renderer,
-    ) -> Option<iced_native::overlay::Element<'call, Message, Renderer>> {
+    ) -> Option<iced_core::overlay::Element<'call, Message, Renderer>> {
         self.contents[self.focused].as_widget_mut().overlay(
             &mut state.children[self.focused],
             layout,

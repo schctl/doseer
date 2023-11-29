@@ -1,4 +1,4 @@
-use iced_core::Color;
+use iced_core::{BorderRadius, Color};
 use iced_style::scrollable::{self, Scrollbar};
 
 use super::Wrap;
@@ -10,10 +10,10 @@ pub trait StyleSheet {
     type Style: Default;
 
     fn active(&self, style: &Self::Style) -> Scrollbar;
-    fn hovered(&self, style: &Self::Style) -> Scrollbar;
+    fn hovered(&self, style: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar;
 
     fn dragging(&self, style: &Self::Style) -> Scrollbar {
-        self.hovered(style)
+        self.hovered(style, false)
     }
 }
 
@@ -37,13 +37,13 @@ where
     fn active(&self, style: &Self::Style) -> Scrollbar {
         match style {
             Self::Style::Default => Scrollbar {
-                background: Color::TRANSPARENT.into(),
-                border_radius: 0.0,
+                background: None,
+                border_radius: BorderRadius::from(0.0),
                 border_width: 0.0,
                 border_color: Color::TRANSPARENT,
                 scroller: scrollable::Scroller {
                     color: Color::TRANSPARENT,
-                    border_radius: 0.0,
+                    border_radius: BorderRadius::from(0.0),
                     border_width: 0.0,
                     border_color: Color::TRANSPARENT,
                 },
@@ -51,18 +51,18 @@ where
         }
     }
 
-    fn hovered(&self, style: &Self::Style) -> Scrollbar {
+    fn hovered(&self, style: &Self::Style, _is_mouse_over_scrollbar: bool) -> Scrollbar {
         let palette = self.palette();
 
         match style {
             Self::Style::Default => Scrollbar {
-                background: Color::TRANSPARENT.into(),
-                border_radius: 0.0,
+                background: None,
+                border_radius: BorderRadius::from(0.0),
                 border_width: 0.0,
                 border_color: Color::TRANSPARENT,
                 scroller: scrollable::Scroller {
                     color: palette.primary.base.on_base,
-                    border_radius: 0.0,
+                    border_radius: BorderRadius::from(0.0),
                     border_width: 0.0,
                     border_color: Color::TRANSPARENT,
                 },
@@ -85,8 +85,8 @@ where
     }
 
     #[inline]
-    fn hovered(&self, style: &Self::Style) -> Scrollbar {
-        T::hovered(self, style)
+    fn hovered(&self, style: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
+        T::hovered(self, style, is_mouse_over_scrollbar)
     }
 
     #[inline]

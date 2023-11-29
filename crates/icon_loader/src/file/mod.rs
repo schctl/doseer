@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use iced_native::{image, svg};
+use iced_core::{image, svg};
 
 mod platform;
 

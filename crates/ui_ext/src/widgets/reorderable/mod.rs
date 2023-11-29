@@ -1,6 +1,6 @@
 //! Row/column widgets that implement re-ordering.
 
-use iced_native::{Element, Layout, Point, Rectangle, Vector};
+use iced_core::{mouse, Element, Layout, Point, Rectangle, Vector};
 
 pub mod column;
 pub use column::Column;
@@ -71,6 +71,13 @@ fn bind_delta(delta: &mut Vector, child: Rectangle, parent: Rectangle) {
         if child.y + child.height + delta.y > parent.y + parent.height {
             delta.y = (parent.y + parent.height) - (child.y + child.height);
         }
+    }
+}
+
+/// Set the cursor's position only if it is available.
+fn set_available_cursor_position(cursor: &mut mouse::Cursor, position: Point) {
+    if let mouse::Cursor::Available(_) = cursor {
+        *cursor = mouse::Cursor::Available(position)
     }
 }
 

@@ -7,8 +7,8 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 enum_dispatch = "0.3"
-iced_core = "0.8"
-iced_style = "0.7"
+iced_core = { workspace = true }
+iced_style = { workspace = true }
 paste = "1"
 
 derive_more = "0.99"

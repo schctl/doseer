@@ -1,10 +1,10 @@
 //! A wrapper widget to make handling an attached panel easier.
 
-use iced_native::widget::container;
-use iced_native::widget::pane_grid::{Pane, PaneGrid, Split};
-use iced_native::{renderer, Element};
+use iced_core::{renderer, Element};
+use iced_widget::container;
+use iced_widget::pane_grid::{Pane, PaneGrid, Split};
 
-pub use iced_native::widget::pane_grid;
+pub use iced_widget::pane_grid;
 
 /// The type of pane contained.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
