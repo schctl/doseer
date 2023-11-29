@@ -29,10 +29,7 @@ pub enum Brightness {
 impl Brightness {
     #[inline]
     pub const fn is_light(&self) -> bool {
-        match self {
-            Self::Light => true,
-            _ => false,
-        }
+        matches!(self, Self::Light)
     }
 
     #[inline]

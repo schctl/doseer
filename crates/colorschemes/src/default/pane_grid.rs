@@ -86,6 +86,6 @@ where
     }
 
     fn hovered_region(&self, style: &Self::Style) -> Appearance {
-        T::hovered_region(&self, style)
+        T::hovered_region(self, style)
     }
 }

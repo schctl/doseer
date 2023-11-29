@@ -96,8 +96,8 @@ impl Content {
         let mut commands = vec![];
 
         match message {
-            Message::Tab(m, id) => match m {
-                tab::Message::Open(p) => {
+            Message::Tab(m, id) => {
+                if let tab::Message::Open(p) = m {
                     let watcher = self
                         .tabs
                         .get_mut(&id.unwrap_or(self.focused))
@@ -106,8 +106,7 @@ impl Content {
 
                     commands.push(watcher.map(move |m| Message::Tab(m, id)));
                 }
-                _ => {}
-            },
+            }
             Message::Focus(id) => {
                 self.focus(id);
             }

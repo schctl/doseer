@@ -63,8 +63,8 @@ impl State {
             self.pane_grid
                 .get_mut(&self.focused)
                 .unwrap()
-                .update_location(&path)?;
-            return Ok(watcher::command(&path));
+                .update_location(path)?;
+            return Ok(watcher::command(path));
         }
 
         open::that(path.as_ref())?;
