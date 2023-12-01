@@ -1,10 +1,9 @@
 [package]
-name = "doseer_ui_ext"
+name = "doseer_iced_ext"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
-publish = { workspace = true }
 
 [dependencies]
 iced_core = { workspace = true }

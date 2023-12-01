@@ -2,8 +2,8 @@
 
 use doseer_colorschemes::WithColorScheme;
 use doseer_core::path::PathWrap;
-use doseer_ui_ext::widgets::only_one;
-use doseer_ui_ext::widgets::reorderable;
+use doseer_iced_ext::widgets::only_one;
+use doseer_iced_ext::widgets::reorderable;
 
 use iced::widget::{button, column, component, container, row, text};
 use iced::{alignment, Alignment, BorderRadius, Command, Length};

@@ -4,7 +4,7 @@ use std::path::Path;
 
 use doseer_core::dirs;
 use doseer_core::path::PathWrap;
-use doseer_ui_ext::widgets::grid::uniform;
+use doseer_iced_ext::widgets::grid::uniform;
 
 use iced::widget::{container, scrollable, Component};
 use iced::Length;

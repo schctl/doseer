@@ -4,7 +4,7 @@ use std::path::Path;
 
 use doseer_colorschemes::WithColorScheme;
 use doseer_core::path::PathWrap;
-use doseer_ui_ext::widgets::reorderable;
+use doseer_iced_ext::widgets::reorderable;
 
 use iced::widget::{button, column, container, row, text, Component};
 use iced::{alignment, Alignment, BorderRadius, Length, Padding};

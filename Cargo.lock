@@ -636,8 +636,8 @@ dependencies = [
  "derive_more",
  "doseer_colorschemes",
  "doseer_core",
+ "doseer_iced_ext",
  "doseer_icon_loader",
- "doseer_ui_ext",
  "iced",
  "indexmap 2.1.0",
  "lazy_static",
@@ -675,6 +675,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "doseer_iced_ext"
+version = "0.1.0"
+dependencies = [
+ "iced_core",
+ "iced_widget",
+]
+
+[[package]]
 name = "doseer_icon_loader"
 version = "0.1.0"
 dependencies = [
@@ -688,14 +696,6 @@ dependencies = [
  "tracing",
  "widestring",
  "windows 0.52.0",
-]
-
-[[package]]
-name = "doseer_ui_ext"
-version = "0.1.0"
-dependencies = [
- "iced_core",
- "iced_widget",
 ]
 
 [[package]]

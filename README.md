@@ -7,7 +7,7 @@ Just an excuse to play around with some UI code.
 **Components**
 - [doseer_core](./crates/core/):
   core functionality (non-UI stuff)
-- [doseer_ui_ext](./crates/ui_ext/):
+- [doseer_iced_ext](./crates/iced_ext/):
   extra widgets/components implemented for iced
 - [doseer_colorschemes](./crates/colorschemes/):
   a custom colorschemes abstraction for styling iced applications

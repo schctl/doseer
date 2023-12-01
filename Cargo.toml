@@ -13,8 +13,8 @@ publish = false
 [workspace.dependencies]
 doseer_core = { path = "crates/core" }
 doseer_colorschemes = { path = "crates/colorschemes" }
+doseer_iced_ext = { path = "crates/iced_ext" }
 doseer_icon_loader = { path = "crates/icon_loader" }
-doseer_ui_ext = { path = "crates/ui_ext" }
 
 iced = "0.10"
 iced_core = "0.10"
@@ -49,8 +49,8 @@ tracing-subscriber = "0.3"
 
 # GUI
 doseer_colorschemes = { workspace = true, features = ["dev-default"]  }
+doseer_iced_ext = { workspace = true }
 doseer_icon_loader = { workspace = true }
-doseer_ui_ext = { workspace = true }
 
 iced = { workspace = true, features = ["image", "svg", "tokio", "advanced"] }
 

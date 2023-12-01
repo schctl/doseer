@@ -1,7 +1,7 @@
 //! The GUI app.
 
 use doseer_colorschemes::default::Wrap;
-use doseer_ui_ext::components::panelled::{self, unpanelled};
+use doseer_iced_ext::components::panelled::{self, unpanelled};
 
 use iced::widget::component;
 use iced::{executor, Application, Command, Length};
