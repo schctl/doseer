@@ -6,6 +6,7 @@ use doseer_core::dirs;
 use doseer_core::path::PathWrap;
 use doseer_iced_ext::widgets::grid::uniform;
 
+use iced::widget::scrollable::Properties;
 use iced::widget::{container, scrollable, Component};
 use iced::Length;
 
@@ -149,7 +150,11 @@ impl<'app> Component<super::Event, gui::Renderer> for Content<'app> {
             .allow_more_spacing(true)
             .on_empty_click(Event::Item(item::Message::Deselect));
 
-            scrollable(container(grid).padding(8).width(iced::Length::Fill)).into()
+            scrollable(container(grid).padding([0.0, 16.0]))
+                .direction(scrollable::Direction::Vertical(
+                    Properties::new().width(5.6).scroller_width(5.0).margin(3.6),
+                ))
+                .into()
         })
         .into()
     }

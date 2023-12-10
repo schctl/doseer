@@ -1,5 +1,6 @@
 //! A single item (file/folder/whatever) in a directory.
 
+use std::borrow::Cow;
 use std::path::Path;
 
 use doseer_colorschemes::WithColorScheme;
@@ -35,6 +36,7 @@ pub enum Message {
     // TODO: Delete, Properties, Copy, Paste, etc
 }
 
+/// Suitable display icon for some path.
 pub fn icon<'a, P: AsRef<Path>>(path: P) -> Element<'a, Message> {
     let icon = ICONS.load(path.as_ref());
 
@@ -45,6 +47,22 @@ pub fn icon<'a, P: AsRef<Path>>(path: P) -> Element<'a, Message> {
         },
         None => Icon::Directory.svg().into(),
     }
+}
+
+/// Modify an item name to fit in the button.
+fn trunc_path(name: Cow<str>) -> Cow<str> {
+    const MAX_LEN: usize = 12;
+
+    if name.len() > MAX_LEN {
+        format!("{}…", &name[..MAX_LEN]).into()
+    } else {
+        name
+    }
+}
+
+/// Appropriate item path to display in the button.
+fn item_name(path: &PathWrap) -> Cow<str> {
+    trunc_path(path.display().to_string_lossy())
 }
 
 pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
@@ -58,8 +76,8 @@ pub fn view<'a>(path: PathWrap, theme: Style) -> Element<'a, Message> {
     .align_x(alignment::Horizontal::Center)
     .align_y(alignment::Vertical::Center);
 
-    let text = text(path.display().to_string_lossy())
-        .size(20)
+    let text = text(item_name(&path))
+        .size(16)
         .font(theme::fonts::Roboto::Regular)
         .horizontal_alignment(iced::alignment::Horizontal::Center);
 

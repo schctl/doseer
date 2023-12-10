@@ -13,7 +13,7 @@ pub trait StyleSheet {
     fn hovered(&self, style: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar;
 
     fn dragging(&self, style: &Self::Style) -> Scrollbar {
-        self.hovered(style, false)
+        self.hovered(style, true)
     }
 }
 
@@ -51,8 +51,17 @@ where
         }
     }
 
-    fn hovered(&self, style: &Self::Style, _is_mouse_over_scrollbar: bool) -> Scrollbar {
+    fn hovered(&self, style: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
         let palette = self.palette();
+
+        let scroller_color = Color {
+            a: 0.7,
+            ..if is_mouse_over_scrollbar {
+                palette.surface.base.on_base
+            } else {
+                palette.surface.weak.on_base
+            }
+        };
 
         match style {
             Self::Style::Default => Scrollbar {
@@ -61,8 +70,8 @@ where
                 border_width: 0.0,
                 border_color: Color::TRANSPARENT,
                 scroller: scrollable::Scroller {
-                    color: palette.primary.base.on_base,
-                    border_radius: BorderRadius::from(0.0),
+                    color: scroller_color,
+                    border_radius: BorderRadius::from(2.0),
                     border_width: 0.0,
                     border_color: Color::TRANSPARENT,
                 },
