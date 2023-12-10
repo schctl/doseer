@@ -8,7 +8,7 @@ use iced::{executor, Application, Command, Length};
 
 use crate::content::{self, Content};
 use crate::side_bar::side_bar;
-use crate::{config, tab, theme, Config, Theme};
+use crate::{config, item, tab, theme, Config, Theme};
 
 /// Shorthand for an iced element generic over some message.
 pub type Renderer = iced::Renderer<Wrap<Theme>>;
@@ -42,29 +42,35 @@ impl Application for Gui {
     fn new(config: Self::Flags) -> (Self, Command<Self::Message>) {
         let mut commands = vec![];
 
-        let pane = Content::new();
+        // initialize the content area
+        let content = Content::new();
 
         let mut split_state = panelled::State::new();
         split_state.resize(0.2);
 
-        // :/
-        let tab_init_cmd = tab::watcher::command(pane.focused().location());
-        commands.push(tab_init_cmd.map(|m| Message::Content(content::Message::Tab(m, None))));
+        // tab update watcher
+        let tab_init_cmd = tab::watcher::command(content.focused().location());
+        commands.push(
+            tab_init_cmd
+                .map(content::Message::tab)
+                .map(Message::Content),
+        );
 
+        // load all the fonts we need
         commands.push(theme::fonts::load_all().map(Message::FontLoad));
 
         (
             Self {
                 split_state,
                 config,
-                content: pane,
+                content,
             },
             Command::batch(commands),
         )
     }
 
     fn title(&self) -> String {
-        String::from("doseer")
+        format!("{}", item::item_name(self.content.focused().location()))
     }
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {

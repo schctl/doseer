@@ -7,7 +7,7 @@ use doseer_core::path::PathWrap;
 use doseer_iced_ext::widgets::reorderable;
 
 use iced::widget::{button, column, container, row, text, Component};
-use iced::{alignment, Alignment, BorderRadius, Length, Padding};
+use iced::{alignment, Alignment, Length, Padding};
 
 use crate::gui::{self, Element};
 use crate::{config, content, theme, Config, Icon};
@@ -147,13 +147,13 @@ impl ButtonStyle {
             Self::Focused => iced::widget::button::Appearance {
                 background: Some(palette.surface.base.base.into()),
                 text_color: palette.surface.base.on_base,
-                border_radius: BorderRadius::from(6.0),
+                border_radius: theme::BASE_BORDER_RADIUS(),
                 ..Default::default()
             },
             Self::Default => iced::widget::button::Appearance {
                 background: None,
                 text_color: palette.primary.base.on_base,
-                border_radius: BorderRadius::from(6.0),
+                border_radius: theme::BASE_BORDER_RADIUS(),
                 ..Default::default()
             },
         }
@@ -167,7 +167,7 @@ impl ButtonStyle {
             Self::Default => iced::widget::button::Appearance {
                 background: Some(palette.surface.weak.base.into()),
                 text_color: palette.surface.weak.on_base,
-                border_radius: BorderRadius::from(6.0),
+                border_radius: theme::BASE_BORDER_RADIUS(),
                 ..Default::default()
             },
         }

@@ -5,8 +5,9 @@ use doseer_core::path::PathWrap;
 use doseer_iced_ext::widgets::only_one;
 use doseer_iced_ext::widgets::reorderable;
 
+use iced::widget::button::Appearance as ButtonAppearance;
 use iced::widget::{button, column, component, container, row, text};
-use iced::{alignment, Alignment, BorderRadius, Command, Length};
+use iced::{alignment, Alignment, Command, Length};
 use indexmap::IndexMap;
 
 use crate::gui::Element;
@@ -91,6 +92,13 @@ pub enum Message {
     Reorder(usize, usize),
 }
 
+impl Message {
+    /// A tab message for the currently focused tab.
+    pub fn tab(m: tab::Message) -> Self {
+        Self::Tab(m, None)
+    }
+}
+
 impl Content {
     pub fn update(&mut self, message: Message) -> anyhow::Result<Command<Message>> {
         let mut commands = vec![];
@@ -134,17 +142,17 @@ impl Content {
         Ok(Command::batch(commands))
     }
 
-    pub const TOP_BAR_HEIGHT: Length = Length::Fixed(50.0);
+    pub const TOP_BAR_HEIGHT: Length = Length::Fixed(38.0);
 
     /// Tab switcher and controls.
-    fn tab_controls(&self) -> Element<Message> {
+    fn top_panel(&self) -> Element<Message> {
+        // re-orderable components (the tab list)
+
         let mut tab_list = reorderable::Row::new()
             .align_items(Alignment::Center)
-            .spacing(4)
+            .spacing(6)
             .height(Length::Fill)
             .on_reorder(Message::Reorder);
-
-        // --- Tab Buttons ---
 
         for (index, tab) in &self.tabs {
             let folder_name = row!(
@@ -195,7 +203,7 @@ impl Content {
                     if *index == self.focused {
                         TabButtonStyle::Focused
                     } else {
-                        TabButtonStyle::Default
+                        TabButtonStyle::SemiEmphasis
                     }
                     .into(),
                 );
@@ -203,12 +211,11 @@ impl Content {
             tab_list = tab_list.push(tab);
         }
 
-        // --- Construct Top Bar ---
+        // non-reorderable components
 
         let mut elements = row!(tab_list)
             .align_items(Alignment::Center)
-            .padding(6)
-            .spacing(4)
+            .spacing(6)
             .height(Self::TOP_BAR_HEIGHT);
 
         elements = elements.push(
@@ -234,7 +241,7 @@ impl Content {
 
     pub fn view(&self) -> Element<Message> {
         // Tab switcher
-        let panel = self.tab_controls();
+        let panel = self.top_panel();
 
         // Focused tab view
         let contents = only_one(
@@ -246,7 +253,9 @@ impl Content {
         .focus(self.tabs.keys().position(|k| *k == self.focused).unwrap());
 
         // TODO: define panel position at runtime
-        column!(panel, contents).into()
+        container(column!(panel, contents).padding(8).spacing(8))
+            .style(theme::container::Container::Strong)
+            .into()
     }
 }
 
@@ -256,6 +265,7 @@ pub enum TabButtonStyle {
     #[default]
     Default,
     Focused,
+    SemiEmphasis,
 }
 
 impl From<TabButtonStyle> for theme::button::Button {
@@ -265,40 +275,45 @@ impl From<TabButtonStyle> for theme::button::Button {
 }
 
 impl TabButtonStyle {
-    pub fn active(&self, theme: &Theme) -> iced::widget::button::Appearance {
+    pub fn active(&self, theme: &Theme) -> ButtonAppearance {
         let palette = theme.palette();
 
         match self {
-            Self::Focused => iced::widget::button::Appearance {
+            Self::Focused => ButtonAppearance {
                 background: Some(palette.surface.base.base.into()),
                 text_color: palette.surface.base.on_base,
-                border_radius: BorderRadius::from(6.0),
+                border_radius: theme::BASE_BORDER_RADIUS(),
                 ..Default::default()
             },
-            Self::Default => iced::widget::button::Appearance {
+            Self::Default => ButtonAppearance {
                 background: None,
                 text_color: palette.surface.weak.on_base,
-                border_radius: BorderRadius::from(6.0),
+                ..Default::default()
+            },
+            Self::SemiEmphasis => ButtonAppearance {
+                border_color: palette.surface.weak.base,
+                border_width: 2.0,
+                border_radius: theme::BASE_BORDER_RADIUS(),
                 ..Default::default()
             },
         }
     }
 
-    pub fn hovered(&self, theme: &Theme) -> iced::widget::button::Appearance {
+    pub fn hovered(&self, theme: &Theme) -> ButtonAppearance {
         let palette = theme.palette();
 
         match self {
-            Self::Focused => self.active(theme),
-            Self::Default => iced::widget::button::Appearance {
+            Self::Focused | Self::SemiEmphasis => self.active(theme),
+            Self::Default => ButtonAppearance {
                 background: Some(palette.surface.base.base.into()),
                 text_color: palette.surface.base.on_base,
-                border_radius: BorderRadius::from(6.0),
+                border_radius: theme::BASE_BORDER_RADIUS(),
                 ..Default::default()
             },
         }
     }
 
-    pub fn pressed(&self, theme: &Theme) -> iced::widget::button::Appearance {
+    pub fn pressed(&self, theme: &Theme) -> ButtonAppearance {
         Self::Focused.active(theme)
     }
 }

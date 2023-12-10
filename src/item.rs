@@ -8,7 +8,7 @@ use doseer_core::path::PathWrap;
 use doseer_icon_loader::file::{ImageOrSvg, Loader};
 
 use iced::widget::{button, column, container, image, svg, text};
-use iced::{alignment, Background, BorderRadius, Color, Length, Size};
+use iced::{alignment, Background, Color, Length, Size};
 use lazy_static::lazy_static;
 
 use crate::gui::Element;
@@ -61,7 +61,7 @@ fn trunc_path(name: Cow<str>) -> Cow<str> {
 }
 
 /// Appropriate item path to display in the button.
-fn item_name(path: &PathWrap) -> Cow<str> {
+pub fn item_name(path: &PathWrap) -> Cow<str> {
     trunc_path(path.display().to_string_lossy())
 }
 
@@ -121,7 +121,7 @@ impl Style {
                     .into(),
                 ),
                 text_color: palette.primary.base.on_accent,
-                border_radius: BorderRadius::from(6.0),
+                border_radius: theme::BASE_BORDER_RADIUS(),
                 border_color: palette.primary.strong.accent,
                 border_width: 1.0,
                 ..Default::default()
@@ -129,7 +129,7 @@ impl Style {
             Self::Default => iced::widget::button::Appearance {
                 background: None,
                 text_color: palette.surface.base.on_base,
-                border_radius: BorderRadius::from(6.0),
+                border_radius: theme::BASE_BORDER_RADIUS(),
                 ..Default::default()
             },
         }
@@ -149,7 +149,7 @@ impl Style {
                     .into(),
                 ),
                 text_color: palette.surface.base.on_base,
-                border_radius: BorderRadius::from(6.0),
+                border_radius: theme::BASE_BORDER_RADIUS(),
                 ..Default::default()
             },
         }

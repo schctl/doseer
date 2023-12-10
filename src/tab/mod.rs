@@ -8,6 +8,7 @@ use iced::widget::{component, pane_grid, Component};
 use iced::Command;
 
 use crate::gui::{self, Element};
+use crate::theme;
 
 use self::content::content;
 
@@ -113,6 +114,7 @@ impl<'app> Component<Message, gui::Renderer> for Tab<'app> {
         // TODO: top toolkit
         pane_grid::PaneGrid::new(&self.state.pane_grid, |_, content_state, _| {
             pane_grid::Content::new(component(content(content_state)))
+                .style(theme::container::Container::BaseSoftBorder)
         })
         .into()
     }

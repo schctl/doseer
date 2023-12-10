@@ -4,6 +4,7 @@
 
 use enum_dispatch::enum_dispatch;
 use iced_core::Color;
+use std::ops::Deref;
 
 pub mod colorschemes;
 #[cfg(feature = "dev-default")]
@@ -112,4 +113,20 @@ pub trait WithColorScheme {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ColorScheme {
     Catppuccin(colorschemes::catppuccin::Variant),
+}
+
+/// Auto impl the colorscheme interface for colorscheme holders.
+impl<T> WithColorScheme for T
+where
+    T: Deref<Target = ColorScheme>,
+{
+    #[inline]
+    fn brightness(&self) -> Brightness {
+        self.deref().brightness()
+    }
+
+    #[inline]
+    fn palette(&self) -> &ColorPalette {
+        self.deref().palette()
+    }
 }

@@ -125,7 +125,7 @@ impl<'app> Component<super::Event, gui::Renderer> for Content<'app> {
         // weird lifetime shenanigans without ownership
         let internal_state = internal_state.clone();
 
-        uniform::responsive(move |_| {
+        let responsive_area = uniform::responsive(move |_| {
             let grid = uniform(
                 self.state.contents.contents().iter().map(|path| {
                     container(
@@ -150,12 +150,13 @@ impl<'app> Component<super::Event, gui::Renderer> for Content<'app> {
             .allow_more_spacing(true)
             .on_empty_click(Event::Item(item::Message::Deselect));
 
-            scrollable(container(grid).padding([0.0, 16.0]))
+            scrollable(container(grid).padding([0.0, 13.0, 0.0, 0.0]))
                 .direction(scrollable::Direction::Vertical(
-                    Properties::new().width(5.6).scroller_width(5.0).margin(3.6),
+                    Properties::new().width(5.6).scroller_width(5.0),
                 ))
                 .into()
-        })
-        .into()
+        });
+
+        container(responsive_area).padding(8).into()
     }
 }

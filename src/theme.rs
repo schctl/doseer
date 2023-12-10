@@ -3,8 +3,15 @@
 use derive_more::{Deref, From};
 use doseer_colorschemes::default;
 use doseer_colorschemes::{ColorScheme, WithColorScheme};
+use iced::BorderRadius;
 
 use crate::{content, item, side_bar};
+
+// TODO: make this a constant
+#[allow(non_snake_case)]
+pub fn BASE_BORDER_RADIUS() -> BorderRadius {
+    BorderRadius::from(6.0)
+}
 
 #[derive(Debug, Clone, From, Deref)]
 pub struct Theme(ColorScheme);
@@ -14,16 +21,6 @@ impl Default for Theme {
         Self(ColorScheme::Catppuccin(
             doseer_colorschemes::colorschemes::catppuccin::Variant::Mocha,
         ))
-    }
-}
-
-impl WithColorScheme for Theme {
-    fn palette(&self) -> &doseer_colorschemes::ColorPalette {
-        self.0.palette()
-    }
-
-    fn brightness(&self) -> doseer_colorschemes::Brightness {
-        self.0.brightness()
     }
 }
 
@@ -88,6 +85,8 @@ pub mod button {
 }
 
 pub mod container {
+    use iced::widget::container::Appearance;
+
     use super::*;
 
     #[derive(Debug, Clone, Default)]
@@ -95,20 +94,33 @@ pub mod container {
         /// A transparent box.
         #[default]
         Default,
-        /// A box with a less emphasized color.
+        /// A box with lesser emphasis.
         Weak,
+        /// A box with greater emphasis.
+        Strong,
+        /// Regular box with application background.
+        BaseSoftBorder,
     }
 
     impl default::container::StyleSheet for Theme {
         type Style = Container;
 
-        fn appearance(&self, style: &Self::Style) -> iced::widget::container::Appearance {
+        fn appearance(&self, style: &Self::Style) -> Appearance {
             let palette = self.palette();
 
             match style {
                 Container::Default => Default::default(),
-                Container::Weak => iced::widget::container::Appearance {
+                Container::Weak => Appearance {
                     background: Some(palette.primary.weak.base.into()),
+                    ..Default::default()
+                },
+                Container::Strong => Appearance {
+                    background: Some(palette.primary.strong.base.into()),
+                    ..Default::default()
+                },
+                Container::BaseSoftBorder => Appearance {
+                    background: Some(palette.primary.base.base.into()),
+                    border_radius: BASE_BORDER_RADIUS(),
                     ..Default::default()
                 },
             }
